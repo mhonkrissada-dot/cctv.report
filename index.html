@@ -88,7 +88,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)!
 .addph input{display:none}
 button.addph{font:inherit;font-size:12.5px}
 .case.target{background:#F3F8FF;box-shadow:inset 3px 0 0 var(--accent)}
-.addc{margin:4px 8px 8px}
+.addc{margin:4px 10px 10px}
+.rowb.addc{margin-top:6px}
 .msel{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:2px 6px;height:28px;font-size:13px}
 .ca{grid-column:3;grid-row:1;display:flex;gap:2px}
 .quiet{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:10px;margin-bottom:10px}
@@ -132,8 +133,12 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 .sp h3 .btn{font-size:13px;font-weight:normal}
 .sp h3 .btn.pri{font-weight:bold}
 .sp.done h3>span[data-pn]::after{content:' ✓';color:var(--ok)}
+.proj.done>header{background:#EEF8F1}
+.proj.done>header .pname::after{content:''}
 .sp.done{background:linear-gradient(90deg,#F2FAF4,transparent 60%)}
 .hbtn{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px}
+.btn.line{background:#06C755;border-color:#06C755;color:#fff;font-weight:600}
+.btn.line:hover{background:#05B04B;border-color:#05B04B}
 .sentb[aria-pressed=true]{background:#E3F4E8;border-color:#A9D8B7;color:var(--ok);font-weight:600}
 .btn.step{background:#2B3138;border-color:#2B3138}
 .tl{margin-top:6px}
@@ -178,6 +183,26 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 
 /* overlays */
 #toast{position:fixed;right:16px;bottom:16px;background:#2B3138;color:#fff;border-radius:8px;padding:8px 14px;z-index:60;max-width:calc(100% - 32px);font-size:13px;box-shadow:0 6px 20px rgba(16,24,40,.25)}
+.totals .clr{color:var(--danger)}
+.totals .clr:hover{background:var(--danger-soft);color:var(--danger)}
+#totop{position:fixed;right:16px;bottom:16px;z-index:55;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:600;color:var(--accent-2);box-shadow:0 4px 14px rgba(16,24,40,.15)}
+#totop:hover{background:var(--accent-soft)}
+body.toast-on #totop{bottom:64px}
+.sentok{font-size:11.5px;font-weight:600;color:var(--ok);white-space:nowrap}
+#msgdlg{position:fixed;inset:0;z-index:80;background:rgba(16,24,40,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+#msgdlg .mbox{background:#fff;border-radius:10px;box-shadow:0 16px 48px rgba(16,24,40,.3);width:min(640px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column}
+#msgdlg .mhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line2)}
+#msgdlg .mtext{margin:0;padding:14px 18px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-size:14px;line-height:1.65;flex:1 1 auto}
+#msgdlg .mfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line2)}
+#msgdlg .mfoot .msg{margin-right:auto}
+.ctx{position:fixed;z-index:70;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.18);padding:4px}
+.ctx .ctxsep{height:1px;background:var(--line2);margin:4px 0}
+.ctx .ctxh{padding:6px 10px 4px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line2);margin-bottom:4px;overflow-wrap:anywhere}
+.ctx button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:5px;padding:6px 10px}
+.ctx button:hover:not(:disabled){background:var(--fill)}
+.ctx button:disabled{color:#AAA;cursor:default}
+.ctx button.dz{color:var(--danger)}
+.ctx button[data-armed]{background:var(--danger);color:#fff}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;cursor:zoom-out}
 #lb img{max-width:100%;max-height:100%;border-radius:8px}
 #lbcopy{position:absolute;bottom:20px;left:50%;transform:translateX(-50%)}
@@ -201,6 +226,290 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 }
 </style>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style id="modern-ui">
+/* ===== Modern UI layer (CSS only, no behaviour changes) ===== */
+:root{
+  --bg:#F1F5FA; --surface:#FFFFFF; --fill:#F5F8FC; --ink:#050B18; --muted:#5B6A82; --line:#D6DFEB; --line2:#E5EBF4;
+  --r:10px; --r-lg:16px;
+  --sh:0 1px 2px rgba(23,26,43,.04),0 4px 14px rgba(23,26,43,.05);
+  --sh-lg:0 12px 40px rgba(23,26,43,.16);
+  --accent:#16397A; --accent-2:#071226; --accent-soft:#E6F0FB; --accent-ink:#fff;
+  --folder:#F5B63F; --danger:#E11D48; --danger-soft:#FFF1F3; --ok:#12A150;
+  --f:'IBM Plex Sans Thai','Segoe UI','Leelawadee UI',Tahoma,system-ui,Arial,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(900px 380px at 8% -80px,rgba(14,165,233,.13),transparent 70%),
+    radial-gradient(700px 320px at 100% -60px,rgba(7,18,38,.08),transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+  padding:12px 18px 56px;font-size:14.5px;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1680px}
+::selection{background:rgba(14,165,233,.25)}
+*{scrollbar-width:thin;scrollbar-color:#C9CDDB transparent}
+
+/* top bar */
+.bar{position:sticky;top:10px;z-index:30;border:1px solid rgba(223,226,236,.8);border-radius:var(--r-lg);
+  background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);
+  box-shadow:var(--sh);padding:10px 16px}
+.brand span{font-size:20px;font-weight:700;letter-spacing:-.02em;display:block;white-space:nowrap}
+.brand b{color:#0284C7}
+.bar .sub{font-size:12.5px}
+.tools{gap:8px}
+.tools input[type=date]{border-radius:var(--r);height:34px;border-color:var(--line);background:#fff;padding:3px 10px}
+
+/* buttons */
+.btn{border-radius:var(--r);min-height:34px;padding:4px 14px;border:1px solid var(--line);background:#fff;font-weight:500;
+  box-shadow:0 1px 1px rgba(23,26,43,.04);transition:background .15s,border-color .15s,box-shadow .15s,transform .08s}
+.btn:hover{background:#F8F9FD;border-color:#C7CCE0;box-shadow:0 2px 6px rgba(23,26,43,.07)}
+.btn:active{transform:translateY(1px);box-shadow:none}
+.btn.pri{background:linear-gradient(180deg,#13305E,#071226);border-color:#071226;color:#fff;font-weight:600;
+  box-shadow:0 2px 8px rgba(7,18,38,.32)}
+.btn.pri:hover{background:linear-gradient(180deg,#0D2347,#030814);border-color:#030814}
+.btn.step{background:#071226;border-color:#071226;color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger-soft);border-color:#F9A8B8}
+.btn.armed{background:var(--danger);border-color:var(--danger);color:#fff}
+.ghost{border-radius:8px}
+.ghost:hover{background:var(--accent-soft);color:var(--accent-2)}
+.ghost.armed{background:var(--danger);color:#fff}
+.sentb[aria-pressed=true]{background:#E7F8EE;border-color:#A8E3BF;color:#0E7A3E}
+.btn.line{background:#06C755;border-color:#06C755}
+
+/* segmented */
+.seg{background:#E8EEF7;border-radius:12px;padding:3px;gap:2px}
+.seg button{border-radius:9px;min-height:30px;padding:3px 14px;font-weight:500;transition:background .15s,color .15s,box-shadow .15s}
+.seg button[aria-pressed=true]{background:#fff;color:var(--accent-2);font-weight:600;box-shadow:0 1px 3px rgba(23,26,43,.14)}
+
+/* totals as stat chips */
+.totals{gap:8px;margin:10px 0 0}
+.totals>span{background:#fff;border:1px solid var(--line2);border-radius:999px;padding:3px 12px;box-shadow:0 1px 1px rgba(23,26,43,.03);color:var(--muted);font-size:13px}
+.totals b{color:var(--accent-2);font-size:15px;margin-right:5px}
+.totals .clr{border-radius:999px;padding:3px 12px}
+.totals .clr:hover{background:var(--danger-soft)}
+
+/* sidebar */
+.layout{gap:14px;margin-top:12px}
+.side{top:84px;max-height:calc(100vh - 100px);border-radius:var(--r-lg);border-color:var(--line2);padding:10px;box-shadow:var(--sh)}
+.shift{border-bottom:1px solid var(--line2);margin-bottom:8px;padding-bottom:10px}
+.shift .seg button{font-size:13px;padding:4px 6px}
+.rail button.f{border-radius:10px;padding:7px 8px;transition:background .12s}
+.rail button.f:hover{background:var(--fill)}
+.rail button.f[aria-current=true]{background:var(--accent-soft);box-shadow:none;position:relative}
+.rail button.f[aria-current=true]::before{content:'';position:absolute;left:-4px;top:9px;bottom:9px;width:4px;border-radius:4px;background:var(--accent)}
+.rail button.f[aria-current=true] .fn{color:var(--accent-2)}
+.rail .fm{font-size:11.5px}
+.rail .gh{font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:#8A90A5;padding:14px 8px 4px}
+.rail .addp{border-style:dashed;border-color:#B8CDE6;color:var(--accent-2);background:transparent;box-shadow:none}
+.rail .addp:hover{background:var(--accent-soft);border-color:var(--accent)}
+.ficon{filter:drop-shadow(0 1px 1px rgba(180,120,10,.25))}
+.sentok{background:#E7F8EE;border-radius:999px;padding:0 7px}
+
+/* project cards */
+.proj{border-radius:var(--r-lg);border-color:var(--line2);box-shadow:var(--sh);margin-bottom:14px;transition:box-shadow .2s,border-color .2s}
+.proj:hover{box-shadow:0 2px 4px rgba(23,26,43,.05),0 10px 28px rgba(23,26,43,.08)}
+.proj>header{padding:10px 14px;background:linear-gradient(180deg,#FBFBFE,#F6F7FB);gap:8px}
+.proj.done{border-color:#BDE8CF}
+.proj.done>header{background:linear-gradient(180deg,#F4FCF7,#ECF8F1)}
+.pname{font-size:16px;font-weight:600;border-radius:8px;padding:3px 8px;transition:border-color .15s,background .15s}
+.pname:hover{border-color:var(--line);background:#fff}
+.cnt{background:var(--accent-soft);color:var(--accent-2);font-weight:600;padding:2px 10px}
+.msel{border-radius:8px;height:32px;background:#fff;border-color:var(--line)}
+
+/* cases */
+.case{padding:8px 14px;gap:6px 10px;grid-template-columns:120px minmax(0,1fr) auto}
+.case input[type=time]{height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-2);font-weight:600;border:1px solid transparent}
+.case textarea{border-radius:10px;background:var(--fill);border-color:var(--line2);padding:6px 10px;transition:background .15s,border-color .15s}
+.case textarea:hover{border-color:var(--line)}
+.case.target{background:linear-gradient(90deg,rgba(14,165,233,.09),transparent 70%);box-shadow:inset 3px 0 0 var(--accent)}
+.thumb{width:96px;height:72px;border-radius:10px;border-color:var(--line2);box-shadow:0 1px 3px rgba(23,26,43,.08)}
+.thumb img{transition:transform .25s}
+.thumb:hover img{transform:scale(1.06)}
+.thumb .x{background:rgba(23,26,43,.7);backdrop-filter:blur(4px)}
+.thumb .cp{background:rgba(23,26,43,.7);backdrop-filter:blur(4px)}
+.addph{height:72px;border-radius:10px;border:1.5px dashed #C3C8DD;color:var(--muted);transition:all .15s}
+.addph.sm{height:28px;border-radius:999px}
+.addph:hover,.addph.over{border-color:var(--accent);color:var(--accent-2);background:var(--accent-soft)}
+.addc{margin:6px 14px 14px}
+.quiet{border-radius:var(--r-lg);border:1px dashed #CDD1E3;background:rgba(255,255,255,.6);padding:14px}
+.chip{border-radius:999px;padding:3px 12px;border-color:var(--line);background:#fff;transition:all .15s}
+.chip:hover{background:var(--accent-soft);border-color:#B3D2F0;color:var(--accent-2)}
+.chip.sent{background:#E7F8EE;border-color:#A8E3BF;color:#0E7A3E}
+.empty{padding:22px 10px}
+
+/* inputs */
+input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 4px rgba(14,165,233,.22)!important}
+.fld input,.fld select,.rn input,.tin{border-radius:var(--r);height:34px;border-color:var(--line)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+/* status pill */
+.pill{border-radius:999px;padding:2px 12px;box-shadow:0 1px 1px rgba(23,26,43,.03)}
+.pill.ok i{box-shadow:0 0 0 3px rgba(18,161,80,.18)}
+.pill.wait i,.pill.busy i{box-shadow:0 0 0 3px rgba(217,154,0,.2)}
+.pill.busy i{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* report / data pages */
+.sheet{border-radius:var(--r-lg);border-color:var(--line2);box-shadow:var(--sh);padding:20px 24px}
+.sheet h2{font-size:22px;letter-spacing:-.01em}
+.sheet .kick{text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:600;color:var(--accent)}
+.sp{padding:16px 0}
+.sp.done{background:linear-gradient(90deg,#F1FBF5,transparent 55%)}
+textarea.mp{border-radius:12px;background:var(--fill);border-color:var(--line2);padding:12px 14px;line-height:1.7}
+.bar2{height:10px;background:#E9EBF4}
+.bar2 i{background:linear-gradient(90deg,#12A150,#34D399)}
+.grid img{border-radius:10px}
+.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.tbl tbody tr:hover td{background:var(--fill)}
+.dsec{padding:14px 0}
+
+/* overlays */
+#toast{border-radius:14px;background:rgba(23,26,43,.94);backdrop-filter:blur(10px);padding:10px 18px;box-shadow:var(--sh-lg);animation:rise .25s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+#totop{border-radius:999px;box-shadow:var(--sh-lg);border-color:var(--line2)}
+#msgdlg{background:rgba(23,26,43,.5);backdrop-filter:blur(4px)}
+#msgdlg .mbox{border-radius:20px;box-shadow:var(--sh-lg);animation:rise .22s ease-out}
+.ctx{border-radius:14px;padding:6px;box-shadow:var(--sh-lg);border-color:var(--line2)}
+.ctx button{border-radius:8px;padding:7px 12px}
+#lb{background:rgba(10,12,24,.86);backdrop-filter:blur(6px)}
+#lb img{border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+@media (max-width:900px){
+  .bar{position:static}
+  .side{top:auto}
+  .rail button.f[aria-current=true]::before{display:none}
+}
+@media (max-width:600px){
+  body{padding:8px 10px 48px}
+  .case{grid-template-columns:minmax(0,1fr) auto}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---- navy + sky formal accents ---- */
+.bar{border-top:3px solid #071226}
+.brand span{color:#071226}
+input:focus,textarea:focus,select:focus{border-color:#0EA5E9!important}
+.rail button.f[aria-current=true]::before{background:#0EA5E9}
+.rail button.f[aria-current=true]{background:#E1ECF8}
+.proj>header{background:linear-gradient(180deg,#F8FBFE,#F0F5FB);border-bottom-color:#DCE6F2}
+.proj{border-top:3px solid #071226}
+.proj.done{border-top-color:#12A150}
+.case input[type=time]{background:#E1ECF8;color:#071226}
+.cnt{background:#DDE8F5;color:#071226}
+.sheet .kick{color:#0284C7}
+.sheet{border-top:3px solid #071226}
+.seg button[aria-pressed=true]{color:#071226}
+.pill.busy i,.pill.wait i{background:#0EA5E9}
+.totals b{color:#071226}
+.ghost:hover{background:#E1ECF8;color:#071226}
+.chip:hover{background:#E1ECF8;color:#071226}
+.addph:hover,.addph.over{border-color:#0EA5E9;color:#071226;background:#E1ECF8}
+#toast{background:rgba(7,18,38,.96)}
+#totop{color:#071226}
+
+/* ---- minimal straight divider lines on every page ---- */
+:root{--rule:#C3CEDF;--rule-strong:#071226}
+/* top bar + totals */
+.totals{padding:0 2px 10px;border-bottom:1px solid var(--rule)}
+.tools .seg{box-shadow:none}
+/* sidebar */
+.shift{border-bottom:1px solid var(--rule)}
+.rail button.f{border-radius:0;border-bottom:1px solid var(--line2);padding:8px 8px}
+.rail button.f:last-of-type{border-bottom:0}
+.rail button.f:hover{border-radius:0}
+.rail button.f[aria-current=true]{border-radius:0;border-bottom-color:var(--line2)}
+.rail button.f[aria-current=true]::before{left:0;top:0;bottom:0;width:3px;border-radius:0}
+.rail .gh{border-top:1px solid var(--rule);margin-top:8px;padding:12px 8px 4px}
+.rail .addp{margin-top:10px}
+/* edit page: project cards */
+.proj>header{border-bottom:1px solid var(--rule)}
+.case{border-top:1px solid var(--line2)}
+.proj>header+.case{border-top:0}
+.addc,.rowb.addc{border-top:1px solid var(--rule);margin:0;padding:10px 14px}
+.proj>.addc{background:#FAFCFE}
+.quiet h3{padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:8px}
+/* report page */
+.sheet>header,.sheet header{border-bottom:1px solid var(--rule)}
+.sp{border-bottom:1px solid var(--rule);padding:18px 0}
+.sp:last-child{border-bottom:0}
+.sp h3{padding-bottom:10px;border-bottom:1px solid var(--line2)}
+.mphead{padding-top:10px;margin-top:10px;border-top:1px solid var(--line2)}
+.prog{padding-top:10px;margin-top:12px;border-top:1px solid var(--line2)}
+.phh{padding-top:8px;border-top:1px solid var(--line2);margin-top:10px}
+.cfg{padding-top:10px}
+/* data page */
+.dsec{border-bottom:1px solid var(--rule)}
+.dsec:last-child{border-bottom:0}
+.dsec h3{padding-bottom:6px;border-bottom:1px solid var(--line2);margin-bottom:4px}
+.tbl th{border-bottom:1px solid var(--rule-strong);color:var(--ink)}
+.tbl td{border-bottom:1px solid var(--line2)}
+.tbl tr:last-child td{border-bottom:1px solid var(--rule)}
+
+/* ---- sticky bar fix: opaque, no see-through gap while scrolling ---- */
+.bar{position:sticky;top:0;z-index:100;background:#FFFFFF;-webkit-backdrop-filter:none;backdrop-filter:none;
+  border-color:var(--line2);border-top:3px solid #071226;
+  box-shadow:0 1px 0 var(--rule),0 6px 16px rgba(7,18,38,.06)}
+.side{top:90px;max-height:calc(100vh - 104px);z-index:20}
+.proj,.sheet{position:relative;z-index:1}
+@media (max-width:900px){.bar{position:static;box-shadow:var(--sh)}.side{position:static;max-height:none}}
+
+/* ---- lighter line colors ---- */
+:root{--rule:#E1E7F0;--rule-strong:#B9C6DA;--line2:#EDF1F7}
+.bar{border-top:2px solid #AFC4E2;box-shadow:0 1px 0 #E1E7F0,0 6px 16px rgba(7,18,38,.05)}
+.proj,.sheet{border-top:2px solid #C4D4EA}
+.proj.done{border-top-color:#BFE6CF}
+.tbl th{color:var(--muted)}
+.rail button.f{border-bottom-color:#EDF1F7}
+.case{border-top-color:#EDF1F7}
+.sp h3,.mphead,.prog,.phh,.dsec h3{border-color:#EDF1F7}
+
+/* ---- report page: lighter lines and fields ---- */
+.sp{border-bottom:1px solid #EDF1F7!important}
+.sp:last-child{border-bottom:0!important}
+.sp h3,.mphead,.phh,.prog,.sheet header,.sheet>header{border-color:#F0F3F8!important}
+.rn input,.fld input,.fld select{border-color:#E1E7F0}
+textarea.mp{background:#F8FAFD;border-color:#E8EDF5}
+.sp .btn{border-color:#E1E7F0}
+.sp .btn.pri{border-color:#071226}
+/* ---- scroll performance layer ---- */
+html{scroll-behavior:auto}
+body{background:var(--bg)!important}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(900px 380px at 8% -80px,rgba(14,165,233,.13),transparent 70%),
+             radial-gradient(700px 320px at 100% -60px,rgba(7,18,38,.08),transparent 70%)}
+.thumb .x,.thumb .cp{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(23,26,43,.78)!important}
+#toast,#msgdlg,#lb{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#toast{background:rgba(7,18,38,.97)}
+#msgdlg{background:rgba(23,26,43,.58)}
+#lb{background:rgba(10,12,24,.92)}
+.proj{transition:none!important}
+.proj:hover{box-shadow:var(--sh)}
+.bar{will-change:transform}
+.side{contain:layout style}
+.rail{overscroll-behavior:contain}
+.thumb{contain:layout paint}
+@media (max-width:900px){.bar{will-change:auto}}
+/* ---- scroll performance layer 2 ---- */
+.proj,.case{contain:layout style}
+.ph{content-visibility:auto;contain-intrinsic-size:auto 150px 140px}
+.addph,.chip{transition:background .15s,border-color .15s,color .15s!important}
+button,.btn,.chip,.ghost,.seg button{touch-action:manipulation}
+@media (hover:none){.thumb:hover img{transform:none}.proj:hover{box-shadow:var(--sh)}}
+.thumb img,.grid img{image-rendering:auto;backface-visibility:hidden}
+/* ---- back-to-top button ---- */
+#totop{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 5px;background:linear-gradient(180deg,#1B4590,#0B1B3A);color:#fff!important;border:0;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.01em;line-height:1;box-shadow:0 8px 20px rgba(7,18,38,.30),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .15s,box-shadow .15s;animation:rise .25s ease-out}
+#totop .ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;transition:background .15s}
+#totop:hover{background:linear-gradient(180deg,#1B4590,#0B1B3A);transform:translateY(-2px);box-shadow:0 12px 26px rgba(7,18,38,.36),inset 0 1px 0 rgba(255,255,255,.14)}
+#totop:hover .ic{background:rgba(255,255,255,.26)}
+#totop:active{transform:translateY(0);box-shadow:0 4px 12px rgba(7,18,38,.3)}
+#totop:focus-visible{outline:2px solid #0EA5E9;outline-offset:3px}
+</style>
+
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
 
@@ -216,7 +525,7 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
       <input type="date" id="date">
       <div class="seg" role="group" aria-label="มุมมอง">
         <button type="button" id="m-edit" aria-pressed="true">บันทึก</button>
-        <button type="button" id="m-rep" aria-pressed="false">รายงานผู้บริหาร</button>
+        <button type="button" id="m-rep" aria-pressed="false">รายงานผู้ว่าจ้าง</button>
         <button type="button" id="m-data" aria-pressed="false">จัดการข้อมูล</button>
       </div>
     </div>
@@ -226,6 +535,7 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 </div>
 <div id="lb" hidden><img alt="รูปขยาย"><button type="button" class="btn pri" id="lbcopy">คัดลอกรูป</button></div>
 <div id="toast" role="status" hidden></div>
+<button type="button" id="totop" aria-label="เลื่อนขึ้นบนสุด" title="เลื่อนขึ้นบนสุด" hidden><span class="ic" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>บนสุด</button>
 
 <script>
 (function(){
@@ -254,7 +564,8 @@ function parse(text){
   });
   return out;
 }
-function byTime(a,b){return a.time<b.time?-1:a.time>b.time?1:0}
+function nkey(c){var t=(c.text||'').replace(/^[\s♦️◆]+/,'').trim();return t==='เวลา 19.00น.-07.00น. เหตุการณ์ปกติ'?'0':t==='เวลา 07.00น.-19.00น. เหตุการณ์ปกติ'?'1':'2'}
+function byTime(a,b){var x=nkey(a)+a.time,y=nkey(b)+b.time;return x<y?-1:x>y?1:0}
 
 /* ---------- state ---------- */
 var store=null;
@@ -343,10 +654,14 @@ var MODES={'24':'ดู 24 ชั่วโมง',night:'ดูเฉพาะ�
 var SHORT={'24':'24 ชม.',night:'กลางคืน',day:'กลางวัน','':''};
 var ORDER=['24','night','day',''];
 function matches(p,k){return p.key===k||(!p.key&&norm(p.name)===k)}
+function removedKeys(){return store.removed||(store.removed=[])}
+function isRemoved(p){return removedKeys().indexOf(p.key||norm(p.name))>=0}
 function ensureProjects(){
+  R().projects=R().projects.filter(function(x){return !(isRemoved(x)&&!x.cases.length)});
   var ps=R().projects;
   REG.forEach(function(r){
-    var k=norm(r[0]),p=ps.filter(function(x){return matches(x,k)})[0];
+    var k=norm(r[0]);if(removedKeys().indexOf(k)>=0)return;
+    var p=ps.filter(function(x){return matches(x,k)})[0];
     if(!p){ps.push({id:uid(),name:r[0],key:k,mode:r[1],cases:[]})}
     else{p.key=k;if(p.mode===undefined)p.mode=r[1]}
   });
@@ -387,6 +702,61 @@ function fixTimes(){
 }
 /* ---------- filter by monitoring window ---------- */
 function curShift(){return store.shift||'all'}
+/* which normal-period line(s) follow the shift button: กลางคืน → 19.00–07.00, กลางวัน → 07.00–19.00,
+   ทั้งหมด → by the project's own window (24 ชม. gets both) */
+function normalKinds(p){var s=curShift(),m=p.mode||'';if(s==='night'||s==='day')return [s];if(m==='night'||m==='day')return [m];return ['night','day']}
+function normalBtn(p){var k=normalKinds(p),lab=k.length>1?'19.00–07.00 + 07.00–19.00':k[0]==='night'?'19.00–07.00':'07.00–19.00';return '<button type="button" class="btn" data-act="addnormal">+ เหตุการณ์ปกติ '+lab+' น.</button>'}
+function removeProject(p){
+  var rk=p.key||norm(p.name);if(inReg(p)&&removedKeys().indexOf(rk)<0)removedKeys().push(rk);
+  p.cases.forEach(function(k){markDel(k);delCasePhotos(k)});
+  R().projects=R().projects.filter(function(k){return k!==p});
+  if(sel===p.id)sel='all';save();render();toast('ลบโครงการ '+(p.name||'')+' แล้ว'+(inReg(p)?' กู้คืนได้ในหน้าจัดการข้อมูล':''));
+}
+function clearProject(p){p.cases.forEach(function(k){markDel(k);delCasePhotos(k)});p.cases=[];save();render();toast('ล้างเหตุการณ์ของ '+p.name+' แล้ว')}
+/* right-click menu on the project list */
+var ctx=null;
+/* popup with the full report message */
+function openMsg(p){
+  closeMsg();
+  var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','ข้อความรายงาน '+(p.name||''));
+  d.innerHTML='<div class="mbox"><div class="mhead"><b>ข้อความรายงาน · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
+    '<pre class="mtext">'+esc(msgFinal(p))+'</pre>'+
+    '<div class="mfoot"><span class="msg">'+(isLUMT(p)?'ฟอร์ม LUM-T · ':'')+'วันที่ '+thaiShort(store.date)+'</span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn pri" data-m="copy">คัดลอกข้อความ</button></div></div>';
+  document.body.appendChild(d);document.body.style.overflow='hidden';
+  d.addEventListener('click',function(e){
+    var b=e.target.closest('[data-m]');
+    if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
+    if(b&&b.dataset.m==='copy'){copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย')}
+  });
+  d.querySelector('[data-m=copy]').focus();
+}
+function closeMsg(){var d=document.getElementById('msgdlg');if(d){d.remove();document.body.style.overflow=''}}
+function closeCtx(){if(ctx){ctx.remove();ctx=null}}
+function openCtx(x,y,p){
+  closeCtx();ctx=document.createElement('div');ctx.className='ctx';ctx.setAttribute('role','menu');
+  ctx.innerHTML='<div class="ctxh">'+esc(p.name||'โครงการ')+'</div>'+
+    '<button type="button" role="menuitem" data-c="viewmsg">ดูข้อความรายงาน</button>'+
+    '<button type="button" role="menuitem" data-c="copymsg"'+(p.cases.length?'':' disabled')+'>คัดลอกข้อความรายงาน</button>'+
+    (projPhotos(p).length?'<button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
+    '<button type="button" role="menuitem" data-c="sent">'+(isSent(p)?'ทำเครื่องหมายยังไม่ส่ง':'ทำเครื่องหมายส่งแล้ว ✓')+'</button>'+
+    '<div class="ctxsep"></div>'+
+    '<button type="button" role="menuitem" data-c="open">เปิดโครงการนี้</button>'+
+    '<button type="button" role="menuitem" data-c="clear"'+(p.cases.length?'':' disabled')+'>ล้างเหตุการณ์ ('+p.cases.length+' เคส)</button>'+
+    '<button type="button" role="menuitem" data-c="remove" class="dz">ลบโครงการ</button>';
+  document.body.appendChild(ctx);
+  var w=ctx.offsetWidth,h=ctx.offsetHeight;ctx.style.left=Math.min(x,innerWidth-w-8)+'px';ctx.style.top=Math.min(y,innerHeight-h-8)+'px';
+  ctx.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-c]');if(!b||b.disabled)return;var c=b.dataset.c;
+    if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
+    if(c==='viewmsg'){closeCtx();openMsg(p);return}
+    if(c==='copymsg'){closeCtx();copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');return}
+    if(c==='copyphotos'){closeCtx();try{navigator.clipboard.write([new ClipboardItem({'image/png':collageBlob(p)})]).then(function(){toast('คัดลอกรูปรวมแล้ว วางใน LINE ได้เลย')},function(){toast('คัดลอกรูปไม่ได้ในเบราว์เซอร์นี้')})}catch(er){toast('คัดลอกรูปไม่ได้ในเบราว์เซอร์นี้')}return}
+    if(c==='sent'){closeCtx();setSent(p,!isSent(p));toast(isSent(p)?'ทำเครื่องหมาย '+p.name+' ส่งแล้ว':'ยกเลิกเครื่องหมายส่งแล้ว');return}
+    if(b.dataset.armed!=='1'){Array.prototype.forEach.call(ctx.querySelectorAll('[data-armed]'),function(o){o.removeAttribute('data-armed');o.textContent=o.dataset.t});b.dataset.t=b.textContent;b.dataset.armed='1';b.textContent='กดอีกครั้งเพื่อยืนยัน';return}
+    closeCtx();if(c==='clear')clearProject(p);else removeProject(p);
+  });
+  ctx.querySelector('button').focus();
+}
 function inShift(p){var s=curShift(),m=p.mode||'';return s==='all'||m===''||m==='24'||m===s}
 function shiftHTML(){
   var all=sortedProjects(),vis=all.filter(inShift),pend=vis.filter(function(p){return !p.cases.length}).length,s=curShift();
@@ -415,7 +785,7 @@ function reportProjects(){var all=sortedProjects();return{ps:all.filter(function
 function plainText(){var r=reportProjects();return r.ps.concat(r.none).map(msgFinal).join('\n\n')}
 function folderIcon(){return '<svg class="ficon" aria-hidden="true"><use href="#fold"/></svg>'}
 var tt;
-function toast(m){var el=document.getElementById('toast');el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(function(){el.hidden=true},2600)}
+function toast(m){var el=document.getElementById('toast');el.textContent=m;el.hidden=false;document.body.classList.add('toast-on');clearTimeout(tt);tt=setTimeout(function(){el.hidden=true;document.body.classList.remove('toast-on')},2600)}
 function copyText(text,okMsg){
   function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(er){}ta.remove();toast(ok?(okMsg||'คัดลอกข้อความแล้ว'):'คัดลอกไม่สำเร็จ ให้เลือกข้อความแล้วคัดลอกเอง')}
   try{navigator.clipboard.writeText(text).then(function(){toast(okMsg||'คัดลอกข้อความแล้ว วางใน LINE หรือ WhatsApp ได้เลย')},fb)}catch(er){fb()}
@@ -514,7 +884,7 @@ function syncHTML(){
 /* ---------- render ---------- */
 var app=document.getElementById('app');
 function renderTotals(){var n=counts();
-  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span><button type="button" id="syncst" class="pill"></button>';paintSync()}
+  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button>';paintSync()}
 function railHTML(){
   var all=sortedProjects(),n=counts();
   var h='<button type="button" class="f" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">รวมทุกโครงการ</span><span class="fm">'+n.c+' เคส · '+n.ph+' รูป</span></button>';
@@ -524,13 +894,13 @@ function railHTML(){
     h+='<div class="gh"><span>'+MODES[m]+'</span><span>'+list.length+'</span></div>';
     list.forEach(function(p){
       var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
-      h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span><span class="fm">'+(p.cases.length?p.cases.length+' เคส · '+ph+' รูป':'ยังไม่มีเหตุการณ์')+'</span></button>';
+      h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+(isSent(p)?' <span class="sentok">✓ ส่งแล้ว</span>':'')+'</span><span class="fm">'+(p.cases.length?p.cases.length+' เคส · '+ph+' รูป':'ยังไม่มีเหตุการณ์')+'</span></button>';
     });
   });
   return h+'<button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button>';
 }
 function caseHTML(c){
-  var th=allPhotos(c).map(function(p){return '<div class="thumb"><img src="'+p.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" data-zoom><button type="button" class="cp" data-act="copyphoto" data-pid="'+p.id+'">คัดลอก</button><button type="button" class="x" data-act="delphoto" data-pid="'+p.id+'" aria-label="ลบรูป">×</button></div>'}).join('');
+  var th=allPhotos(c).map(function(p){return '<div class="thumb"><img decoding="async" loading="lazy" src="'+p.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" data-zoom><button type="button" class="cp" data-act="copyphoto" data-pid="'+p.id+'">คัดลอก</button><button type="button" class="x" data-act="delphoto" data-pid="'+p.id+'" aria-label="ลบรูป">×</button></div>'}).join('');
   return '<div class="case" data-c="'+c.id+'">'+
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
     '<div class="ca"><button type="button" class="ghost" data-act="copycase">คัดลอก</button><button type="button" class="ghost" data-act="delcase">ลบ</button></div>'+
@@ -539,14 +909,17 @@ function caseHTML(c){
 }
 function projHTML(p){
   var opts=ORDER.map(function(m){return '<option value="'+m+'"'+((p.mode||'')===m?' selected':'')+'>'+(m?MODES[m]:'ไม่ระบุช่วงเวลา')+'</option>'}).join('');
-  return '<section class="proj" data-p="'+p.id+'"><header>'+folderIcon()+
+  return '<section class="proj'+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
     '<input class="pname" id="n-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'" placeholder="ชื่อโครงการ" aria-label="ชื่อโครงการ">'+
     '<select class="msel" id="s-'+p.id+'" data-f="mode" aria-label="ช่วงเวลาที่ดู CCTV">'+opts+'</select>'+
     '<span class="cnt">'+p.cases.length+' เคส</span>'+
-    (p.cases.length?'<button type="button" class="btn" data-act="copyproj">คัดลอกข้อความ</button>':'')+
-    '<button type="button" class="ghost" data-act="delproj">'+(inReg(p)?'ล้างเหตุการณ์':'ลบโครงการ')+'</button></header>'+
+    (p.cases.length||isLUMT(p)?'<button type="button" class="btn" data-act="viewmsg">ดูข้อความ</button>':'')+
+    (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+
+      (projPhotos(p).length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+
+      '<button type="button" class="btn pri" data-act="copymsg">'+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
+    '<button type="button" class="ghost" data-act="delproj">'+(inReg(p)?'ล้างเหตุการณ์':'ลบโครงการ')+'</button>'+(inReg(p)?'<button type="button" class="ghost" data-act="rmproj" title="เอาโครงการนี้ออกจากรายการทุกวัน กู้คืนได้ในหน้าจัดการข้อมูล">ลบโครงการ</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
-    '<button type="button" class="btn addc" data-act="addcase">+ เพิ่มเหตุการณ์</button></section>';
+    '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
 }
 function fit(el){if(!el.offsetWidth)return;el.style.height='0px';el.style.height=Math.max(el.classList.contains('mp')?100:30,el.scrollHeight+2)+'px'}
 function fitAll(){Array.prototype.forEach.call(app.querySelectorAll('textarea'),fit)}
@@ -583,7 +956,7 @@ function settings(){
 function senderName(S){return String((S.sender==='__other'?S.senderOther:S.sender)||'').replace(/\s*EOC$/i,'')+'EOC'}
 function thaiShort(iso){var a=String(iso).split('-');return (+a[2])+'/'+(+a[1])+'/'+(+a[0]+543)}
 function sortCases(list){
-  function k(c){return c.time}
+  function k(c){return nkey(c)+c.time}
   return list.slice().sort(function(a,b){var x=k(a),y=k(b);return x<y?-1:x>y?1:0});
 }
 var LINE_NIGHT='♦️ เวลา 19.00น.-07.00น. เหตุการณ์ปกติ',LINE_DAY='♦️ เวลา 07.00น.-19.00น. เหตุการณ์ปกติ';
@@ -608,23 +981,34 @@ function normalLines(p){
 }
 function projPhotos(p){var out=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){out.push(x)})});return out}
 function dataFile(d,name){var a=d.split(','),bin=atob(a[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new File([u],name,{type:(a[0].match(/:(.*?);/)||[])[1]||'image/jpeg'})}
+var IS_MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
 var CAN_SHARE=(function(){try{return !!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.jpg',{type:'image/jpeg'})]}))}catch(e){return false}})();
 function edits(){return R().msgs||(R().msgs={})}
 function isEdited(p){return typeof edits()[p.id]==='string'}
 function msgFinal(p){return isEdited(p)?edits()[p.id]:msgText(p)}
 function nl(p){var m=(R().nl=R().nl||{});return m[p.id]||(m[p.id]={night:false,day:false})}
-function extraLines(p){var o=nl(p),a=[];if(o.night)a.push(LINE_NIGHT);if(o.day)a.push(LINE_DAY);return a}
-function addLine(v,line){var mk='\n\n  จึงเรียนมาเพื่อทราบ',ix=v.indexOf(mk);if(ix<0)return v.replace(/\s+$/,'')+'\n'+line;var head=v.slice(0,ix).replace(/\s+$/,'');return head+(/ดังต่อไปนี้$/.test(head)?'\n\n':'\n')+line+v.slice(ix)}
+function extraLines(p){return []}
+function addLine(v,line){
+  var hd='ดังต่อไปนี้',i=v.indexOf(hd);
+  if(i>=0){
+    var start=v.indexOf('\n',i);if(start<0)return v+'\n\n'+line;
+    var rest=v.slice(start).replace(/^\n+/,''),pre=v.slice(0,start)+'\n\n';
+    if(line===LINE_DAY&&rest.indexOf(LINE_NIGHT)===0){var e=rest.indexOf('\n');return pre+(e<0?rest+'\n'+line:rest.slice(0,e)+'\n'+line+rest.slice(e))}
+    return pre+line+'\n'+rest;
+  }
+  return addLineEnd(v,line);
+}
+function addLineEnd(v,line){var mk='\n\n  จึงเรียนมาเพื่อทราบ',ix=v.indexOf(mk);if(ix<0)return v.replace(/\s+$/,'')+'\n'+line;var head=v.slice(0,ix).replace(/\s+$/,'');return head+(/ดังต่อไปนี้$/.test(head)?'\n\n':'\n')+line+v.slice(ix)}
 function dropLine(v,line){return v.split('\n').filter(function(l){return l.trim()!==line}).join('\n')}
 function isSent(p){return !!(R().sent&&R().sent[p.id])}
-function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();var sec=app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
+function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
 function paintProg(){
   var el=document.getElementById('prog');if(!el)return;
   var ps=reportProjects().ps,n=ps.filter(isSent).length,pct=ps.length?Math.round(n*100/ps.length):0;
   el.innerHTML=ps.length?'<div class="progtop"><b>ส่งแล้ว '+n+' จาก '+ps.length+' โครงการ</b>'+(n===ps.length?'<span class="okmsg">ส่งครบทุกโครงการแล้ว</span>':'')+'</div><div class="bar2"><i style="width:'+pct+'%"></i></div><div class="chips">'+ps.map(function(p){return '<button type="button" class="chip'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'}).join('')+'</div>':'';
 }
 function nextUnsent(p){var ps=reportProjects().ps,i=ps.indexOf(p);for(var k=1;k<=ps.length;k++){var q=ps[(i+k)%ps.length];if(!isSent(q))return q}return null}
-function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);var sc=app.querySelector('.sp[data-p="'+q.id+'"]');if(sc)sc.scrollIntoView({behavior:'smooth',block:'start'})}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
+function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);var sc=app.querySelector('.proj[data-p="'+q.id+'"]');if(sc)sc.scrollIntoView({behavior:'smooth',block:'start'})}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
 /* one picture with every photo of the project, labelled with its time */
 function collageBlob(p){return new Promise(function(res,rej){
   var list=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){list.push({x:x,t:c.time})})});
@@ -640,11 +1024,26 @@ function collageBlob(p){return new Promise(function(res,rej){
     if(--left===0)cv.toBlob(function(b){b?res(b):rej()},'image/png');
   };im.onerror=function(){if(--left===0)cv.toBlob(function(b){b?res(b):rej()},'image/png')};im.src=o.x.data});
 })}
+var LUMT_POINTS=['จุดที่ 13 ป้อมหน้า','จุดที่ 14 จุดรับ-ส่งสินค้า','จุดที่ 15 ถนนทาง เข้า-ออกหลัก','จุดที่ 16 ป้อมลานจอดขาเข้า','จุดที่ 17 ด้านหน้าทาง เข้า-ออกรับส่งสินค้า','จุดที่ 18 ห้องน้ำ ชั้น G','จุดที่ 19 ห้อง MDB 1','จุดที่ 20 ห้อง MDB 4-5','จุดที่ 21 ห้อง MDB 2-3','จุดที่ 22 ป้อมลานจอดรถจยย.','จุดที่ 23 ทางเดินเข้าอาคารด้านหน้า ชั้น G','จุดที่ 24 ด้านหน้าอาคาร','จุดที่ 25 ด้านหลังอาคาร','จุดที่ 26 ทางเดินเข้าอาคารด้านหลัง ชั้น G','จุดที่ 27 โถงลิฟต์โซนต่ำ','จุดที่ 28 โถงลิฟต์โซนสูง','จุดที่ 29 ด้านหน้านิติบุคคล','จุดที่ 30 ด้านหน้าล็อบบี้','จุดที่ 31 ป้อมลานจอดขาออก','จุดที่ 32 ประตูหน้าทาง เข้า-ออก อาคาร'];
+function isLUMT(p){return norm(p.name)===norm('LUM-T')}
+/* shift for the header: the shift button, else the normal line already in the project */
+function msgShift(p){var s=curShift();if(s==='night'||s==='day')return s;var t=p.cases.map(function(c){return (c.text||'').trim()});return t.indexOf(LINE_DAY)>=0&&t.indexOf(LINE_NIGHT)<0?'day':'night'}
+function lumtText(p){
+  var S=settings(),sh=msgShift(p),rng=sh==='night'?'19.00-07.00น.':'07.00-19.00น.';
+  var other=sortCases(p.cases).filter(function(c){var t=(c.text||'').trim();return t!==LINE_NIGHT&&t!==LINE_DAY}).map(caseText);
+  return '         '+S.salute+' @'+p.name+' '+S.particle+'\n'+
+    'สรุปรายงานเหตุการณ์ประจำวันที่ '+thaiShort(R().repDate||store.date)+' จากระบบ CCTV เวลา '+rng+' ดังต่อไปนี้\n\n'+
+    '♦️ ลิฟต์ตัว A - L\n'+
+    LUMT_POINTS.map(function(x){return '♦️ '+x+'\n✅ เหตุการณ์ปกติ'}).join('\n')+
+    (other.length?'\n'+other.join('\n'):'')+
+    '\n\n             จึงเรียนมาเพื่อทราบ\n     ศูนย์ปฏิบัติการรักษาความปลอดภัย\n                '+senderName(S).replace(/EOC$/,' EOC');
+}
 function msgText(p){
+  if(isLUMT(p))return lumtText(p);
   var S=settings(),d=R().repDate||store.date;
   return S.salute+' @'+p.name+' '+S.particle+'\n'+
     'สรุปรายงานเหตุการณ์ประจำวันที่ '+thaiShort(d)+' จากระบบ CCTV ดังต่อไปนี้\n\n'+
-    (casesIn(p).length?sortCases(casesIn(p)).map(caseText).concat(extraLines(p)):normalLines(p)).join('\n')+
+    (casesIn(p).length?extraLines(p).concat(sortCases(casesIn(p)).map(caseText)):normalLines(p)).join('\n')+
     '\n\n  จึงเรียนมาเพื่อทราบ\n  '+S.org+'\n     '+senderName(S);
 }
 function refreshMsgs(){
@@ -656,11 +1055,20 @@ function refreshMsgs(){
   Array.prototype.forEach.call(app.querySelectorAll('section[data-p] [data-pn]'),function(el){var pp=findP(el);if(pp)el.textContent=pp.name});
   var l=document.getElementById('repdatelbl');if(l)l.textContent=thaiShort(R().repDate||store.date);
 }
+function msgSettingsHTML(){
+  var S=settings();
+  return '<article class="sheet"><header><p class="kick">ข้อความรายงาน</p><h2>ตั้งค่าข้อความ</h2><p class="tot">ใช้กับ คัดลอกข้อความรายงาน (คลิกขวาที่โครงการในหน้าบันทึก) วันที่ในข้อความคือวันที่รายงานด้านบน</p></header>'+
+    '<div class="cfg">'+fld('st-salute','คำขึ้นต้น','salute',S.salute)+
+      '<div class="fld"><label for="st-particle">คำลงท้าย</label><select id="st-particle" data-st="particle"><option value="ค่ะ"'+(S.particle==='ค่ะ'?' selected':'')+'>ค่ะ</option><option value="ครับ"'+(S.particle==='ครับ'?' selected':'')+'>ครับ</option></select></div>'+
+      fld('st-org','หน่วยงาน','org',S.org)+
+      '<div class="fld"><label for="st-sender">ชื่อผู้ส่ง</label><select id="st-sender" data-st="sender">'+NAMES.map(function(x){return '<option value="'+esc(x)+'"'+(S.sender===x?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'<option value="__other"'+(S.sender==='__other'?' selected':'')+'>อื่นๆ (พิมพ์เอง)</option></select>'+(S.sender==='__other'?'<input id="st-sender2" data-st="senderOther" value="'+esc(S.senderOther)+'" placeholder="พิมพ์ชื่อ" aria-label="ชื่อผู้ส่ง">':'')+'</div>'+
+    '</div><div class="rowb"><button type="button" class="btn" data-act="copy">คัดลอกข้อความรายงานทุกโครงการ</button></div></article>';
+}
 function fld(id,label,key,val){return '<div class="fld"><label for="'+id+'">'+label+'</label><input id="'+id+'" data-st="'+key+'" value="'+esc(val)+'"></div>'}
 function renderReport(){
   var S=settings(),rp=reportProjects(),ps=rp.ps,none=rp.none,n={c:0,ph:0},g=repRange(),pk=repPreset();ps.forEach(function(p){casesIn(p).forEach(function(c){n.c++;n.ph+=allPhotos(c).length})});
   var rd=R().repDate||store.date;
-  var h='<article class="sheet"><header><p class="kick">รายงานผู้บริหาร</p><h2>'+esc(thaiDate())+'</h2><p class="tot">'+ps.length+' โครงการที่มีเหตุการณ์ · '+n.c+' เคส · '+n.ph+' รูป</p>'+
+  var h='<article class="sheet"><header><p class="kick">รายงานผู้ว่าจ้าง</p><h2>'+esc(thaiDate())+'</h2><p class="tot">'+ps.length+' โครงการที่มีเหตุการณ์ · '+n.c+' เคส · '+n.ph+' รูป</p>'+
     '<div class="cfg">'+
       '<div class="fld"><label for="repdate">วันที่ในรายงาน</label><input type="date" id="repdate" value="'+esc(rd)+'"><span class="msg" id="repdatelbl">'+thaiShort(rd)+'</span></div>'+
       fld('st-salute','คำขึ้นต้น','salute',S.salute)+
@@ -676,10 +1084,9 @@ function renderReport(){
     return '<section class="sp'+(quiet?' quiet3':'')+(isEdited(p)?' edited':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><h3>โครงการ <span data-pn>'+esc(p.name)+'</span><small>'+(tag?tag+' · ':'')+(quiet?'เหตุการณ์ปกติ':p.cases.length+' เคส')+'</small><span class="hbtn"><button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+(phs.length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+'<button type="button" class="btn pri" data-act="copymsg">'+(phs.length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button></span></h3>'+
       '<div class="rn"><label for="rn-'+p.id+'">ชื่อโครงการ (ใช้หลัง @ ในข้อความ)</label><input id="rn-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'"></div>'+
       (quiet&&(p.mode||'')!=='night'&&(p.mode||'')!=='day'?'<div class="rowb"><span class="msg">ช่วงเวลาเหตุการณ์ปกติ</span><div class="seg" role="group" aria-label="ช่วงเวลาเหตุการณ์ปกติ">'+[['night','19.00–07.00'],['day','07.00–19.00'],['both','ทั้งสองช่วง']].concat(repPreset()==='custom'?[['range',hhmm(repRange().from)+'–'+hhmm(repRange().to)]]:[]).map(function(o){return '<button type="button" data-act="pnorm" data-v="'+o[0]+'" aria-pressed="'+(normalChoice(p)===o[0])+'">'+o[1]+'</button>'}).join('')+'</div></div>':'')+
-      (quiet?'':'<div class="rowb tl"><span class="msg">เพิ่มบรรทัดเหตุการณ์ปกติ</span><div class="seg" role="group" aria-label="เพิ่มบรรทัดเหตุการณ์ปกติ"><button type="button" data-act="tline" data-v="night" aria-pressed="'+o.night+'">19.00–07.00 น. ปกติ</button><button type="button" data-act="tline" data-v="day" aria-pressed="'+o.day+'">07.00–19.00 น. ปกติ</button></div></div>')+
       '<div class="mphead"><label class="msg" for="mp-'+p.id+'">ข้อความ แก้ไขได้</label><span class="ed tag">แก้ไขเอง</span><button type="button" class="ghost ed" data-act="resetmsg">ใช้ข้อความอัตโนมัติ</button></div>'+
       '<textarea class="mp" id="mp-'+p.id+'" data-msg="'+p.id+'" data-f="msg" spellcheck="false">'+esc(msgFinal(p))+'</textarea>'+
-      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img src="'+o.x.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
+      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img decoding="async" loading="lazy" src="'+o.x.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
       '</section>';
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
@@ -720,6 +1127,7 @@ function renderData(){
       '<button type="button" class="btn" data-act="orphans"'+(orph.length?'':' disabled')+'>ลบรูปที่ไม่มีเหตุการณ์อ้างถึง ('+orph.length+' รูป, '+fmtB(ob)+')</button>'+
       '<button type="button" class="btn" data-act="prune"'+(ex?'':' disabled')+'>ลบโครงการที่เพิ่มเองและว่างเปล่า ('+ex+')</button></div></div>'+
     '<div class="dsec"><h3>รายวัน</h3>'+(days.length?'<div class="scroll"><table class="tbl"><thead><tr><th>วันที่</th><th class="num">โครงการ</th><th class="num">เคส</th><th class="num">รูป</th><th class="num">ขนาด</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<p>ยังไม่มีข้อมูล</p>')+'</div>'+
+    (removedKeys().length?'<div class="dsec"><h3>โครงการที่ลบออก</h3><p>โครงการเหล่านี้จะไม่แสดงในรายการ กด นำกลับ เพื่อให้แสดงอีกครั้ง</p><div class="rowb">'+removedKeys().map(function(k){var nm=(REG.filter(function(r){return norm(r[0])===k})[0]||[k])[0];return '<button type="button" class="chip" data-act="restoreproj" data-k="'+esc(k)+'">'+esc(nm)+' · นำกลับ</button>'}).join('')+'</div></div>':'')+
     '<div class="dsec"><h3>ล้างทั้งหมด</h3><p>ลบทุกวัน ทุกเหตุการณ์ และทุกรูปในเบราว์เซอร์นี้ รายชื่อโครงการตามช่วงเวลาที่ดูจะกลับมาเป็นรายการว่าง</p><div class="rowb"><button type="button" class="btn danger" data-act="wipe">ล้างข้อมูลทั้งหมด</button></div></div></article>';
   try{if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(function(e){var el=document.getElementById('est');if(el&&e.quota)el.textContent='เบราว์เซอร์ใช้พื้นที่ของหน้านี้ '+fmtB(e.usage||0)+' จากที่อนุญาตประมาณ '+fmtB(e.quota)})}catch(er){}
 }
@@ -737,10 +1145,9 @@ function renderNow(){
   if(sel!=='all'&&!R().projects.some(function(p){return p.id===sel}))sel='all';
   document.getElementById('date').value=store.date;
   document.getElementById('m-edit').setAttribute('aria-pressed',mode==='edit');
-  document.getElementById('m-rep').setAttribute('aria-pressed',mode==='report');
   document.getElementById('m-data').setAttribute('aria-pressed',mode==='data');
   renderTotals();
-  mode==='edit'?renderEdit():mode==='report'?renderReport():renderData();paintSync();
+  document.getElementById('m-rep').setAttribute('aria-pressed',mode==='report');mode==='edit'?renderEdit():mode==='report'?renderReport():renderData();paintSync();
   var dl=document.getElementById('folders');
   if(!dl.children.length){
     var seen={},names=[];
@@ -775,6 +1182,12 @@ app.addEventListener('input',function(e){
 });
 app.addEventListener('change',function(e){
   var t=e.target;
+  if(t.dataset&&t.dataset.actChange==='addnormal'){
+    var np=findP(t),w=t.value;t.value='';if(!np||!w)return;
+    var tx=w==='night'?LINE_NIGHT:LINE_DAY,tm=w==='night'?'19:00':'07:00';
+    if(np.cases.some(function(k){return (k.text||'').trim()===tx})){toast('มีบรรทัดนี้ในโครงการแล้ว');return}
+    var nc={id:uid(),time:tm,text:tx};np.cases.push(nc);np.cases.sort(byTime);markP(np);save();render();return;
+  }
   if(t.id==='rep-from'||t.id==='rep-to'){var fr=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;if(fr&&to){if(fr===to){toast('เวลาเริ่มกับเวลาสิ้นสุดต้องไม่เท่ากัน');return}R().repFrom=fr;R().repTo=to;save();render()}return}
   if(t.dataset&&t.dataset.f==='text'){var p0=findP(t),c0=p0&&findC(t,p0);if(c0&&!applyTime(p0,c0,false)){tidy(c0);t.value=c0.text;markP(p0);save();fit(t)}return}
   if(t.dataset&&t.dataset.act==='file'){
@@ -787,7 +1200,25 @@ app.addEventListener('click',function(e){
   var z=e.target.closest('[data-zoom]');
   if(z){var lb=document.getElementById('lb');lb.querySelector('img').src=z.src;lb.hidden=false;return}
   var sh=e.target.closest('[data-shift]');
-  if(sh){store.shift=sh.dataset.shift;save();render();return}
+  if(sh){
+    store.shift=sh.dataset.shift;
+    /* กลางคืน / กลางวัน: put that shift's normal line on every project shown for this shift */
+    if(store.shift==='night'||store.shift==='day'){
+      var tx=store.shift==='night'?LINE_NIGHT:LINE_DAY,tm=store.shift==='night'?'19:00':'07:00',other=store.shift==='night'?LINE_DAY:LINE_NIGHT,n=0;
+      /* drop the other shift's normal line (when it has no photos) so only the chosen shift remains */
+      R().projects.forEach(function(p){
+        var keep=p.cases.filter(function(k){var gone=(k.text||'').trim()===other&&!allPhotos(k).length;if(gone)markDel(k);return !gone});
+        if(keep.length!==p.cases.length){p.cases=keep;markP(p)}
+      });
+      R().projects.forEach(function(p){
+        if(!inShift(p)||!(p.name||'').trim())return;
+        if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;
+        p.cases.push({id:uid(),time:tm,text:tx});p.cases.sort(byTime);markP(p);n++;
+      });
+      if(n)toast('ใส่ "'+tx.replace('♦️ ','')+'" ให้ '+n+' โครงการแล้ว');
+    }
+    save();render();return;
+  }
   var s=e.target.closest('[data-sel]');
   if(s){sel=s.dataset.sel;render();window.scrollTo(0,0);return}
   var b=e.target.closest('[data-act]');if(!b)return;
@@ -795,6 +1226,13 @@ app.addEventListener('click',function(e){
   if(act==='addproj'){var np={id:uid(),name:'',mode:'',cases:[{id:uid(),time:'08:00',text:'♦️ '}]};R().projects.push(np);sel=np.id;save();render();var i=document.getElementById('n-'+np.id);if(i)i.focus()}
   else if(act==='addcase'&&p){var nc={id:uid(),time:'08:00',text:'♦️ '};p.cases.push(nc);save();render();var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}
   else if(act==='delcase'&&c){if(!arm(b,'ยืนยันลบ'))return;markDel(c);delCasePhotos(c);p.cases=p.cases.filter(function(k){return k!==c});save();render()}
+  else if(act==='addnormal'&&p){
+    var added=0;normalKinds(p).forEach(function(w){var tx=w==='night'?LINE_NIGHT:LINE_DAY;if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;p.cases.push({id:uid(),time:w==='night'?'19:00':'07:00',text:tx});added++});
+    if(!added){toast('มีเหตุการณ์ปกติของกะนี้แล้ว');return}
+    p.cases.sort(byTime);markP(p);save();render();
+  }
+  else if(act==='rmproj'&&p){if(!arm(b,'ยืนยันลบโครงการ'))return;removeProject(p)}
+  else if(act==='restoreproj'){var ix=removedKeys().indexOf(b.dataset.k);if(ix>=0)removedKeys().splice(ix,1);save();render();toast('นำโครงการกลับมาแล้ว')}
   else if(act==='delproj'&&p){
     if(!arm(b,inReg(p)?'ยืนยันล้าง':'ยืนยันลบโครงการ'))return;
     p.cases.forEach(function(k){markDel(k);delCasePhotos(k)});
@@ -832,10 +1270,11 @@ app.addEventListener('click',function(e){
     loop().then(function(){b.disabled=false;toast('ลบบน Drive แล้ว '+tot.f+' รูป ('+fmtB(tot.kb*1024)+')'+(what==='all'?' และ '+tot.r+' แถว':'')+(perm?' คืนพื้นที่แล้ว':' ไฟล์อยู่ในถังขยะ จะหายถาวรใน 30 วัน'))},function(er){b.disabled=false;toast('ลบไม่สำเร็จ: '+er.message)});
   }
   else if(act==='copycase'&&c){copyText(caseText(c))}
-  else if(act==='copyproj'&&p){copyText(projText(p))}
+  else if(act==='viewmsg'&&p){openMsg(p)}
+  else if(act==='copyproj'&&p){copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย')}
   else if(act==='copymsg'&&p){
     var mt=app.querySelector('#mp-'+p.id),txt=mt?mt.value:msgFinal(p),pl=projPhotos(p);
-    if(!pl.length||!b.closest('.sp')){copyText(txt);if(b.closest('.sp'))finishProject(p);return}
+    if(!pl.length){copyText(txt);finishProject(p);return}
     copyText(txt,'คัดลอกข้อความแล้ว วางใน LINE แล้วกดปุ่มอีกครั้งเพื่อคัดลอกรูปที่ 1');
     b.dataset.act='copynext';b.dataset.step='0';b.classList.add('step');b.textContent='คัดลอกรูป 1/'+pl.length;
   }
@@ -861,6 +1300,17 @@ app.addEventListener('click',function(e){
     if(isEdited(p)){var v2=on?addLine(edits()[p.id],line):dropLine(edits()[p.id],line);edits()[p.id]=v2;if(tt){tt.value=v2;fit(tt)}}
     else if(tt){tt.value=msgText(p);fit(tt)}
     b.setAttribute('aria-pressed',on);save();
+  }
+  else if(act==='lineshare'&&p){
+    var lt=app.querySelector('#mp-'+p.id),ltx=lt?lt.value:msgFinal(p),lph=projPhotos(p);
+    /* LINE's own share page: pick a friend or group, the report text is filled in */
+    var w=window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(ltx)+'&url='+encodeURIComponent(' '),'lineshare','width=620,height=720');
+    if(!w){toast('เบราว์เซอร์บล็อกหน้าต่าง LINE ให้กดอนุญาตป๊อปอัปแล้วลองใหม่');return}
+    if(lph.length){
+      /* text is copied as a backup, photos follow as one picture to paste in LINE PC */
+      copyText(ltx,' ');
+      setTimeout(function(){try{navigator.clipboard.write([new ClipboardItem({'image/png':collageBlob(p)})]).then(function(){toast('ส่งข้อความในหน้าต่าง LINE แล้วเปิดกลุ่มใน LINE PC กด Ctrl+V เพื่อวางรูป')},function(){})}catch(er){}},400);
+    }else copyText(ltx,'เลือกกลุ่มในหน้าต่าง LINE แล้วกดส่ง (ข้อความถูกคัดลอกไว้ด้วย)');
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
   else if(act==='jump'){var js=app.querySelector('.sp[data-p="'+b.dataset.to+'"]');if(js)js.scrollIntoView({behavior:'smooth',block:'start'})}
@@ -894,6 +1344,14 @@ app.addEventListener('click',function(e){
   }
 });
 /* drag photos onto a case */
+app.addEventListener('contextmenu',function(e){
+  var f=e.target.closest('.rail button.f[data-sel]');if(!f||f.dataset.sel==='all')return;
+  var p=R().projects.filter(function(q){return q.id===f.dataset.sel})[0];if(!p)return;
+  e.preventDefault();openCtx(e.clientX,e.clientY,p);
+});
+document.addEventListener('mousedown',function(e){if(ctx&&!ctx.contains(e.target))closeCtx()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();closeMsg()}});
+window.addEventListener('scroll',function(){if(ctx)closeCtx()},{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
 app.addEventListener('mousedown',function(e){setPasteCase(e.target)});
 document.addEventListener('paste',function(e){
@@ -915,9 +1373,19 @@ lbEl.addEventListener('click',function(e){if(e.target.id==='lbcopy'){e.stopPropa
 document.addEventListener('keydown',function(e){if(e.key==='Escape')lbEl.hidden=true});
 document.getElementById('date').addEventListener('change',function(){if(this.value){store.date=this.value;save();sel='all';render()}});
 document.getElementById('m-edit').addEventListener('click',function(){mode='edit';render()});
-document.getElementById('m-rep').addEventListener('click',function(){mode='report';render()});
+
 document.getElementById('m-data').addEventListener('click',function(){mode='data';render()});
-document.getElementById('totals').addEventListener('click',function(e){if(e.target.closest('#syncst')){mode='data';render();window.scrollTo(0,0)}});
+document.getElementById('m-rep').addEventListener('click',function(){mode='report';render();window.scrollTo(0,0)});
+document.getElementById('totals').addEventListener('click',function(e){
+  if(e.target.closest('#syncst')){mode='data';render();window.scrollTo(0,0);return}
+  var cb=e.target.closest('#clrday');if(!cb)return;
+  if(!arm(cb,'ยืนยันล้างข้อมูลวันที่ '+thaiShort(store.date)))return;
+  /* clear test entries: every case and photo of this day (also removed from Drive), project list stays */
+  var n=0;R().projects.forEach(function(p){p.cases.forEach(function(k){markDel(k);delCasePhotos(k);n++});p.cases=[]});
+  R().projects=R().projects.filter(function(p){return inReg(p)});
+  delete R().sent;delete R().msgs;delete R().nl;
+  save();sel='all';render();toast('ล้างข้อมูลวันที่ '+thaiShort(store.date)+' แล้ว ('+n+' เคส)');
+});
 
 fixTimes();
 render();
@@ -925,6 +1393,11 @@ loadPhotos().then(function(){render();schedule()});
 /* re-measure text boxes once the web font arrives and whenever the window width changes */
 try{document.fonts.ready.then(fitAll)}catch(e){}
 var rzT;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fitAll,120)});
+var topBtn=document.getElementById('totop');
+var topHid=null,topBusy=false;
+function paintTop(){if(topBusy)return;topBusy=true;requestAnimationFrame(function(){topBusy=false;var h=window.scrollY<600;if(h!==topHid){topHid=h;topBtn.hidden=h}})}
+window.addEventListener('scroll',paintTop,{passive:true});
+topBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
 window.addEventListener('online',function(){SY.err='';schedule()});
 (function(){
   var b=document.getElementById('setdir');
