@@ -618,12 +618,21 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .bar .brand span{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
 .bar .brand+.sub{font-size:12px;margin-top:1px!important}
 @media (max-width:620px){.bar .brand span{font-size:17px}}
+
+/* ===== sticky header fix: a solid strip behind the bar so cards never show above or below it while scrolling ===== */
+.topwrap{position:sticky;top:0;z-index:40;margin:-10px -14px 0;padding:10px 14px 8px;
+  background:linear-gradient(180deg,#EEF2F9 0,#F5F6FA 320px,#F5F6FA 100%) fixed}
+.topwrap .bar{position:relative!important;top:auto!important;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)!important}
+.topwrap::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(245,246,250,.9),rgba(245,246,250,0))}
+.side{top:100px!important;max-height:calc(100vh - 108px)!important}
+@media (max-width:700px){.topwrap{position:static}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
 
 <div class="wrap">
-  <div class="bar">
+  <div class="topwrap"><div class="bar">
     <div class="brandwrap">
       <div class="bt">
         <h1 class="brand"><span>CCTV<b>Report</b></span></h1>
@@ -640,7 +649,7 @@ textarea.mp{border-radius:16px;padding:12px 16px}
         <button type="button" id="m-data" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>จัดการข้อมูล</span></button>
       </div>
     </div>
-  </div>
+  </div></div>
   <p class="totals" id="totals"></p>
   <div id="app"></div>
 </div>
