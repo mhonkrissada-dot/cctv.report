@@ -82,7 +82,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)!
 .thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
 .thumb .x{position:absolute;top:3px;right:3px;width:18px;height:18px;border:0;border-radius:50%;background:rgba(20,24,30,.65);color:#fff;font-size:12px;line-height:1;padding:0}
 .thumb .cp{position:absolute;left:3px;bottom:3px;border:0;border-radius:999px;background:rgba(20,24,30,.65);color:#fff;font-size:11px;padding:0 6px}
-.addph{display:inline-flex;align-items:center;gap:4px;height:66px;padding:0 10px;border:1px dashed #B9C0CA;border-radius:var(--r);color:var(--muted);font-size:12.5px;cursor:pointer;background:transparent}
+.addph{display:inline-flex;align-items:center;gap:4px;height:66px;padding:0 10px;border:1px solid var(--line2);border-radius:var(--r);color:var(--muted);font-size:12.5px;cursor:pointer;background:transparent}
 .addph.sm{height:24px;padding:0 10px;border-radius:999px}
 .addph:hover,.addph.over{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .addph input{display:none}
@@ -153,13 +153,29 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 .ph .cpimg{position:absolute;right:6px;bottom:26px;border:0;border-radius:999px;background:rgba(20,24,30,.65);color:#fff;font-size:11.5px;padding:1px 8px}
 .pend{color:var(--muted)}
 .pend b{color:var(--ink)}
-.prog{margin-top:8px}
+.prog{margin-top:12px;background:var(--surface);border:1px solid var(--line2);border-radius:10px;box-shadow:var(--sh);padding:12px 14px 14px}
 .prog:empty{display:none}
-.progtop{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
-.progtop b{font-weight:bold}
-.okmsg{color:var(--ok);font-weight:bold}
-.bar2{height:8px;border-radius:999px;background:#E7EAEE;overflow:hidden;margin:6px 0 8px;max-width:520px}
-.bar2 i{display:block;height:100%;background:var(--ok);border-radius:999px;transition:width .3s}
+.progtop{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.progtop b{font-size:15px;font-weight:700}
+.progtop .pct{margin-left:auto;font-size:13px;font-weight:700;color:var(--ok);background:#E3F4E8;border-radius:999px;padding:1px 10px}
+.okmsg{color:var(--ok);font-weight:700}
+.progtop .left{color:#9A5B00;font-weight:600;font-size:13px}
+.bar2{height:10px;border-radius:999px;background:#E7EAEE;overflow:hidden;margin:8px 0 4px}
+.bar2 i{display:block;height:100%;background:linear-gradient(90deg,#2E9E55,var(--ok));border-radius:999px;transition:width .35s}
+.pgrp{margin-top:12px;padding:10px 12px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--fill)}
+.pgrp.wait{background:#FFFBF0;border-color:#F0DDB0}
+.pgrp.ok{background:#F3FAF5;border-color:#CFE8D8}
+.pgh{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin-bottom:8px}
+.pgh::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+.pgh em{font-style:normal;font-weight:600;font-size:12px;border-radius:999px;padding:0 8px;background:#fff;border:1px solid currentColor}
+.pgrp.wait .pgh{color:#9A5B00}
+.pgrp.ok .pgh{color:var(--ok)}
+.pgrp .chips{gap:6px}
+.pgrp .chip{padding:3px 12px;line-height:1.4;transition:background .12s,border-color .12s,transform .08s}
+.pgrp .chip:active{transform:scale(.97)}
+.pgrp.wait .chip{background:#fff;border-color:#E8C77E}
+.pgrp.wait .chip:hover{background:#FFF1D6;border-color:#D9A93F;color:#7A4800}
+.pgrp.ok .chip.sent:hover{background:#D5EEDC;border-color:#7CC194}
 .chip.sent{background:#E3F4E8;border-color:#A9D8B7;color:var(--ok)}
 .dsec{padding:10px 0;border-bottom:1px solid var(--line2)}
 .dsec:last-child{border-bottom:0;padding-bottom:0}
@@ -185,9 +201,6 @@ pre.mp{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-siz
 #toast{position:fixed;right:16px;bottom:16px;background:#2B3138;color:#fff;border-radius:8px;padding:8px 14px;z-index:60;max-width:calc(100% - 32px);font-size:13px;box-shadow:0 6px 20px rgba(16,24,40,.25)}
 .totals .clr{color:var(--danger)}
 .totals .clr:hover{background:var(--danger-soft);color:var(--danger)}
-#totop{position:fixed;right:16px;bottom:16px;z-index:55;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:600;color:var(--accent-2);box-shadow:0 4px 14px rgba(16,24,40,.15)}
-#totop:hover{background:var(--accent-soft)}
-body.toast-on #totop{bottom:64px}
 .sentok{font-size:11.5px;font-weight:600;color:var(--ok);white-space:nowrap}
 #msgdlg{position:fixed;inset:0;z-index:80;background:rgba(16,24,40,.45);display:flex;align-items:center;justify-content:center;padding:16px}
 #msgdlg .mbox{background:#fff;border-radius:10px;box-shadow:0 16px 48px rgba(16,24,40,.3);width:min(640px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column}
@@ -224,309 +237,407 @@ body.toast-on #totop{bottom:64px}
   .photos{grid-column:1 / 3}
   .pname{flex:1 1 100%}
 }
-</style>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
-<style id="modern-ui">
-/* ===== Modern UI layer (CSS only, no behaviour changes) ===== */
-:root{
-  --bg:#F1F5FA; --surface:#FFFFFF; --fill:#F5F8FC; --ink:#050B18; --muted:#5B6A82; --line:#D6DFEB; --line2:#E5EBF4;
-  --r:10px; --r-lg:16px;
-  --sh:0 1px 2px rgba(23,26,43,.04),0 4px 14px rgba(23,26,43,.05);
-  --sh-lg:0 12px 40px rgba(23,26,43,.16);
-  --accent:#16397A; --accent-2:#071226; --accent-soft:#E6F0FB; --accent-ink:#fff;
-  --folder:#F5B63F; --danger:#E11D48; --danger-soft:#FFF1F3; --ok:#12A150;
-  --f:'IBM Plex Sans Thai','Segoe UI','Leelawadee UI',Tahoma,system-ui,Arial,sans-serif;
-}
+/* ===== folder UI (image-style) ===== */
+:root{--fb:#2b4a4c;--ft:#8fbdba;--fu:#3a6264}
+.rail button.f{grid-template-columns:22px minmax(0,1fr) auto;border-radius:12px;padding:7px 8px;gap:0 10px}
+.rail button.f[aria-current=true]{background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.08),0 4px 14px rgba(16,24,40,.08)}
+.rail .fm{grid-column:auto;font-size:12px;order:3;white-space:nowrap}
+.rail .fn{order:2}.rail .ficon{order:1}
+.ficon{width:22px;height:17px}
+.fgrid{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:6px;scroll-snap-type:x proximity}
+.fgrid h3{display:none}
+.fcard{flex:0 0 190px;scroll-snap-align:start;background:transparent;border:0;border-radius:20px;padding:10px 10px 12px;text-align:center;transition:background .15s}
+.fcard:hover{background:var(--fill)}
+.fcard .nm{display:block;font-weight:600;margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fcard .mt{display:block;color:var(--muted);font-size:12px}
+.fart{position:relative;height:104px;margin:0 4px}
+.fart i{position:absolute;display:block}
+.fart .bk{left:5%;right:5%;top:16px;bottom:0;border-radius:12px;background:var(--fb)}
+.fart .bk:before{content:"";position:absolute;left:0;top:-10px;width:42%;height:14px;border-radius:9px 9px 0 0;background:var(--fb)}
+.fart .p1,.fart .p2{background:#fff;border-radius:7px;box-shadow:0 2px 6px rgba(0,0,0,.14);height:60px;width:42%;top:0;transition:transform .25s}
+.fart .p1{left:16%;transform:rotate(-5deg)}.fart .p2{left:42%;top:5px;transform:rotate(4deg)}
+.fart .p1:before,.fart .p2:before{content:"";position:absolute;left:8px;right:12px;top:11px;height:3px;border-radius:3px;background:#d5d3e6;box-shadow:0 9px 0 #e6e5ef,0 18px 0 #e6e5ef}
+.fcard:hover .p1{transform:rotate(-8deg) translateY(-5px)}.fcard:hover .p2{transform:rotate(7deg) translateY(-6px)}
+.fart .ft{left:0;right:0;bottom:0;height:58px;border-radius:14px;background:linear-gradient(180deg,var(--ft),var(--fu));box-shadow:0 7px 14px -6px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.35)}
+.fart .pl{position:absolute;right:8px;bottom:8px;font-size:11.5px;padding:1px 9px;border-radius:99px;background:rgba(255,255,255,.3);color:#fff}
+.fart.lt .pl{background:rgba(255,255,255,.9);color:#555}
+.fhero{display:flex;gap:16px;align-items:center;margin-bottom:8px;padding:6px 4px}
+.fhero .fart{display:block;width:64px;height:54px;flex:none;margin:0}
+.fhero .fart .bk{top:9px;border-radius:7px}.fhero .fart .bk:before{top:-6px;height:8px;border-radius:5px 5px 0 0}
+.fhero .fart .p1,.fhero .fart .p2{height:32px;border-radius:4px}.fhero .fart .p1:before,.fhero .fart .p2:before{display:none}
+.fhero .fart .ft{height:32px;border-radius:8px}.fhero .fart .pl{display:none}
+.fhbtn{border:0;background:transparent;padding:4px;border-radius:12px;cursor:pointer;flex:none;transition:background .15s}
+.fhbtn:hover{background:var(--fill)}.fhbtn:hover .p1{transform:rotate(-8deg) translateY(-3px)}.fhbtn:hover .p2{transform:rotate(7deg) translateY(-4px)}
+.fhero h2{font-size:18px!important}
+.fhero h2{font-size:22px;margin:0;font-weight:700}
+.fhero .sub{margin:2px 0 0}
+.hist{background:var(--surface);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--sh);padding:10px 14px;margin-top:12px}
+.hist h3{font-size:15px;margin-bottom:6px}
+.hd{border-top:1px solid var(--line2)}
+.hd:first-of-type{border-top:0}
+.hd>summary{list-style:none;display:flex;gap:10px;align-items:center;padding:8px 2px;cursor:pointer;border-radius:8px}
+.hd>summary::-webkit-details-marker{display:none}
+.hd>summary:hover{background:var(--fill)}
+.hd .dn{font-weight:600}.hd .dc{color:var(--accent-2);background:var(--accent-soft);border-radius:999px;padding:0 9px;font-size:12px}
+.hd .go{margin-left:auto}
+.hd ul{margin:0 0 10px 6px;padding:0;list-style:none}
+.hd li{display:flex;gap:10px;padding:5px 10px;background:var(--fill);border-radius:8px;margin-bottom:4px;white-space:pre-wrap}
+.hd li b{color:var(--accent-2);flex:none}
+.hist .none{color:var(--muted);padding:6px 2px}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .fcard:hover{background:#ffffff10}}
+.addtop{width:100%;margin-bottom:8px;border-radius:12px;min-height:36px}
+.psearch{display:flex;align-items:center;gap:6px;background:var(--fill);border:1px solid var(--line2);border-radius:12px;padding:0 6px 0 10px;margin-bottom:8px;color:var(--muted);transition:border-color .15s,box-shadow .15s}
+.psearch:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,88,202,.15);background:#fff}
+.psearch svg{width:16px;height:16px;flex:none}
+.psearch input{flex:1;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;outline:none;padding:6px 0;height:34px}
+.psearch input::-webkit-search-cancel-button{display:none}
+.psearch .pqx{border:0;background:#E3E6EB;color:var(--muted);width:20px;height:20px;border-radius:50%;font-size:11px;line-height:1;padding:0;flex:none}
+.psearch .pqx:hover{background:#D3D7DE;color:var(--ink)}
+/* floating buttons: search + back to top (navy, small horizontal) */
+#fab{position:fixed;right:20px;bottom:20px;z-index:55;display:flex;flex-direction:column;gap:8px;align-items:stretch;transition:bottom .2s}
+#fab button{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;min-width:92px;height:38px;padding:0 12px;border-radius:9px;font-weight:600;font-size:13px;line-height:1;cursor:pointer;
+  background:#1B2B4B;color:#fff;border:1px solid #13203A;box-shadow:0 4px 12px rgba(19,32,58,.28);transition:opacity .2s,transform .2s,box-shadow .2s,background .15s}
+#fab button:hover{background:#24385F;box-shadow:0 6px 16px rgba(19,32,58,.35);transform:translateY(-1px)}
+#fab svg{width:16px;height:16px;flex:none}
+#totop{opacity:0;transform:translateY(8px);pointer-events:none;height:0!important;margin-top:-8px;padding-top:0;padding-bottom:0;overflow:hidden;border-width:0!important}
+#totop.on{opacity:1;transform:none;pointer-events:auto;height:38px!important;margin-top:0;border-width:1px!important}
+#fab button:active{transform:scale(.97)}
+body.toast-on #fab{bottom:72px}
+.psearch.flash{animation:flash 1s ease}
+@keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(10,88,202,0)}30%{box-shadow:0 0 0 5px rgba(10,88,202,.3)}}
+@media (prefers-reduced-motion:reduce){#fab button,.psearch.flash{transition:none;animation:none}}
+/* folder overview */
+.fov{background:var(--surface);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--sh);padding:16px 18px;margin-top:8px}
+.fovtop{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line2)}
+.fovtop h2{font-size:20px;font-weight:700;margin:0}
+.fovtop .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+.fstats{display:flex;gap:8px;flex-wrap:wrap}
+.fstats div{background:var(--fill);border-radius:10px;padding:6px 14px;text-align:center;min-width:76px}
+.fstats b{display:block;font-size:18px;line-height:1.2}
+.fstats span{font-size:12px;color:var(--muted)}
+.fovtools{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fovtools .psearch{margin:0;width:230px}
+.fovtools .shift{margin:0;padding:0;border:0}
+.fovtools .shift .msg{display:none}
+.fgroup{margin-top:14px}
+.fgroup h3{display:flex;gap:10px;align-items:baseline;font-size:15px;font-weight:600;margin:0 0 4px}
+.fgroup h3 small{font-weight:400;color:var(--muted);font-size:12.5px}
+.fwrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:6px}
+.fwrap .fcard{flex:none;width:auto;display:block}
+.fcard .fart{display:block}
+.fovtools .shift .seg button{white-space:nowrap;padding:3px 14px}
+.fcard .fst{display:inline-block;margin-top:4px;font-size:11.5px;padding:0 8px;border-radius:999px;background:#EEF0F3;color:var(--muted)}
+.fcard .fst.ok{background:#E3F4E8;color:var(--ok);font-weight:600}
+.fcard .fst.wait{background:#FFF3CD;color:#7A5A00}
+.fcard.empty0 .fart{opacity:.55;filter:saturate(.6)}
+.frange{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:100%}
+.fovtop .frange{padding-top:10px}
+.frange input[type=date]{height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#fff;font-weight:600}
+.frange .seg.qr{margin-left:6px}
+.frange .seg.qr button{padding:3px 12px;white-space:nowrap}
+.fdtools{flex-wrap:wrap;justify-content:flex-end}
+.fdtools .frange{width:auto}
+.fstats .rng span{white-space:nowrap}
+/* case row: camera icon instead of dashed add/paste boxes */
+.ca{align-items:center}
+.addph.cab,.cab2{display:inline-flex;align-items:center;gap:5px;height:26px;width:auto;padding:0 9px;justify-content:center;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:12.5px;cursor:pointer}
+.cab2 svg{width:15px;height:15px}
+.cab2:hover{background:var(--accent-soft);color:var(--accent-2)}
+.cacts{display:flex;gap:2px;align-items:center}
+.thumb+.cacts{margin-left:4px}
+.addph.cab svg{width:15px;height:15px}
+.addph.cab:hover{background:var(--accent-soft);color:var(--accent-2)}
+.case.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.photos{margin-top:2px}
+.thumb{border:0;box-shadow:0 1px 3px rgba(16,24,40,.15)}
+/* folder colour picker in the right-click menu */
+.ctx .ctxl{padding:4px 10px 2px;font-size:12px;color:var(--muted)}
+.ctx .swatches{display:flex;flex-wrap:wrap;gap:6px;padding:4px 10px 6px;max-width:220px}
+.ctx .sw{width:22px!important;height:22px;padding:0!important;border-radius:6px!important;border:0;background:linear-gradient(180deg,var(--a),var(--b))!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);cursor:pointer}
+.ctx .sw.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
+.ctx .sw:hover{transform:scale(1.12)}
+.ctx .sw.auto{background:#F1F3F6!important;color:var(--muted);font-size:11px;font-weight:700;display:flex!important;align-items:center;justify-content:center}
+/* simple, quiet scrolling */
 html{scroll-behavior:smooth}
-body{
-  background:
-    radial-gradient(900px 380px at 8% -80px,rgba(14,165,233,.13),transparent 70%),
-    radial-gradient(700px 320px at 100% -60px,rgba(7,18,38,.08),transparent 70%),
-    var(--bg);
-  background-attachment:fixed;
-  padding:12px 18px 56px;font-size:14.5px;-webkit-font-smoothing:antialiased;
-}
-.wrap{max-width:1680px}
-::selection{background:rgba(14,165,233,.25)}
-*{scrollbar-width:thin;scrollbar-color:#C9CDDB transparent}
+*{scrollbar-width:thin;scrollbar-color:#CBD2DC transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD2DC;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#AEB7C4;background-clip:padding-box}
+.fgrid{scrollbar-width:none}.fgrid::-webkit-scrollbar{display:none}
+.frow{position:relative}
+.frow .fgrid{cursor:grab;scroll-behavior:smooth}
+.frow .fgrid.dragging{cursor:grabbing;scroll-behavior:auto;user-select:none}
+.frow .fgrid.dragging .fcard{pointer-events:none}
+.frow.canr .fgrid{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.frow.canl .fgrid{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%);mask-image:linear-gradient(90deg,transparent,#000 12%)}
+.frow.canl.canr .fgrid{-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.farr{position:absolute;top:30px;z-index:2;width:34px;height:34px;border-radius:9px;border:0;padding:0;display:none;align-items:center;justify-content:center;
+  background:#1B2B4B;color:#fff;box-shadow:0 4px 12px rgba(19,32,58,.3);cursor:pointer;transition:background .15s,transform .15s}
+.farr svg{width:18px;height:18px}
+.farr:hover{background:#24385F;transform:scale(1.06)}
+.farr.l{left:-6px}.farr.r{right:-6px}
+.frow.canl .farr.l,.frow.canr .farr.r{display:flex}
+.btn.navy{background:#1B2B4B;border-color:#1B2B4B;color:#fff;font-weight:600}
+.btn.navy:hover{background:#24385F;border-color:#24385F}
+.rail{scrollbar-gutter:stable}
+.proj,.fov,.sheet,.side,.bar{transition:box-shadow .2s}
+.proj:hover{box-shadow:0 2px 10px rgba(16,24,40,.07)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.case textarea.locked{background:#EAF3FC!important;border-color:#BFD9F2!important;color:#0C447C;cursor:default;padding-left:28px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.5' fill='%23185FA5'/%3E%3Cpath d='M5 7V5a3 3 0 0 1 6 0v2' fill='none' stroke='%23185FA5' stroke-width='1.6'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:9px 50%!important;background-size:13px!important}
+.case textarea.locked:focus{box-shadow:none!important}
+/* smaller folders in the overview */
+.fwrap{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:2px}
+.fwrap .fcard{padding:6px 4px 8px;border-radius:14px}
+.fwrap .fart{height:58px;margin:0 10px}
+.fwrap .fart .bk{top:9px;border-radius:8px}.fwrap .fart .bk:before{top:-6px;height:8px;border-radius:6px 6px 0 0}
+.fwrap .fart .p1,.fwrap .fart .p2{height:34px;border-radius:5px}
+.fwrap .fart .p1:before,.fwrap .fart .p2:before{left:5px;right:7px;top:7px;height:2px;box-shadow:0 6px 0 #e6e5ef,0 12px 0 #e6e5ef}
+.fwrap .fart .ft{height:33px;border-radius:9px}
+.fwrap .fart .pl{right:5px;bottom:5px;font-size:10px;padding:0 6px}
+.fwrap .fcard .nm{font-size:12.5px;margin-top:5px}
+.fwrap .fcard .mt{font-size:10.5px}
+.fwrap .fcard .fst{font-size:10.5px;padding:0 6px}
+/* compact folder row on the record page */
+.fgrid{gap:4px;padding:2px 2px 8px}
+.fgrid .fcard{flex:0 0 112px;padding:6px 6px 8px;border-radius:14px}
+.fgrid .fart{display:block;height:58px;margin:0 6px}
+.fgrid .fart .bk{top:9px;border-radius:8px}.fgrid .fart .bk:before{top:-6px;height:8px;border-radius:6px 6px 0 0}
+.fgrid .fart .p1,.fgrid .fart .p2{height:34px;border-radius:5px}
+.fgrid .fart .p1:before,.fgrid .fart .p2:before{left:5px;right:7px;top:7px;height:2px;box-shadow:0 6px 0 #e6e5ef,0 12px 0 #e6e5ef}
+.fgrid .fart .ft{height:33px;border-radius:9px}
+.fgrid .fart .pl{right:5px;bottom:5px;font-size:10px;padding:0 6px}
+.fgrid .fcard .nm{font-size:12.5px;margin-top:5px}
+.fgrid .fcard .mt{font-size:11px}
+.fdtop{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line2)}
+.fdhero{display:flex;gap:14px;align-items:center}
+.fdhero .fart{display:block;width:110px;height:92px;flex:none;margin:0}
+.fdhero h2,.fgh{font-size:20px;font-weight:700;margin:0}
+.fdtop .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+.fdtools{margin-left:auto;display:flex;gap:10px;align-items:center}
+.fdchk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.fday{border-bottom:1px solid var(--line2)}
+.fday>summary{list-style:none;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 4px;cursor:pointer}
+.fday>summary::-webkit-details-marker{display:none}
+.fday>summary:before{content:'▸';color:var(--muted);transition:transform .15s}
+.fday[open]>summary:before{transform:rotate(90deg)}
+.fday>summary:hover{background:var(--fill);border-radius:8px}
+.fday .dn{font-weight:600}
+.fday .dc{color:var(--accent-2);background:var(--accent-soft);border-radius:999px;padding:0 9px;font-size:12px}
+.fday .dc.ph{background:#FDEBDD;color:#A4511B}
+.fday .dc.today{background:#E3F4E8;color:var(--ok)}
+.fday .go{margin-left:auto;font-size:12.5px;min-height:26px}
+.fcases{padding:0 4px 12px 22px;display:flex;flex-direction:column;gap:6px}
+.fcase{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;background:var(--fill);border-radius:10px;padding:8px 10px}
+.fcase .tm{color:var(--accent-2)}
+.fcase .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.fphs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fphs img{width:120px;height:90px;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--line2)}
+.fgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px}
+.fgal figure{margin:0}
+.fgal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;cursor:zoom-in;display:block}
+.fgal figcaption{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+.fgal figcaption b{color:var(--ink)}
 
-/* top bar */
-.bar{position:sticky;top:10px;z-index:30;border:1px solid rgba(223,226,236,.8);border-radius:var(--r-lg);
-  background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);
-  box-shadow:var(--sh);padding:10px 16px}
-.brand span{font-size:20px;font-weight:700;letter-spacing:-.02em;display:block;white-space:nowrap}
-.brand b{color:#0284C7}
-.bar .sub{font-size:12.5px}
-.tools{gap:8px}
-.tools input[type=date]{border-radius:var(--r);height:34px;border-color:var(--line);background:#fff;padding:3px 10px}
+/* ===== modern top bar (clean white) ===== */
+.bar{position:sticky;top:8px;z-index:40;background:#fff;
+  border:1px solid #E6E9EE;border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06),0 -14px 0 6px var(--bg);padding:10px 14px 10px 18px;color:var(--ink)}
+.bar .brand{display:flex;align-items:center;gap:10px;margin:0}
+.bar .brand span{color:#111827;font-size:19px;letter-spacing:-.01em}
+.bar .brand b{color:#2563EB}
+.bar .brand+.sub{color:#6B7280;font-size:12px;margin:2px 0 0!important}
+.brandwrap{display:flex;align-items:center;gap:12px;min-width:0}
+.blogo{width:42px;height:42px;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(37,99,235,.28))}
+.bt{min-width:0}
+.bar .brand span{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:#0F172A}
+.bar .brand b{font-weight:800;margin-left:5px;background:linear-gradient(90deg,#2563EB,#4F8CFF);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.bar .brand+.sub{color:#64748B;font-size:12.5px;margin:1px 0 0!important;line-height:1.35}
+@media (max-width:620px){.blogo{width:36px;height:36px}.bar .brand+.sub{display:none}}
+.bar .tools{gap:8px}
+.bar .btn{background:#fff;border-color:#E5E7EB;color:#374151}
+.bar .btn:hover{background:#F9FAFB;border-color:#D1D5DB}
+.datebox{display:flex;align-items:center;gap:6px;height:36px;padding:0 4px 0 10px;border-radius:10px;background:#F7F8FA;box-shadow:inset 0 0 0 1px #E5E7EB;color:#6B7280;cursor:pointer;transition:box-shadow .15s}
+.datebox svg{width:16px;height:16px;flex:none}
+.datebox .dl{font-size:12px;white-space:nowrap}
+.datebox input[type=date]{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827;height:30px;padding:0 6px;font-weight:600;outline:none}
+.datebox:hover{box-shadow:inset 0 0 0 1px #D1D5DB}
+.datebox:focus-within{box-shadow:inset 0 0 0 1px #2563EB,0 0 0 3px rgba(37,99,235,.15)}
+.seg.tabs{background:#F3F4F6;padding:3px;border-radius:11px;gap:2px;box-shadow:none}
+.seg.tabs button{display:flex;align-items:center;gap:6px;color:#6B7280;border-radius:8px;padding:5px 12px;min-height:32px;font-weight:500;transition:background .15s,color .15s}
+.seg.tabs button svg{width:16px;height:16px;flex:none;opacity:.8}
+.seg.tabs button:hover{color:#111827;background:rgba(255,255,255,.6)}
+.seg.tabs button[aria-pressed=true]{background:#fff;color:#2563EB;font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.08),0 1px 6px rgba(16,24,40,.06)}
+.seg.tabs button[aria-pressed=true] svg{opacity:1}
+.totals{margin-top:10px}
+@media (max-width:1100px){.seg.tabs button span{display:none}.seg.tabs button{padding:5px 10px}.seg.tabs button[aria-pressed=true] span{display:inline}}
+@media (max-width:700px){.bar{position:static}.datebox .dl{display:none}}
 
-/* buttons */
-.btn{border-radius:var(--r);min-height:34px;padding:4px 14px;border:1px solid var(--line);background:#fff;font-weight:500;
-  box-shadow:0 1px 1px rgba(23,26,43,.04);transition:background .15s,border-color .15s,box-shadow .15s,transform .08s}
-.btn:hover{background:#F8F9FD;border-color:#C7CCE0;box-shadow:0 2px 6px rgba(23,26,43,.07)}
-.btn:active{transform:translateY(1px);box-shadow:none}
-.btn.pri{background:linear-gradient(180deg,#13305E,#071226);border-color:#071226;color:#fff;font-weight:600;
-  box-shadow:0 2px 8px rgba(7,18,38,.32)}
-.btn.pri:hover{background:linear-gradient(180deg,#0D2347,#030814);border-color:#030814}
-.btn.step{background:#071226;border-color:#071226;color:#fff}
-.btn.danger{color:var(--danger)}
-.btn.danger:hover{background:var(--danger-soft);border-color:#F9A8B8}
-.btn.armed{background:var(--danger);border-color:var(--danger);color:#fff}
-.ghost{border-radius:8px}
-.ghost:hover{background:var(--accent-soft);color:var(--accent-2)}
-.ghost.armed{background:var(--danger);color:#fff}
-.sentb[aria-pressed=true]{background:#E7F8EE;border-color:#A8E3BF;color:#0E7A3E}
-.btn.line{background:#06C755;border-color:#06C755}
+/* ===== performance: let the browser skip off-screen blocks ===== */
+.proj{content-visibility:auto;contain-intrinsic-size:auto 150px}
+.fday,.fgroup,.sp{content-visibility:auto;contain-intrinsic-size:auto 220px}
+.fcard,.thumb,.fgal figure{contain:layout paint}
+img{image-rendering:auto}
 
-/* segmented */
-.seg{background:#E8EEF7;border-radius:12px;padding:3px;gap:2px}
-.seg button{border-radius:9px;min-height:30px;padding:3px 14px;font-weight:500;transition:background .15s,color .15s,box-shadow .15s}
-.seg button[aria-pressed=true]{background:#fff;color:var(--accent-2);font-weight:600;box-shadow:0 1px 3px rgba(23,26,43,.14)}
-
-/* totals as stat chips */
-.totals{gap:8px;margin:10px 0 0}
-.totals>span{background:#fff;border:1px solid var(--line2);border-radius:999px;padding:3px 12px;box-shadow:0 1px 1px rgba(23,26,43,.03);color:var(--muted);font-size:13px}
-.totals b{color:var(--accent-2);font-size:15px;margin-right:5px}
-.totals .clr{border-radius:999px;padding:3px 12px}
-.totals .clr:hover{background:var(--danger-soft)}
-
-/* sidebar */
-.layout{gap:14px;margin-top:12px}
-.side{top:84px;max-height:calc(100vh - 100px);border-radius:var(--r-lg);border-color:var(--line2);padding:10px;box-shadow:var(--sh)}
-.shift{border-bottom:1px solid var(--line2);margin-bottom:8px;padding-bottom:10px}
-.shift .seg button{font-size:13px;padding:4px 6px}
-.rail button.f{border-radius:10px;padding:7px 8px;transition:background .12s}
-.rail button.f:hover{background:var(--fill)}
-.rail button.f[aria-current=true]{background:var(--accent-soft);box-shadow:none;position:relative}
-.rail button.f[aria-current=true]::before{content:'';position:absolute;left:-4px;top:9px;bottom:9px;width:4px;border-radius:4px;background:var(--accent)}
-.rail button.f[aria-current=true] .fn{color:var(--accent-2)}
-.rail .fm{font-size:11.5px}
-.rail .gh{font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:#8A90A5;padding:14px 8px 4px}
-.rail .addp{border-style:dashed;border-color:#B8CDE6;color:var(--accent-2);background:transparent;box-shadow:none}
-.rail .addp:hover{background:var(--accent-soft);border-color:var(--accent)}
-.ficon{filter:drop-shadow(0 1px 1px rgba(180,120,10,.25))}
-.sentok{background:#E7F8EE;border-radius:999px;padding:0 7px}
-
-/* project cards */
-.proj{border-radius:var(--r-lg);border-color:var(--line2);box-shadow:var(--sh);margin-bottom:14px;transition:box-shadow .2s,border-color .2s}
-.proj:hover{box-shadow:0 2px 4px rgba(23,26,43,.05),0 10px 28px rgba(23,26,43,.08)}
-.proj>header{padding:10px 14px;background:linear-gradient(180deg,#FBFBFE,#F6F7FB);gap:8px}
-.proj.done{border-color:#BDE8CF}
-.proj.done>header{background:linear-gradient(180deg,#F4FCF7,#ECF8F1)}
-.pname{font-size:16px;font-weight:600;border-radius:8px;padding:3px 8px;transition:border-color .15s,background .15s}
-.pname:hover{border-color:var(--line);background:#fff}
-.cnt{background:var(--accent-soft);color:var(--accent-2);font-weight:600;padding:2px 10px}
-.msel{border-radius:8px;height:32px;background:#fff;border-color:var(--line)}
-
-/* cases */
-.case{padding:8px 14px;gap:6px 10px;grid-template-columns:120px minmax(0,1fr) auto}
-.case input[type=time]{height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-2);font-weight:600;border:1px solid transparent}
-.case textarea{border-radius:10px;background:var(--fill);border-color:var(--line2);padding:6px 10px;transition:background .15s,border-color .15s}
-.case textarea:hover{border-color:var(--line)}
-.case.target{background:linear-gradient(90deg,rgba(14,165,233,.09),transparent 70%);box-shadow:inset 3px 0 0 var(--accent)}
-.thumb{width:96px;height:72px;border-radius:10px;border-color:var(--line2);box-shadow:0 1px 3px rgba(23,26,43,.08)}
-.thumb img{transition:transform .25s}
-.thumb:hover img{transform:scale(1.06)}
-.thumb .x{background:rgba(23,26,43,.7);backdrop-filter:blur(4px)}
-.thumb .cp{background:rgba(23,26,43,.7);backdrop-filter:blur(4px)}
-.addph{height:72px;border-radius:10px;border:1.5px dashed #C3C8DD;color:var(--muted);transition:all .15s}
-.addph.sm{height:28px;border-radius:999px}
-.addph:hover,.addph.over{border-color:var(--accent);color:var(--accent-2);background:var(--accent-soft)}
-.addc{margin:6px 14px 14px}
-.quiet{border-radius:var(--r-lg);border:1px dashed #CDD1E3;background:rgba(255,255,255,.6);padding:14px}
-.chip{border-radius:999px;padding:3px 12px;border-color:var(--line);background:#fff;transition:all .15s}
-.chip:hover{background:var(--accent-soft);border-color:#B3D2F0;color:var(--accent-2)}
-.chip.sent{background:#E7F8EE;border-color:#A8E3BF;color:#0E7A3E}
-.empty{padding:22px 10px}
-
-/* inputs */
-input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 4px rgba(14,165,233,.22)!important}
-.fld input,.fld select,.rn input,.tin{border-radius:var(--r);height:34px;border-color:var(--line)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
-
-/* status pill */
-.pill{border-radius:999px;padding:2px 12px;box-shadow:0 1px 1px rgba(23,26,43,.03)}
-.pill.ok i{box-shadow:0 0 0 3px rgba(18,161,80,.18)}
-.pill.wait i,.pill.busy i{box-shadow:0 0 0 3px rgba(217,154,0,.2)}
-.pill.busy i{animation:pulse 1.1s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.35}}
-
-/* report / data pages */
-.sheet{border-radius:var(--r-lg);border-color:var(--line2);box-shadow:var(--sh);padding:20px 24px}
-.sheet h2{font-size:22px;letter-spacing:-.01em}
-.sheet .kick{text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:600;color:var(--accent)}
-.sp{padding:16px 0}
-.sp.done{background:linear-gradient(90deg,#F1FBF5,transparent 55%)}
-textarea.mp{border-radius:12px;background:var(--fill);border-color:var(--line2);padding:12px 14px;line-height:1.7}
-.bar2{height:10px;background:#E9EBF4}
-.bar2 i{background:linear-gradient(90deg,#12A150,#34D399)}
-.grid img{border-radius:10px}
-.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.04em}
-.tbl tbody tr:hover td{background:var(--fill)}
-.dsec{padding:14px 0}
-
-/* overlays */
-#toast{border-radius:14px;background:rgba(23,26,43,.94);backdrop-filter:blur(10px);padding:10px 18px;box-shadow:var(--sh-lg);animation:rise .25s ease-out}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}}
-#totop{border-radius:999px;box-shadow:var(--sh-lg);border-color:var(--line2)}
-#msgdlg{background:rgba(23,26,43,.5);backdrop-filter:blur(4px)}
-#msgdlg .mbox{border-radius:20px;box-shadow:var(--sh-lg);animation:rise .22s ease-out}
-.ctx{border-radius:14px;padding:6px;box-shadow:var(--sh-lg);border-color:var(--line2)}
-.ctx button{border-radius:8px;padding:7px 12px}
-#lb{background:rgba(10,12,24,.86);backdrop-filter:blur(6px)}
-#lb img{border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-
-@media (max-width:900px){
-  .bar{position:static}
-  .side{top:auto}
-  .rail button.f[aria-current=true]::before{display:none}
-}
-@media (max-width:600px){
-  body{padding:8px 10px 48px}
-  .case{grid-template-columns:minmax(0,1fr) auto}
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-
-/* ---- navy + sky formal accents ---- */
-.bar{border-top:3px solid #071226}
-.brand span{color:#071226}
-input:focus,textarea:focus,select:focus{border-color:#0EA5E9!important}
-.rail button.f[aria-current=true]::before{background:#0EA5E9}
-.rail button.f[aria-current=true]{background:#E1ECF8}
-.proj>header{background:linear-gradient(180deg,#F8FBFE,#F0F5FB);border-bottom-color:#DCE6F2}
-.proj{border-top:3px solid #071226}
-.proj.done{border-top-color:#12A150}
-.case input[type=time]{background:#E1ECF8;color:#071226}
-.cnt{background:#DDE8F5;color:#071226}
-.sheet .kick{color:#0284C7}
-.sheet{border-top:3px solid #071226}
-.seg button[aria-pressed=true]{color:#071226}
-.pill.busy i,.pill.wait i{background:#0EA5E9}
-.totals b{color:#071226}
-.ghost:hover{background:#E1ECF8;color:#071226}
-.chip:hover{background:#E1ECF8;color:#071226}
-.addph:hover,.addph.over{border-color:#0EA5E9;color:#071226;background:#E1ECF8}
-#toast{background:rgba(7,18,38,.96)}
-#totop{color:#071226}
-
-/* ---- minimal straight divider lines on every page ---- */
-:root{--rule:#C3CEDF;--rule-strong:#071226}
-/* top bar + totals */
-.totals{padding:0 2px 10px;border-bottom:1px solid var(--rule)}
-.tools .seg{box-shadow:none}
-/* sidebar */
-.shift{border-bottom:1px solid var(--rule)}
-.rail button.f{border-radius:0;border-bottom:1px solid var(--line2);padding:8px 8px}
-.rail button.f:last-of-type{border-bottom:0}
-.rail button.f:hover{border-radius:0}
-.rail button.f[aria-current=true]{border-radius:0;border-bottom-color:var(--line2)}
-.rail button.f[aria-current=true]::before{left:0;top:0;bottom:0;width:3px;border-radius:0}
-.rail .gh{border-top:1px solid var(--rule);margin-top:8px;padding:12px 8px 4px}
-.rail .addp{margin-top:10px}
-/* edit page: project cards */
-.proj>header{border-bottom:1px solid var(--rule)}
-.case{border-top:1px solid var(--line2)}
-.proj>header+.case{border-top:0}
-.addc,.rowb.addc{border-top:1px solid var(--rule);margin:0;padding:10px 14px}
-.proj>.addc{background:#FAFCFE}
-.quiet h3{padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:8px}
-/* report page */
-.sheet>header,.sheet header{border-bottom:1px solid var(--rule)}
-.sp{border-bottom:1px solid var(--rule);padding:18px 0}
-.sp:last-child{border-bottom:0}
-.sp h3{padding-bottom:10px;border-bottom:1px solid var(--line2)}
-.mphead{padding-top:10px;margin-top:10px;border-top:1px solid var(--line2)}
-.prog{padding-top:10px;margin-top:12px;border-top:1px solid var(--line2)}
-.phh{padding-top:8px;border-top:1px solid var(--line2);margin-top:10px}
-.cfg{padding-top:10px}
-/* data page */
-.dsec{border-bottom:1px solid var(--rule)}
-.dsec:last-child{border-bottom:0}
-.dsec h3{padding-bottom:6px;border-bottom:1px solid var(--line2);margin-bottom:4px}
-.tbl th{border-bottom:1px solid var(--rule-strong);color:var(--ink)}
-.tbl td{border-bottom:1px solid var(--line2)}
-.tbl tr:last-child td{border-bottom:1px solid var(--rule)}
-
-/* ---- sticky bar fix: opaque, no see-through gap while scrolling ---- */
-.bar{position:sticky;top:0;z-index:100;background:#FFFFFF;-webkit-backdrop-filter:none;backdrop-filter:none;
-  border-color:var(--line2);border-top:3px solid #071226;
-  box-shadow:0 1px 0 var(--rule),0 6px 16px rgba(7,18,38,.06)}
-.side{top:90px;max-height:calc(100vh - 104px);z-index:20}
-.proj,.sheet{position:relative;z-index:1}
-@media (max-width:900px){.bar{position:static;box-shadow:var(--sh)}.side{position:static;max-height:none}}
-
-/* ---- lighter line colors ---- */
-:root{--rule:#E1E7F0;--rule-strong:#B9C6DA;--line2:#EDF1F7}
-.bar{border-top:2px solid #AFC4E2;box-shadow:0 1px 0 #E1E7F0,0 6px 16px rgba(7,18,38,.05)}
-.proj,.sheet{border-top:2px solid #C4D4EA}
-.proj.done{border-top-color:#BFE6CF}
-.tbl th{color:var(--muted)}
-.rail button.f{border-bottom-color:#EDF1F7}
-.case{border-top-color:#EDF1F7}
-.sp h3,.mphead,.prog,.phh,.dsec h3{border-color:#EDF1F7}
-
-/* ---- report page: lighter lines and fields ---- */
-.sp{border-bottom:1px solid #EDF1F7!important}
-.sp:last-child{border-bottom:0!important}
-.sp h3,.mphead,.phh,.prog,.sheet header,.sheet>header{border-color:#F0F3F8!important}
-.rn input,.fld input,.fld select{border-color:#E1E7F0}
-textarea.mp{background:#F8FAFD;border-color:#E8EDF5}
-.sp .btn{border-color:#E1E7F0}
-.sp .btn.pri{border-color:#071226}
-/* ---- scroll performance layer ---- */
-html{scroll-behavior:auto}
-body{background:var(--bg)!important}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(900px 380px at 8% -80px,rgba(14,165,233,.13),transparent 70%),
-             radial-gradient(700px 320px at 100% -60px,rgba(7,18,38,.08),transparent 70%)}
-.thumb .x,.thumb .cp{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(23,26,43,.78)!important}
-#toast,#msgdlg,#lb{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-#toast{background:rgba(7,18,38,.97)}
-#msgdlg{background:rgba(23,26,43,.58)}
-#lb{background:rgba(10,12,24,.92)}
-.proj{transition:none!important}
-.proj:hover{box-shadow:var(--sh)}
-.bar{will-change:transform}
-.side{contain:layout style}
-.rail{overscroll-behavior:contain}
-.thumb{contain:layout paint}
-@media (max-width:900px){.bar{will-change:auto}}
-/* ---- scroll performance layer 2 ---- */
-.proj,.case{contain:layout style}
-.ph{content-visibility:auto;contain-intrinsic-size:auto 150px 140px}
-.addph,.chip{transition:background .15s,border-color .15s,color .15s!important}
-button,.btn,.chip,.ghost,.seg button{touch-action:manipulation}
-@media (hover:none){.thumb:hover img{transform:none}.proj:hover{box-shadow:var(--sh)}}
-.thumb img,.grid img{image-rendering:auto;backface-visibility:hidden}
-/* ---- back-to-top button ---- */
-#totop{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 5px;background:linear-gradient(180deg,#1B4590,#0B1B3A);color:#fff!important;border:0;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.01em;line-height:1;box-shadow:0 8px 20px rgba(7,18,38,.30),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .15s,box-shadow .15s;animation:rise .25s ease-out}
-#totop .ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;transition:background .15s}
-#totop:hover{background:linear-gradient(180deg,#1B4590,#0B1B3A);transform:translateY(-2px);box-shadow:0 12px 26px rgba(7,18,38,.36),inset 0 1px 0 rgba(255,255,255,.14)}
-#totop:hover .ic{background:rgba(255,255,255,.26)}
-#totop:active{transform:translateY(0);box-shadow:0 4px 12px rgba(7,18,38,.3)}
-#totop:focus-visible{outline:2px solid #0EA5E9;outline-offset:3px}
+/* ===== folder overview: clean modern tiles ===== */
+.fgroup{margin-top:26px}
+.fgroup:first-of-type{margin-top:18px}
+.fgroup h3{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px;color:#0F172A}
+.fgroup h3::before{content:"";width:4px;height:18px;border-radius:3px;background:linear-gradient(180deg,#4F8CFF,#2563EB)}
+.fgroup h3 small{font-weight:500;font-size:12px;color:#64748B;background:#F1F4F9;border-radius:999px;padding:2px 11px}
+.fwrap{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
+.fwrap .fcard{background:#fff;border:1px solid #E8ECF2;border-radius:16px;padding:16px 10px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04);transition:transform .18s,box-shadow .18s,border-color .18s}
+.fwrap .fcard:hover{background:#fff;border-color:#D3DBE8;transform:translateY(-3px);box-shadow:0 10px 24px -8px rgba(37,99,235,.18),0 2px 6px rgba(16,24,40,.05)}
+.fwrap .fart{height:66px;margin:0 16px;filter:saturate(.82)}
+.fwrap .fart .bk{top:11px;border-radius:10px}
+.fwrap .fart .bk:before{top:-7px;height:9px;border-radius:7px 7px 0 0;width:40%}
+.fwrap .fart .p1,.fwrap .fart .p2{height:36px;border-radius:6px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.fwrap .fart .ft{height:38px;border-radius:11px;box-shadow:0 8px 14px -8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.4)}
+.fwrap .fart .pl{right:7px;bottom:7px;font-size:10px;font-weight:600;padding:0 7px;background:rgba(255,255,255,.34)}
+.fwrap .fart.lt .pl{background:rgba(255,255,255,.95)}
+.fwrap .fcard .nm{font-size:13.5px;font-weight:700;margin-top:12px;color:#111827;letter-spacing:-.005em}
+.fwrap .fcard .mt{font-size:11.5px;color:#6B7280;margin-top:2px}
+.fwrap .fcard .mt:empty{display:none}
+.fcard .fst{display:inline-flex;align-items:center;gap:5px;margin-top:9px;font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:#F1F3F6;color:#6B7280}
+.fcard .fst.wait{background:#FFF6E0;color:#8A5A00}
+.fcard .fst.wait::before,.fcard .fst.ok::before{content:"";width:6px;height:6px;border-radius:50%}
+.fcard .fst.wait::before{background:#F5A623}
+.fcard .fst.ok{background:#E8F6EC;color:#1B7F3B}
+.fcard .fst.ok::before{background:#2E9E55}
+.fwrap .fcard.empty0{background:#FAFBFC}
+.fstats div{background:#F6F8FB;border:1px solid #EDF0F5;border-radius:12px}
+.fstats b{font-weight:700;color:#0F172A}
+.fov{border-radius:18px;padding:20px 22px 24px}
+.fovtop h2{letter-spacing:-.015em}
 </style>
 
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anuphan:wght@400;500;600;700&display=swap">
+<style>
+/* ===== modern refresh: font + rounder corners + soft depth ===== */
+:root{
+  --f:'Inter','Anuphan','Noto Sans Thai','Leelawadee UI','Segoe UI',system-ui,sans-serif;
+  --r:12px; --rl:20px; --rxl:26px;
+  --bg:#F2F4F8; --line:#E3E7EE; --line2:#ECEFF4;
+  --sh:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);
+  --sh2:0 2px 4px rgba(16,24,40,.05),0 12px 32px rgba(16,24,40,.08);
+}
+body{font-family:var(--f);font-size:14.5px;letter-spacing:0;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;background:linear-gradient(180deg,#EEF2F9 0,#F5F6FA 320px,#F5F6FA 100%) fixed}
+button,input,textarea,select{font-family:var(--f)}
+h1,h2,h3{font-family:var(--f);letter-spacing:-.01em}
+/* surfaces */
+.bar,.side,.proj,.sheet,.fov,.hist,.quiet,.prog,.import{border-radius:var(--rl)!important;border-color:var(--line2);box-shadow:var(--sh)}
+.fov{border-radius:var(--rxl)!important}
+.bar{border-radius:22px!important;padding:12px 18px 12px 22px}
+.proj{border-radius:22px!important;transition:box-shadow .25s,transform .25s}
+.proj:hover{box-shadow:var(--sh2)}
+.proj>header{padding:12px 16px;background:linear-gradient(180deg,#F7F9FC,#F2F5FA)}
+.proj.done>header{background:linear-gradient(180deg,#F0FAF4,#E8F6EE)}
+.case{padding:10px 16px;gap:6px 12px;grid-template-columns:124px minmax(0,1fr) auto}
+.layout{gap:14px}
+.side{padding:10px}
+/* controls: pill-shaped */
+.btn,.ghost,.msel,.tin,.fld input,.fld select,.rn input,.frange input[type=date],.tools input[type=date]{border-radius:999px!important}
+.btn{padding:4px 16px;min-height:34px;font-weight:500;border-color:var(--line);box-shadow:0 1px 1px rgba(16,24,40,.03);transition:all .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(16,24,40,.08)}
+.btn.pri,.btn.navy{background:linear-gradient(180deg,#2D4A87,#1B2B4B);border-color:#1B2B4B;box-shadow:0 4px 12px rgba(27,43,75,.28)}
+.btn.pri:hover,.btn.navy:hover{background:linear-gradient(180deg,#36579C,#24385F);box-shadow:0 6px 16px rgba(27,43,75,.35)}
+.btn.line{border-radius:999px}
+.msel{height:34px;padding:2px 14px}
+.fld input,.fld select,.rn input{height:36px;padding:2px 14px}
+.pname{border-radius:12px;font-size:15.5px;font-weight:600}
+.pname:hover{background:#fff}
+.cnt,.chip,.pill,.fcard .fst,.fgroup h3 small,.dc{border-radius:999px}
+.chip{padding:3px 14px}
+/* inputs on cases */
+.case input[type=time]{border-radius:12px;height:36px;padding:2px 10px}
+.case textarea{border-radius:14px;padding:7px 14px;background:#F6F8FB;border-color:var(--line2)}
+.case textarea.locked{border-radius:14px}
+.rn input,textarea.mp,pre.mp{border-radius:14px}
+textarea.mp{border-radius:16px;padding:12px 16px}
+.thumb,.fgal img,.fphs img,.grid img{border-radius:14px}
+.addph,.addph.cab,.cab2{border-radius:999px}
+.addph.cab,.cab2{height:30px;padding:0 12px}
+.thumb .x,.thumb .cp{backdrop-filter:blur(4px)}
+/* tabs + datebox */
+.seg{border-radius:999px;padding:3px}
+.seg button{border-radius:999px;padding:4px 14px}
+.seg.tabs{border-radius:999px;padding:4px}
+.seg.tabs button{border-radius:999px;padding:6px 16px;min-height:34px}
+.datebox{border-radius:999px;height:38px;padding:0 6px 0 14px}
+.shift .seg button{border-radius:999px}
+/* sidebar list */
+.rail button.f{border-radius:14px;padding:8px 10px}
+.rail button.f[aria-current=true]{border-radius:14px}
+.psearch{border-radius:999px;padding:0 8px 0 14px}
+.psearch input{height:36px}
+.addtop,.rail .addp{border-radius:999px}
+/* folder cards */
+.fwrap .fcard{border-radius:22px}
+.fgrid .fcard{border-radius:18px}
+.fstats div{border-radius:16px}
+.fcase{border-radius:16px}
+.hd li{border-radius:14px}
+.fday>summary:hover,.hd>summary:hover{border-radius:14px}
+.fhero .fart{filter:none}
+/* overlays */
+.ctx{border-radius:16px;padding:6px;box-shadow:0 16px 40px rgba(16,24,40,.2)}
+.ctx button{border-radius:10px}
+#msgdlg .mbox{border-radius:24px}
+#toast{border-radius:999px;padding:10px 20px}
+#lb img{border-radius:18px}
+#fab button{border-radius:999px;height:40px;padding:0 16px}
+.farr{border-radius:50%}
+.tbl th{font-weight:600}
+.bar2{height:12px}
+.pgrp{border-radius:16px}
+.sp.done{border-radius:16px}
+::-webkit-scrollbar-thumb{border-radius:999px}
+@media (max-width:600px){.case{grid-template-columns:minmax(0,1fr) auto}}
+/* ===== clean: blue only on text, no blue fills ===== */
+.case.target{background:transparent;box-shadow:none}
+.case.over{background:#FAFAFB;box-shadow:inset 0 0 0 2px var(--line)}
+.case input[type=time]{background:#fff;border:1px solid var(--line);color:var(--accent-2)}
+.case textarea{background:#fff;border-color:var(--line)}
+.case textarea.locked{background-color:#fff!important;border-color:var(--line)!important;color:var(--accent-2)}
+.rail button.f[aria-current=true]{background:#fff;box-shadow:0 0 0 1px var(--line),0 2px 8px rgba(16,24,40,.06)}
+.rail button.f[aria-current=true] .fn{color:var(--accent-2)}
+.cnt,.dc,.fday .dc{background:#F3F4F6;color:var(--accent-2)}
+.addph:hover,.addph.over,.addph.cab:hover,.cab2:hover,.chip:hover{background:#F3F4F6;border-color:var(--line);color:var(--accent-2)}
+.fday>summary:hover,.hd>summary:hover{background:#F7F8FA}
+.thumb,.seg button[aria-pressed=true]{box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.sp time{color:var(--accent-2)}
+/* ===== blue only inside the fields; row itself stays white ===== */
+.case,.case.target,.case.over{background:#fff;box-shadow:none}
+.case input[type=time]{background:#E8F0FC;border:1px solid transparent;color:var(--accent-2)}
+.case textarea{background:#F1F6FE;border-color:#DCE7F8}
+.case textarea:focus{background:#fff!important}
+.case textarea.locked{background-color:#E8F0FC!important;border-color:#D3E1F6!important;color:#0C447C}
+/* ===== header title ===== */
+.bar .brand span{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.bar .brand+.sub{font-size:12px;margin-top:1px!important}
+@media (max-width:620px){.bar .brand span{font-size:17px}}
+</style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
 
 <div class="wrap">
   <div class="bar">
-    <div>
-      <h1 class="brand"><span>cctv<b>-report</b></span></h1>
-      <p class="sub">บันทึกเหตุการณ์และรูปแยกตามโครงการ แล้วสรุปส่งผู้บริหาร</p>
+    <div class="brandwrap">
+      <div class="bt">
+        <h1 class="brand"><span>CCTV<b>Report</b></span></h1>
+        <p class="sub">บันทึกเหตุการณ์และรูปแยกตามโครงการ แล้วสรุปส่งผู้บริหาร</p>
+      </div>
     </div>
     <div class="tools">
       <button type="button" class="btn" id="setdir" hidden>ตั้งโฟลเดอร์รูป</button>
-      <label for="date" class="sub" style="margin:0">วันที่รายงาน</label>
-      <input type="date" id="date">
-      <div class="seg" role="group" aria-label="มุมมอง">
-        <button type="button" id="m-edit" aria-pressed="true">บันทึก</button>
-        <button type="button" id="m-rep" aria-pressed="false">รายงานผู้ว่าจ้าง</button>
-        <button type="button" id="m-data" aria-pressed="false">จัดการข้อมูล</button>
+      <label class="datebox" for="date"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5h14M7 2.5v4M13 2.5v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="dl">วันที่รายงาน</span><input type="date" id="date"></label>
+      <div class="seg tabs" role="group" aria-label="มุมมอง">
+        <button type="button" id="m-edit" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 15.5V13l8.5-8.5 2.5 2.5L6.5 15.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 6l2.5 2.5" stroke="currentColor" stroke-width="1.6"/></svg><span>บันทึก</span></button>
+        <button type="button" id="m-fold" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 1.5h7.5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>โฟลเดอร์</span></button>
+        <button type="button" id="m-rep" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 2.5h6l3 3v12h-9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 10h5M8 13h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>รายงานผู้ว่าจ้าง</span></button>
+        <button type="button" id="m-data" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>จัดการข้อมูล</span></button>
       </div>
     </div>
   </div>
@@ -535,7 +646,7 @@ button,.btn,.chip,.ghost,.seg button{touch-action:manipulation}
 </div>
 <div id="lb" hidden><img alt="รูปขยาย"><button type="button" class="btn pri" id="lbcopy">คัดลอกรูป</button></div>
 <div id="toast" role="status" hidden></div>
-<button type="button" id="totop" aria-label="เลื่อนขึ้นบนสุด" title="เลื่อนขึ้นบนสุด" hidden><span class="ic" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>บนสุด</button>
+<div id="fab"><button type="button" id="tofind" aria-label="ค้นหาโครงการ" title="ค้นหาโครงการ (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>ค้นหา</span></button><button type="button" id="totop" aria-label="เลื่อนขึ้นบนสุด" title="เลื่อนขึ้นบนสุด"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>บนสุด</span></button></div>
 
 <script>
 (function(){
@@ -576,9 +687,22 @@ if(!store||!store.reports){
 }
 var mode='edit',sel='all',photoMap={};
 store.sync=store.sync||{};['dirty','dels','pdels'].forEach(function(k){store.sync[k]=store.sync[k]||{}});store.sync.n=store.sync.n||0;
-function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+/* saves are batched: many quick edits write to storage once, and anything pending is written when the page is hidden or closed */
+var saveT=null;
+function saveNow(){clearTimeout(saveT);saveT=null;try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+function save(){if(saveT)return;saveT=setTimeout(saveNow,300)}
+window.addEventListener('pagehide',saveNow);
+document.addEventListener('visibilitychange',function(){if(document.hidden)saveNow()});
 function R(){return store.reports[store.date]||(store.reports[store.date]={projects:[]})}
 function allPhotos(c){return photoMap[c.id]||[]}
+var URLS={};
+function imgURL(r){
+  if(!r||!r.data)return '';
+  var u=URLS[r.id];if(u)return u;
+  try{var a=r.data.split(','),bin=atob(a[1]),n=bin.length,b=new Uint8Array(n);for(var i=0;i<n;i++)b[i]=bin.charCodeAt(i);
+    u=URL.createObjectURL(new Blob([b],{type:(a[0].match(/:(.*?);/)||[])[1]||'image/jpeg'}))}catch(e){u=r.data}
+  return URLS[r.id]=u;
+}
 
 /* ---------- photo storage (IndexedDB, per browser) ---------- */
 var dbp=new Promise(function(res){
@@ -646,14 +770,14 @@ function pickPhotos(caseId){
 }
 /* ---------- projects and monitoring windows ---------- */
 var REG=[['ELDN','24'],['AN-ID-ASK','24'],['AN-ID-LSL','24'],['LPARK-RM9','24'],['LPARK-VC','24'],['LP-RM3 RR','24'],['LSL-CS65','24'],['LV-SK109','24'],
- ['จรรยวรรธ กม.16','24'],['คลังสินค้า กม.16','24'],['จรรยวรรธ ระยอง','24'],['คลังสินค้า ระยอง','24'],
+ ['CHOD KM.16','24'],['จรรยวรรธ','24'],
  ['IDRS','night'],['LC-EC48','night'],['LPARK-PH32','night'],['LP-RM3 RV','night'],['LP-RM4 RD','night'],['LUM-T','night'],['LV-CC','night'],['LV-SK101/1','night'],
- ['แซฟไฟน์ พระราม3','night'],['SP-VR-RM9','night'],['TIJ','night'],['TPS','night'],['U-CENTER','night'],['LT-LPN','night'],
+ ['SPC-RM3','night'],['TIJ','night'],['TPS','night'],['U-CENTER','night'],['LT-LPN','night'],['TRR','night'],['VL 168WG','night'],['LP-SH','night'],
  ['LV-SW RM2','day']];
 var MODES={'24':'ดู 24 ชั่วโมง',night:'ดูเฉพาะกลางคืน',day:'ดูเฉพาะกลางวัน','':'อื่นๆ'};
 var SHORT={'24':'24 ชม.',night:'กลางคืน',day:'กลางวัน','':''};
 var ORDER=['24','night','day',''];
-function matches(p,k){return p.key===k||(!p.key&&norm(p.name)===k)}
+function matches(p,k){return p.key===k||norm(p.name)===k}
 function removedKeys(){return store.removed||(store.removed=[])}
 function isRemoved(p){return removedKeys().indexOf(p.key||norm(p.name))>=0}
 function ensureProjects(){
@@ -740,12 +864,15 @@ function openCtx(x,y,p){
     (projPhotos(p).length?'<button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
     '<button type="button" role="menuitem" data-c="sent">'+(isSent(p)?'ทำเครื่องหมายยังไม่ส่ง':'ทำเครื่องหมายส่งแล้ว ✓')+'</button>'+
     '<div class="ctxsep"></div>'+
+    '<div class="ctxl">สีโฟลเดอร์</div><div class="swatches">'+PAL.map(function(c,i){return '<button type="button" class="sw'+(pal(p)===c?' on':'')+'" data-sw="'+i+'" style="--a:'+c[1]+';--b:'+c[2]+'" aria-label="สีที่ '+(i+1)+'"></button>'}).join('')+'<button type="button" class="sw auto" data-sw="auto" title="สีอัตโนมัติ" aria-label="สีอัตโนมัติ">A</button></div><div class="ctxsep"></div>'+
     '<button type="button" role="menuitem" data-c="open">เปิดโครงการนี้</button>'+
     '<button type="button" role="menuitem" data-c="clear"'+(p.cases.length?'':' disabled')+'>ล้างเหตุการณ์ ('+p.cases.length+' เคส)</button>'+
     '<button type="button" role="menuitem" data-c="remove" class="dz">ลบโครงการ</button>';
   document.body.appendChild(ctx);
   var w=ctx.offsetWidth,h=ctx.offsetHeight;ctx.style.left=Math.min(x,innerWidth-w-8)+'px';ctx.style.top=Math.min(y,innerHeight-h-8)+'px';
   ctx.addEventListener('click',function(e){
+    var sw=e.target.closest('[data-sw]');
+    if(sw){store.fcolor=store.fcolor||{};var k=norm(p.name||'x');if(sw.dataset.sw==='auto')delete store.fcolor[k];else store.fcolor[k]=+sw.dataset.sw;save();closeCtx();render();toast('เปลี่ยนสีโฟลเดอร์ '+p.name+' แล้ว');return}
     var b=e.target.closest('button[data-c]');if(!b||b.disabled)return;var c=b.dataset.c;
     if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
     if(c==='viewmsg'){closeCtx();openMsg(p);return}
@@ -777,13 +904,130 @@ function sortedProjects(){
 /* ---------- helpers ---------- */
 function hhmm(t){return t.replace(':','.')}
 function thaiDate(){return new Date(store.date+'T00:00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
-function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){if(x.cases.length)p++;c+=x.cases.length;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
+/* fixed normal-period lines (19.00–07.00 / 07.00–19.00 เหตุการณ์ปกติ) are not counted as cases */
+function isFixed(c){return nkey(c)!=='2'}
+function realN(list){return list.filter(function(c){return !isFixed(c)}).length}
+function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){var r=realN(x.cases);if(r)p++;c+=r;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
 function bodyText(c){return (c.text||'').replace(LEAD,'').replace(/^เวลา\s*\d{1,2}\s*[.:]\s*\d{2}\s*น?\.?\s*/,'').trim()}
 function caseText(c){var t=(c.text||'').replace(LEAD,'').trim();return '♦️ '+(/^เวลา\s*\d/.test(t)?t:'เวลา'+hhmm(c.time)+'น. '+t)}
 function projText(p){return 'โครงการ '+p.name+' จำนวน '+p.cases.length+' เคส\n'+p.cases.slice().sort(byTime).map(caseText).join('\n')}
 function reportProjects(){var all=sortedProjects();return{ps:all.filter(function(p){return casesIn(p).length}),none:[]}}
 function plainText(){var r=reportProjects();return r.ps.concat(r.none).map(msgFinal).join('\n\n')}
-function folderIcon(){return '<svg class="ficon" aria-hidden="true"><use href="#fold"/></svg>'}
+var PAL=[['#1B2B4B','#5D7AB5','#24385F',0,'#24385F'],['#8E2B2B','#F08A8A','#C94444',0,'#C94444'],['#1E6B45','#7FD3A4','#2E9B60',0,'#2E9B60'],['#9C3B6B','#F4A3C8','#D0578F',0,'#D0578F'],['#2b4a4c','#8fbdba','#3a6264',0,'#3a6264'],['#f09a6e','#ffb893','#f2733f',0,'#f2733f'],['#d6d9df','#f6f7f9','#e0e3e8',1,'#9aa0aa'],['#5b4b9a','#b3a7e6','#6b5bb5',0,'#7b6bc5'],['#e0a21a','#ffd777','#f0b429',0,'#f0b429'],['#2d4fb3','#97aef7','#4565d6',0,'#4565d6']];
+function pal(p){var fc=store.fcolor&&store.fcolor[norm(p&&p.name||'x')];if(fc!=null&&PAL[fc])return PAL[fc];var n=norm(p&&p.name||'x'),h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return PAL[4+h%6]}  /* automatic colours keep the original six */
+function folderIcon(p){var c=p?pal(p)[4]:'#E0A82E';return '<svg class="ficon" aria-hidden="true" style="fill:'+c+'"><use href="#fold"/></svg>'}
+function folderArt(p,pill){var c=pal(p);return '<span class="fart'+(c[3]?' lt':'')+'" style="--fb:'+c[0]+';--ft:'+c[1]+';--fu:'+c[2]+'"><i class="bk"></i><i class="p1"></i><i class="p2"></i><i class="ft"></i>'+(pill?'<span class="pl">'+pill+'</span>':'')+'</span>'}
+function foldersHTML(){
+  var ps=sortedProjects().filter(function(p){return p.cases.length||inShift(p)});
+  if(!ps.length)return '';
+  return '<div class="frow"><button type="button" class="farr l" data-farr="-1" aria-label="เลื่อนไปทางซ้าย"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="fgrid" role="list" aria-label="โฟลเดอร์โครงการ">'+ps.map(function(p){
+    var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
+    return '<button type="button" role="listitem" class="fcard" data-sel="'+p.id+'">'+folderArt(p,realN(p.cases)?realN(p.cases)+' เคส':'')+'<span class="nm">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span><span class="mt">'+(realN(p.cases)?realN(p.cases)+' เคส · '+ph+' รูป':p.cases.length?'เหตุการณ์ปกติ':'ยังไม่มีเหตุการณ์')+'</span></button>'}).join('')+'</div><button type="button" class="farr r" data-farr="1" aria-label="เลื่อนไปทางขวา"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5L13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+}
+function histHTML(p){
+  var k=norm(p.name||''),days=[];
+  if(k)Object.keys(store.reports).sort().reverse().forEach(function(d){
+    if(d===store.date)return;
+    var q=store.reports[d].projects.filter(function(x){return norm(x.name||'')===k&&x.cases.length})[0];
+    if(q)days.push([d,q]);
+  });
+  var h='<div class="hist"><h3>ประวัติย้อนหลัง'+(days.length?' ('+days.length+' วัน)':'')+'</h3>';
+  if(!days.length)return h+'<div class="none">ยังไม่มีข้อมูลวันก่อนหน้าของโครงการนี้</div></div>';
+  return h+days.slice(0,60).map(function(x){var d=x[0],q=x[1];
+    return '<details class="hd"><summary><span class="dn">'+thaiShort(d)+'</span><span class="dc">'+realN(q.cases)+' เคส</span><button type="button" class="btn go" data-hist="'+d+'|'+q.id+'">เปิดวันนี้</button></summary><ul>'+
+      q.cases.slice().sort(byTime).map(function(c){return '<li><b>'+hhmm(c.time)+'</b><span>'+esc((c.text||'').replace(/^[\s♦️◆]+/,''))+'</span></li>'}).join('')+'</ul></details>'}).join('')+'</div>';
+}
+/* totals across every day stored in this browser, per project name */
+var FTOT=null;
+function folderTotals(){
+  if(FTOT)return FTOT;FTOT={};
+  Object.keys(store.reports).forEach(function(d){if(!inRangeD(d))return;store.reports[d].projects.forEach(function(q){
+    if(!q.cases.length)return;var k=norm(q.name||q.id),t=FTOT[k]||(FTOT[k]={c:0,ph:0,days:0,last:''});
+    t.days++;t.c+=realN(q.cases);q.cases.forEach(function(c){t.ph+=allPhotos(c).length});if(d>t.last)t.last=d;
+  })});
+  return FTOT;
+}
+function fovCard(p){
+  var t=folderTotals()[norm(p.name||p.id)]||{c:0,ph:0,days:0,last:''},today=realN(p.cases);
+  var st=p.cases.length?(isSent(p)?'<span class="fst ok">ส่งแล้ว</span>':'<span class="fst wait">'+(today?today+' เคส':'ปกติ')+' · ยังไม่ส่ง</span>'):(t.c?'<span class="fst">ล่าสุด '+thaiShort(t.last)+'</span>':'<span class="fst">ยังไม่มีเหตุการณ์</span>');
+  return '<button type="button" role="listitem" class="fcard'+(t.c||p.cases.length?'':' empty0')+'" data-fopen="'+esc(norm(p.name||p.id))+'" title="ดูเคสทั้งหมดของ '+esc(p.name||'')+'">'+folderArt(p,t.c?t.c+' เคส':'')+
+    '<span class="nm">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span><span class="mt">'+(t.c?'รวม '+t.c+' เคส · '+t.ph+' รูป · '+t.days+' วัน':'')+'</span>'+st+'</button>';
+}
+function folderGroupsHTML(){
+  var tot=folderTotals(),all=sortedProjects().filter(function(p){return pq?pqMatch(p):inShift(p)||p.cases.length||tot[norm(p.name||p.id)]}),h='';
+  ORDER.forEach(function(m){
+    var l=all.filter(function(p){return (p.mode||'')===m});if(!l.length)return;
+    var withC=l.filter(function(p){return realN(p.cases)}).length;
+    h+='<section class="fgroup"><h3>'+MODES[m]+'<small>'+l.length+' โครงการ · วันนี้มีเหตุการณ์ '+withC+'</small></h3><div class="fwrap" role="list">'+l.map(fovCard).join('')+'</div></section>';
+  });
+  return h||'<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
+}
+/* ---------- folder detail: every day's cases and photos for one project ---------- */
+var fsel=null,fonlyPh=false;
+/* date range for the folder views ('' = open end) */
+var fFrom='',fTo='';
+function inRangeD(d){return (!fFrom||d>=fFrom)&&(!fTo||d<=fTo)}
+function isoAdd(days){var t=new Date(store.date+'T00:00:00');t.setDate(t.getDate()+days);return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2)}
+function rangeKey(){if(!fFrom&&!fTo)return 'all';if(fTo===store.date){if(fFrom===store.date)return 'd1';if(fFrom===isoAdd(-6))return 'd7';if(fFrom===isoAdd(-29))return 'd30';if(fFrom===store.date.slice(0,8)+'01')return 'm'}return 'custom'}
+function rangeHTML(){
+  var k=rangeKey(),q=[['d1','วันนี้'],['d7','7 วัน'],['d30','30 วัน'],['m','เดือนนี้'],['all','ทั้งหมด']];
+  return '<div class="frange"><span class="msg">ช่วงวันที่</span><input type="date" data-frange="from" value="'+esc(fFrom)+'" aria-label="ตั้งแต่วันที่"><span class="msg">ถึง</span><input type="date" data-frange="to" value="'+esc(fTo)+'" aria-label="ถึงวันที่">'+
+    '<div class="seg qr">'+q.map(function(o){return '<button type="button" data-fq="'+o[0]+'" aria-pressed="'+(k===o[0])+'">'+o[1]+'</button>'}).join('')+'</div></div>';
+}
+function rangeLabel(){if(!fFrom&&!fTo)return 'ทุกวัน';return (fFrom?thaiShort(fFrom):'แรกสุด')+' – '+(fTo?thaiShort(fTo):'ล่าสุด')}
+function folderDays(key){
+  var out=[];
+  Object.keys(store.reports).sort().reverse().forEach(function(d){
+    if(!inRangeD(d))return;
+    store.reports[d].projects.forEach(function(q){if(norm(q.name||q.id)===key&&q.cases.length)out.push({d:d,p:q})});
+  });
+  return out;
+}
+function renderFolderDetail(){
+  var days=folderDays(fsel),cur=sortedProjects().filter(function(p){return norm(p.name||p.id)===fsel})[0]||(days[0]&&days[0].p);
+  var name=cur?cur.name:fsel,nc=0,nph=0;
+  days.forEach(function(x){x.p.cases.forEach(function(c){if(!isFixed(c))nc++;nph+=allPhotos(c).length})});
+  var h='<div class="fov"><div class="fdtop"><button type="button" class="btn navy" data-fback>← ภาพรวมโฟลเดอร์</button>'+
+    '<div class="fdhero">'+folderArt(cur||{name:name},nc?nc+' เคส':'')+'<div><h2>'+esc(name)+'</h2><p class="sub">'+(cur&&cur.mode?MODES[cur.mode]+' · ':'')+esc(rangeLabel())+' · '+days.length+' วัน · '+nc+' เคส · '+nph+' รูป</p></div></div>'+
+    '<div class="fdtools">'+rangeHTML()+'<label class="msg fdchk"><input type="checkbox" data-fph'+(fonlyPh?' checked':'')+'> เฉพาะเคสที่มีรูป</label>'+(nph?'<button type="button" class="btn" data-fgal>ดูรูปทั้งหมด ('+nph+')</button>':'')+'</div></div>';
+  if(!days.length)return app.innerHTML=h+'<div class="empty">'+(fFrom||fTo?'ไม่มีเคสในช่วง '+esc(rangeLabel())+' ลองเปลี่ยนช่วงวันที่':'ยังไม่มีเคสของโครงการนี้ในเบราว์เซอร์นี้')+'</div></div>';
+  var shown=0;
+  days.forEach(function(x,i){
+    var cs=sortCases(x.p.cases).filter(function(c){return !fonlyPh||allPhotos(c).length});if(!cs.length)return;
+    var dph=0;cs.forEach(function(c){dph+=allPhotos(c).length});
+    h+='<details class="fday"'+(shown<5?' open':'')+'><summary><span class="dn">'+esc(thaiDateOf(x.d))+'</span><span class="dc">'+cs.length+' เคส</span>'+(dph?'<span class="dc ph">'+dph+' รูป</span>':'')+(x.d===store.date?'<span class="dc today">วันที่เปิดอยู่</span>':'')+
+      '<button type="button" class="btn go" data-hist="'+x.d+'|'+x.p.id+'">เปิดวันนั้นในหน้าบันทึก</button></summary><div class="fcases">'+
+      cs.map(function(c){var ph=allPhotos(c);
+        return '<div class="fcase"><b class="tm">'+hhmm(c.time)+'</b><div class="tx"><div>'+esc((c.text||'').replace(/^[\s♦️◆]+/,''))+'</div>'+
+          (ph.length?'<div class="fphs">'+ph.map(function(x2){return '<img src="'+imgURL(x2)+'" decoding="async" alt="รูปเหตุการณ์ '+esc(thaiShort(x.d))+' เวลา '+hhmm(c.time)+'" data-zoom loading="lazy">'}).join('')+'</div>':'')+'</div></div>';
+      }).join('')+'</div></details>';
+    shown++;
+  });
+  if(!shown)h+='<div class="empty">ไม่มีเคสที่แนบรูป</div>';
+  app.innerHTML=h+'</div>';
+}
+function renderFolderGallery(){
+  var days=folderDays(fsel),items=[];
+  days.forEach(function(x){sortCases(x.p.cases).forEach(function(c){allPhotos(c).forEach(function(ph){items.push({d:x.d,c:c,ph:ph})})})});
+  app.innerHTML='<div class="fov"><div class="fdtop"><button type="button" class="btn navy" data-fgalx>← กลับไปรายการเคส</button><div><h2 class="fgh">รูปทั้งหมด · '+esc((days[0]&&days[0].p.name)||'')+'</h2><p class="sub">'+items.length+' รูป เรียงจากวันล่าสุด</p></div></div>'+
+    '<div class="fgal">'+items.map(function(o){return '<figure><img src="'+imgURL(o.ph)+'" decoding="async" alt="" data-zoom loading="lazy"><figcaption><b>'+esc(thaiShort(o.d))+'</b> · '+hhmm(o.c.time)+' น.<br><span>'+esc(bodyText(o.c).slice(0,60))+'</span></figcaption></figure>'}).join('')+'</div></div>';
+}
+var fgal=false;
+function thaiDateOf(iso){try{return new Date(iso+'T00:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}catch(e){return thaiShort(iso)}}
+function renderFolders(){
+  FTOT=null;
+  if(fsel){return fgal?renderFolderGallery():renderFolderDetail()}
+  var ps=sortedProjects(),n=counts(),withC=ps.filter(function(p){return p.cases.length}),sent=withC.filter(isSent).length;
+  app.innerHTML='<div class="fov"><div class="fovtop"><div><h2>ภาพรวมโฟลเดอร์</h2><p class="sub">'+esc(thaiDate())+'</p></div>'+
+    (function(){var T=folderTotals(),ac=0,ap=0;Object.keys(T).forEach(function(k){ac+=T[k].c;ap+=T[k].ph});
+      return '<div class="fstats"><div><b>'+n.c+'</b><span>เคสวันนี้</span></div><div><b>'+sent+'/'+withC.length+'</b><span>ส่งแล้ววันนี้</span></div><div class="rng"><b>'+ac+'</b><span>เคส · '+esc(rangeLabel())+'</span></div><div class="rng"><b>'+ap+'</b><span>รูป · ช่วงที่เลือก</span></div><div class="rng"><b>'+Object.keys(store.reports).filter(function(d){return inRangeD(d)&&store.reports[d].projects.some(function(q){return q.cases.length})}).length+'</b><span>วันที่มีข้อมูล</span></div></div>'})()+
+    '<div class="fovtools">'+searchHTML('fsearch')+shiftHTML()+'</div>'+rangeHTML()+'</div>'+
+    '<div id="fovgrid">'+folderGroupsHTML()+'</div></div>';
+}
+function heroHTML(p){
+  var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
+  return '<div class="fhero"><button type="button" class="fhbtn" data-fopen="'+esc(norm(p.name||p.id))+'" title="ดูเคสย้อนหลังและรูปทั้งหมดของ '+esc(p.name||'')+'" aria-label="เปิดโฟลเดอร์ '+esc(p.name||'')+'">'+folderArt(p,realN(p.cases)?realN(p.cases)+' เคส':'')+'</button><div><h2>'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</h2><p class="sub">'+thaiDate()+' · '+realN(p.cases)+' เคส · '+ph+' รูป</p></div></div>';
+}
 var tt;
 function toast(m){var el=document.getElementById('toast');el.textContent=m;el.hidden=false;document.body.classList.add('toast-on');clearTimeout(tt);tt=setTimeout(function(){el.hidden=true;document.body.classList.remove('toast-on')},2600)}
 function copyText(text,okMsg){
@@ -885,39 +1129,44 @@ function syncHTML(){
 var app=document.getElementById('app');
 function renderTotals(){var n=counts();
   document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button>';paintSync()}
+/* project search: filters the project list (and the folder overview) by name */
+var pq='';
+function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))>=0||String(p.name||'').toLowerCase().indexOf(pq.toLowerCase())>=0}
+function searchHTML(id){return '<label class="psearch" for="'+id+'"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="'+id+'" type="search" data-search placeholder="ค้นหาโครงการ" autocomplete="off" value="'+esc(pq)+'"><button type="button" class="pqx" data-pqx aria-label="ล้างคำค้นหา"'+(pq?'':' hidden')+'>✕</button></label>'}
 function railHTML(){
   var all=sortedProjects(),n=counts();
   var h='<button type="button" class="f" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">รวมทุกโครงการ</span><span class="fm">'+n.c+' เคส · '+n.ph+' รูป</span></button>';
   ORDER.forEach(function(m){
-    var list=all.filter(function(p){return (p.mode||'')===m&&(p.cases.length||inShift(p)||sel===p.id)});
+    var list=all.filter(function(p){return (p.mode||'')===m&&(pq?pqMatch(p):(p.cases.length||inShift(p)||sel===p.id))});
     if(!list.length)return;
     h+='<div class="gh"><span>'+MODES[m]+'</span><span>'+list.length+'</span></div>';
     list.forEach(function(p){
       var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
-      h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+(isSent(p)?' <span class="sentok">✓ ส่งแล้ว</span>':'')+'</span><span class="fm">'+(p.cases.length?p.cases.length+' เคส · '+ph+' รูป':'ยังไม่มีเหตุการณ์')+'</span></button>';
+      h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon(p)+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+(isSent(p)?' <span class="sentok">✓ ส่งแล้ว</span>':'')+'</span><span class="fm">'+(realN(p.cases)?realN(p.cases)+' เคส · '+ph+' รูป':p.cases.length?'ปกติ':'ยังไม่มีเหตุการณ์')+'</span></button>';
     });
   });
+  if(pq&&h.indexOf('class="gh"')<0)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
   return h+'<button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button>';
 }
 function caseHTML(c){
-  var th=allPhotos(c).map(function(p){return '<div class="thumb"><img decoding="async" loading="lazy" src="'+p.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" data-zoom><button type="button" class="cp" data-act="copyphoto" data-pid="'+p.id+'">คัดลอก</button><button type="button" class="x" data-act="delphoto" data-pid="'+p.id+'" aria-label="ลบรูป">×</button></div>'}).join('');
-  return '<div class="case" data-c="'+c.id+'">'+
+  var th=allPhotos(c).map(function(p){return '<div class="thumb"><img src="'+imgURL(p)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" data-zoom><button type="button" class="cp" data-act="copyphoto" data-pid="'+p.id+'">คัดลอก</button><button type="button" class="x" data-act="delphoto" data-pid="'+p.id+'" aria-label="ลบรูป">×</button></div>'}).join('');
+  return '<div class="case" data-c="'+c.id+'" data-drop>'+
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
-    '<div class="ca"><button type="button" class="ghost" data-act="copycase">คัดลอก</button><button type="button" class="ghost" data-act="delcase">ลบ</button></div>'+
-    '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์">'+esc(c.text)+'</textarea>'+
-    '<div class="photos">'+th+'<label class="addph'+(th?'':' sm')+'" data-drop>+ เพิ่มรูป<input type="file" accept="image/*" multiple data-act="file"></label><button type="button" class="addph'+(th?'':' sm')+' pst" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)">วางรูป</button></div></div>';
+    '<div class="ca"><button type="button" class="ghost" data-act="delcase">ลบ</button></div>'+
+    '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
+    '<div class="photos">'+th+'<div class="cacts"><label class="addph cab" title="แนบรูป (หรือคลิกที่เคสแล้วกด Ctrl+V / ลากรูปมาวาง)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h3l1.4-2h5.2l1.4 2h3v9.5H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="10" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label><button type="button" class="cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="4" width="11" height="13.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 4V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 12.5l2-2 1.5 1.5 2-2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>วางรูป</span></button></div></div></div>';
 }
 function projHTML(p){
   var opts=ORDER.map(function(m){return '<option value="'+m+'"'+((p.mode||'')===m?' selected':'')+'>'+(m?MODES[m]:'ไม่ระบุช่วงเวลา')+'</option>'}).join('');
   return '<section class="proj'+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
     '<input class="pname" id="n-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'" placeholder="ชื่อโครงการ" aria-label="ชื่อโครงการ">'+
     '<select class="msel" id="s-'+p.id+'" data-f="mode" aria-label="ช่วงเวลาที่ดู CCTV">'+opts+'</select>'+
-    '<span class="cnt">'+p.cases.length+' เคส</span>'+
+    '<span class="cnt">'+(realN(p.cases)||!p.cases.length?realN(p.cases)+' เคส':'ปกติ')+'</span>'+
     (p.cases.length||isLUMT(p)?'<button type="button" class="btn" data-act="viewmsg">ดูข้อความ</button>':'')+
     (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+
       (projPhotos(p).length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+
       '<button type="button" class="btn pri" data-act="copymsg">'+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
-    '<button type="button" class="ghost" data-act="delproj">'+(inReg(p)?'ล้างเหตุการณ์':'ลบโครงการ')+'</button>'+(inReg(p)?'<button type="button" class="ghost" data-act="rmproj" title="เอาโครงการนี้ออกจากรายการทุกวัน กู้คืนได้ในหน้าจัดการข้อมูล">ลบโครงการ</button>':'')+'</header>'+
+    (p.cases.length?'<button type="button" class="ghost" data-act="clearcases">ล้างเหตุการณ์</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
     '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
 }
@@ -927,7 +1176,7 @@ function renderEdit(){
   var ps=sortedProjects(),body='';
   if(sel==='all'){
     var withC=ps.filter(function(p){return p.cases.length}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
-    body=withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>';
+    body=foldersHTML()+(withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>');
     if(quiet.length){
       body+='<div class="quiet"><h3>ยังไม่มีเหตุการณ์วันนี้ ('+quiet.length+' โครงการ)</h3>';
       ORDER.forEach(function(m){
@@ -937,10 +1186,10 @@ function renderEdit(){
       body+='</div>';
     }
   }else{
-    body=ps.filter(function(p){return p.id===sel}).map(projHTML).join('');
+    body=ps.filter(function(p){return p.id===sel}).map(function(p){return heroHTML(p)+projHTML(p)}).join('');
   }
-  app.innerHTML='<div class="layout"><div class="side"><div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav></div><div id="main">'+body+'</div></div>';
-  fitAll();
+  app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav></div><div id="main">'+body+'</div></div>';
+  fitAll();paintArrows();
 }
 /* ---------- executive report: message form ---------- */
 var DEFAULTS={salute:'เรียนผู้จัดการ',particle:'ค่ะ',org:'ศูนย์รับแจ้งเหตุลุมพินี',sender:'นริศา'};
@@ -1005,7 +1254,11 @@ function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent
 function paintProg(){
   var el=document.getElementById('prog');if(!el)return;
   var ps=reportProjects().ps,n=ps.filter(isSent).length,pct=ps.length?Math.round(n*100/ps.length):0;
-  el.innerHTML=ps.length?'<div class="progtop"><b>ส่งแล้ว '+n+' จาก '+ps.length+' โครงการ</b>'+(n===ps.length?'<span class="okmsg">ส่งครบทุกโครงการแล้ว</span>':'')+'</div><div class="bar2"><i style="width:'+pct+'%"></i></div><div class="chips">'+ps.map(function(p){return '<button type="button" class="chip'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'}).join('')+'</div>':'';
+  var chip=function(p){return '<button type="button" class="chip'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'};
+  var un=ps.filter(function(p){return !isSent(p)}),dn=ps.filter(isSent);
+  el.innerHTML=ps.length?'<div class="progtop"><b>ส่งแล้ว '+n+' จาก '+ps.length+' โครงการ</b>'+(n===ps.length?'<span class="okmsg">ส่งครบทุกโครงการแล้ว</span>':'<span class="left">เหลืออีก '+un.length+' โครงการ</span>')+'<span class="pct">'+pct+'%</span></div><div class="bar2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'
+    +(un.length?'<div class="pgrp wait"><div class="pgh">ยังไม่ส่ง <em>'+un.length+'</em></div><div class="chips">'+un.map(chip).join('')+'</div></div>':'')
+    +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
 }
 function nextUnsent(p){var ps=reportProjects().ps,i=ps.indexOf(p);for(var k=1;k<=ps.length;k++){var q=ps[(i+k)%ps.length];if(!isSent(q))return q}return null}
 function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);var sc=app.querySelector('.proj[data-p="'+q.id+'"]');if(sc)sc.scrollIntoView({behavior:'smooth',block:'start'})}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
@@ -1081,12 +1334,12 @@ function renderReport(){
     var tag=SHORT[p.mode||''],phs=[];
     sortCases(p.cases).forEach(function(c){allPhotos(c).forEach(function(x){phs.push({c:c,x:x})})});
     var o=nl(p);
-    return '<section class="sp'+(quiet?' quiet3':'')+(isEdited(p)?' edited':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><h3>โครงการ <span data-pn>'+esc(p.name)+'</span><small>'+(tag?tag+' · ':'')+(quiet?'เหตุการณ์ปกติ':p.cases.length+' เคส')+'</small><span class="hbtn"><button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+(phs.length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+'<button type="button" class="btn pri" data-act="copymsg">'+(phs.length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button></span></h3>'+
+    return '<section class="sp'+(quiet?' quiet3':'')+(isEdited(p)?' edited':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><h3>โครงการ <span data-pn>'+esc(p.name)+'</span><small>'+(tag?tag+' · ':'')+(quiet?'เหตุการณ์ปกติ':(realN(p.cases)?realN(p.cases)+' เคส':'เหตุการณ์ปกติ'))+'</small><span class="hbtn"><button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+(phs.length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+'<button type="button" class="btn pri" data-act="copymsg">'+(phs.length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button></span></h3>'+
       '<div class="rn"><label for="rn-'+p.id+'">ชื่อโครงการ (ใช้หลัง @ ในข้อความ)</label><input id="rn-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'"></div>'+
       (quiet&&(p.mode||'')!=='night'&&(p.mode||'')!=='day'?'<div class="rowb"><span class="msg">ช่วงเวลาเหตุการณ์ปกติ</span><div class="seg" role="group" aria-label="ช่วงเวลาเหตุการณ์ปกติ">'+[['night','19.00–07.00'],['day','07.00–19.00'],['both','ทั้งสองช่วง']].concat(repPreset()==='custom'?[['range',hhmm(repRange().from)+'–'+hhmm(repRange().to)]]:[]).map(function(o){return '<button type="button" data-act="pnorm" data-v="'+o[0]+'" aria-pressed="'+(normalChoice(p)===o[0])+'">'+o[1]+'</button>'}).join('')+'</div></div>':'')+
       '<div class="mphead"><label class="msg" for="mp-'+p.id+'">ข้อความ แก้ไขได้</label><span class="ed tag">แก้ไขเอง</span><button type="button" class="ghost ed" data-act="resetmsg">ใช้ข้อความอัตโนมัติ</button></div>'+
       '<textarea class="mp" id="mp-'+p.id+'" data-msg="'+p.id+'" data-f="msg" spellcheck="false">'+esc(msgFinal(p))+'</textarea>'+
-      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img decoding="async" loading="lazy" src="'+o.x.data+'" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
+      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img src="'+imgURL(o.x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
       '</section>';
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
@@ -1147,7 +1400,7 @@ function renderNow(){
   document.getElementById('m-edit').setAttribute('aria-pressed',mode==='edit');
   document.getElementById('m-data').setAttribute('aria-pressed',mode==='data');
   renderTotals();
-  document.getElementById('m-rep').setAttribute('aria-pressed',mode==='report');mode==='edit'?renderEdit():mode==='report'?renderReport():renderData();paintSync();
+  document.getElementById('m-rep').setAttribute('aria-pressed',mode==='report');document.getElementById('m-fold').setAttribute('aria-pressed',mode==='folders');mode==='edit'?renderEdit():mode==='folders'?renderFolders():mode==='report'?renderReport():renderData();paintSync();
   var dl=document.getElementById('folders');
   if(!dl.children.length){
     var seen={},names=[];
@@ -1177,7 +1430,7 @@ app.addEventListener('input',function(e){
   if(f==='rname'){p.rname=t.value;save();refreshMsgs();return}
   if(f==='name'){p.name=t.value}
   else if(f==='mode'){p.mode=t.value}
-  else{var c=findC(t,p);if(!c)return;c[f]=t.value;if(f==='time'&&t.value&&TP.test(c.text||'')){c.text=c.text.replace(/เวลา\s*\d{1,2}\s*[.:]\s*\d{2}/,'เวลา'+hhmm(t.value));var tx2=document.getElementById('x-'+c.id);if(tx2)tx2.value=c.text}if(f==='text'){if(/^insertFrom/.test(e.inputType||'')&&applyTime(p,c,true))return;fit(t)}}
+  else{var c=findC(t,p);if(!c)return;if(f==='text'&&isFixed(c)&&t.readOnly)return;c[f]=t.value;if(f==='time'&&t.value&&!isFixed(c)&&TP.test(c.text||'')){c.text=c.text.replace(/เวลา\s*\d{1,2}\s*[.:]\s*\d{2}/,'เวลา'+hhmm(t.value));var tx2=document.getElementById('x-'+c.id);if(tx2)tx2.value=c.text}if(f==='text'){if(/^insertFrom/.test(e.inputType||'')&&applyTime(p,c,true))return;fit(t)}}
   markP(p);save();refreshRail();refreshMsgs();
 });
 app.addEventListener('change',function(e){
@@ -1189,6 +1442,7 @@ app.addEventListener('change',function(e){
     var nc={id:uid(),time:tm,text:tx};np.cases.push(nc);np.cases.sort(byTime);markP(np);save();render();return;
   }
   if(t.id==='rep-from'||t.id==='rep-to'){var fr=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;if(fr&&to){if(fr===to){toast('เวลาเริ่มกับเวลาสิ้นสุดต้องไม่เท่ากัน');return}R().repFrom=fr;R().repTo=to;save();render()}return}
+  if(t.dataset&&t.dataset.f==='text'&&t.readOnly)return;
   if(t.dataset&&t.dataset.f==='text'){var p0=findP(t),c0=p0&&findC(t,p0);if(c0&&!applyTime(p0,c0,false)){tidy(c0);t.value=c0.text;markP(p0);save();fit(t)}return}
   if(t.dataset&&t.dataset.act==='file'){
     var p=findP(t),c=p&&findC(t,p);if(c&&t.files.length)addPhotos(c.id,t.files);
@@ -1219,8 +1473,15 @@ app.addEventListener('click',function(e){
     }
     save();render();return;
   }
+  var fo=e.target.closest('[data-fopen]');
+  if(fo){fsel=fo.dataset.fopen;fgal=false;mode='folders';render();window.scrollTo(0,0);return}
+  if(e.target.closest('[data-fback]')){fsel=null;fgal=false;render();window.scrollTo(0,0);return}
+  if(e.target.closest('[data-fgal]')){fgal=true;render();window.scrollTo(0,0);return}
+  if(e.target.closest('[data-fgalx]')){fgal=false;render();window.scrollTo(0,0);return}
+  var hb=e.target.closest('[data-hist]');
+  if(hb){e.preventDefault();var hp=hb.dataset.hist.split('|');if(mode==='folders')mode='edit';store.date=hp[0];save();render();sel=hp[1];render();window.scrollTo(0,0);return}
   var s=e.target.closest('[data-sel]');
-  if(s){sel=s.dataset.sel;render();window.scrollTo(0,0);return}
+  if(s){sel=s.dataset.sel;if(mode==='folders')mode='edit';render();window.scrollTo(0,0);return}
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act,p=findP(b),c=p&&findC(b,p);
   if(act==='addproj'){var np={id:uid(),name:'',mode:'',cases:[{id:uid(),time:'08:00',text:'♦️ '}]};R().projects.push(np);sel=np.id;save();render();var i=document.getElementById('n-'+np.id);if(i)i.focus()}
@@ -1231,6 +1492,7 @@ app.addEventListener('click',function(e){
     if(!added){toast('มีเหตุการณ์ปกติของกะนี้แล้ว');return}
     p.cases.sort(byTime);markP(p);save();render();
   }
+  else if(act==='clearcases'&&p){if(!arm(b,'ยืนยันล้าง'))return;clearProject(p)}
   else if(act==='rmproj'&&p){if(!arm(b,'ยืนยันลบโครงการ'))return;removeProject(p)}
   else if(act==='restoreproj'){var ix=removedKeys().indexOf(b.dataset.k);if(ix>=0)removedKeys().splice(ix,1);save();render();toast('นำโครงการกลับมาแล้ว')}
   else if(act==='delproj'&&p){
@@ -1345,13 +1607,17 @@ app.addEventListener('click',function(e){
 });
 /* drag photos onto a case */
 app.addEventListener('contextmenu',function(e){
-  var f=e.target.closest('.rail button.f[data-sel]');if(!f||f.dataset.sel==='all')return;
-  var p=R().projects.filter(function(q){return q.id===f.dataset.sel})[0];if(!p)return;
+  var p=null,f=e.target.closest('.rail button.f[data-sel],.fcard[data-sel],.fcard[data-fopen],.fhbtn[data-fopen],.proj>header>.ficon,.fhero');
+  if(!f)return;
+  if(f.dataset.sel&&f.dataset.sel!=='all')p=R().projects.filter(function(q){return q.id===f.dataset.sel})[0];
+  else if(f.dataset.fopen)p=R().projects.filter(function(q){return norm(q.name||q.id)===f.dataset.fopen})[0];
+  else{var pp=findP(f)||(sel!=='all'&&R().projects.filter(function(q){return q.id===sel})[0]);p=pp}
+  if(!p)return;
   e.preventDefault();openCtx(e.clientX,e.clientY,p);
 });
 document.addEventListener('mousedown',function(e){if(ctx&&!ctx.contains(e.target))closeCtx()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();closeMsg()}});
-window.addEventListener('scroll',function(){if(ctx)closeCtx()},{passive:true});
+window.addEventListener('scroll',closeCtx,{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
 app.addEventListener('mousedown',function(e){setPasteCase(e.target)});
 document.addEventListener('paste',function(e){
@@ -1362,6 +1628,25 @@ document.addEventListener('paste',function(e){
   e.preventDefault();
   addPhotos(id,imgs).then(function(){toast('วางรูปแล้ว '+imgs.length+' รูป');var n=app.querySelector('.case[data-c="'+id+'"]');if(n){n.classList.add('target');pasteCase=id}});
 });
+/* folder row: arrow buttons, drag with the mouse, wheel */
+function paintArrows(){
+  Array.prototype.forEach.call(document.querySelectorAll('.frow'),function(r){
+    var g=r.querySelector('.fgrid');if(!g)return;var max=g.scrollWidth-g.clientWidth;
+    r.classList.toggle('canl',g.scrollLeft>4);r.classList.toggle('canr',g.scrollLeft<max-4);
+  });
+}
+document.addEventListener('scroll',function(e){if(e.target.classList&&e.target.classList.contains('fgrid'))paintArrows()},true);
+window.addEventListener('resize',paintArrows);
+app.addEventListener('click',function(e){
+  var a=e.target.closest('[data-farr]');if(!a)return;e.stopPropagation();
+  var g=a.parentNode.querySelector('.fgrid');g.scrollBy({left:(+a.dataset.farr)*Math.max(240,g.clientWidth*0.8),behavior:'smooth'});
+},true);
+var drag=null;
+app.addEventListener('mousedown',function(e){var g=e.target.closest('.fgrid');if(!g||e.button!==0)return;drag={g:g,x:e.clientX,l:g.scrollLeft,moved:false}});
+window.addEventListener('mousemove',function(e){if(!drag)return;var dx=e.clientX-drag.x;if(Math.abs(dx)>4){drag.moved=true;drag.g.classList.add('dragging')}if(drag.moved)drag.g.scrollLeft=drag.l-dx});
+window.addEventListener('mouseup',function(){if(!drag)return;var d=drag;drag=null;d.g.classList.remove('dragging');if(d.moved){var stop=function(ev){ev.stopPropagation();ev.preventDefault();window.removeEventListener('click',stop,true)};window.addEventListener('click',stop,true);setTimeout(function(){window.removeEventListener('click',stop,true)},0)}});
+/* mouse wheel scrolls the folder row sideways */
+app.addEventListener('wheel',function(e){var g=e.target.closest('.fgrid');if(!g||g.scrollWidth<=g.clientWidth||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;var max=g.scrollWidth-g.clientWidth;if((e.deltaY<0&&g.scrollLeft<=0)||(e.deltaY>0&&g.scrollLeft>=max-1))return;e.preventDefault();g.scrollLeft+=e.deltaY},{passive:false});
 app.addEventListener('dragover',function(e){var d=e.target.closest('[data-drop]');if(d){e.preventDefault();d.classList.add('over')}});
 app.addEventListener('dragleave',function(e){var d=e.target.closest('[data-drop]');if(d)d.classList.remove('over')});
 app.addEventListener('drop',function(e){
@@ -1375,6 +1660,7 @@ document.getElementById('date').addEventListener('change',function(){if(this.val
 document.getElementById('m-edit').addEventListener('click',function(){mode='edit';render()});
 
 document.getElementById('m-data').addEventListener('click',function(){mode='data';render()});
+document.getElementById('m-fold').addEventListener('click',function(){mode='folders';fsel=null;fgal=false;render();window.scrollTo(0,0)});
 document.getElementById('m-rep').addEventListener('click',function(){mode='report';render();window.scrollTo(0,0)});
 document.getElementById('totals').addEventListener('click',function(e){
   if(e.target.closest('#syncst')){mode='data';render();window.scrollTo(0,0);return}
@@ -1393,11 +1679,47 @@ loadPhotos().then(function(){render();schedule()});
 /* re-measure text boxes once the web font arrives and whenever the window width changes */
 try{document.fonts.ready.then(fitAll)}catch(e){}
 var rzT;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fitAll,120)});
+document.addEventListener('change',function(e){
+  var t=e.target;if(!t.hasAttribute)return;
+  if(t.hasAttribute('data-fph')){fonlyPh=t.checked;render();return}
+  var r=t.getAttribute('data-frange');if(r){if(r==='from')fFrom=t.value;else fTo=t.value;if(fFrom&&fTo&&fFrom>fTo){var x=fFrom;fFrom=fTo;fTo=x}render()}
+});
+document.addEventListener('click',function(e){
+  var q=e.target.closest&&e.target.closest('[data-fq]');if(!q)return;
+  var k=q.dataset.fq;fTo=k==='all'?'':store.date;fFrom=k==='all'?'':k==='d1'?store.date:k==='d7'?isoAdd(-6):k==='d30'?isoAdd(-29):store.date.slice(0,8)+'01';render();
+});
+document.addEventListener('input',function(e){
+  var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-search'))return;
+  pq=t.value.trim();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-pqx]'),function(x){x.hidden=!pq});
+  if(mode==='folders'){var g=document.getElementById('fovgrid');if(g)g.innerHTML=folderGroupsHTML()}else refreshRail();
+});
+document.addEventListener('keydown',function(e){
+  var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-search'))return;
+  if(e.key==='Escape'){t.value='';pq='';t.dispatchEvent(new Event('input',{bubbles:true}));return}
+  if(e.key==='Enter'){
+    var first=sortedProjects().filter(function(p){return pq&&pqMatch(p)})[0];
+    if(first){e.preventDefault();sel=first.id;mode='edit';pq='';render();window.scrollTo(0,0)}
+  }
+});
+document.addEventListener('click',function(e){
+  var x=e.target.closest&&e.target.closest('[data-pqx]');if(!x)return;
+  var i=x.parentNode.querySelector('input');i.value='';pq='';i.dispatchEvent(new Event('input',{bubbles:true}));i.focus();
+});
 var topBtn=document.getElementById('totop');
-var topHid=null,topBusy=false;
-function paintTop(){if(topBusy)return;topBusy=true;requestAnimationFrame(function(){topBusy=false;var h=window.scrollY<600;if(h!==topHid){topHid=h;topBtn.hidden=h}})}
+function paintTop(){topBtn.classList.toggle('on',window.scrollY>500)}
 window.addEventListener('scroll',paintTop,{passive:true});
 topBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+/* magnifier: jump to the project search box (record page or folder overview) */
+function openFind(){
+  if(mode!=='edit'&&mode!=='folders'){mode='edit';render()}
+  if(mode==='folders'&&fsel){fsel=null;fgal=false;render()}
+  window.scrollTo({top:0,behavior:'smooth'});
+  var i=document.getElementById(mode==='folders'?'fsearch':'psearch');
+  if(i){setTimeout(function(){i.focus();i.select()},250);var w=i.closest('.psearch');if(w){w.classList.remove('flash');void w.offsetWidth;w.classList.add('flash')}}
+}
+document.getElementById('tofind').addEventListener('click',openFind);
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();openFind()}});
 window.addEventListener('online',function(){SY.err='';schedule()});
 (function(){
   var b=document.getElementById('setdir');
