@@ -627,6 +627,9 @@ textarea.mp{border-radius:16px;padding:12px 16px}
   background:linear-gradient(180deg,rgba(245,246,250,.9),rgba(245,246,250,0))}
 .side{top:100px!important;max-height:calc(100vh - 108px)!important}
 @media (max-width:700px){.topwrap{position:static}}
+
+.chip.alb{background:#1B2B4B;border-color:#1B2B4B;color:#fff;font-weight:600}
+.chip.alb:hover{background:#24385F;border-color:#24385F;color:#fff}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -870,7 +873,7 @@ function openCtx(x,y,p){
   ctx.innerHTML='<div class="ctxh">'+esc(p.name||'โครงการ')+'</div>'+
     '<button type="button" role="menuitem" data-c="viewmsg">ดูข้อความรายงาน</button>'+
     '<button type="button" role="menuitem" data-c="copymsg"'+(p.cases.length?'':' disabled')+'>คัดลอกข้อความรายงาน</button>'+
-    (projPhotos(p).length?'<button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
+    (projPhotos(p).length?'<button type="button" role="menuitem" data-c="album">'+(IS_MOB?'ส่งรูปเป็นอัลบั้ม':'บันทึกรูปเป็นอัลบั้ม')+' ('+projPhotos(p).length+' รูป)</button><button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
     '<button type="button" role="menuitem" data-c="sent">'+(isSent(p)?'ทำเครื่องหมายยังไม่ส่ง':'ทำเครื่องหมายส่งแล้ว ✓')+'</button>'+
     '<div class="ctxsep"></div>'+
     '<div class="ctxl">สีโฟลเดอร์</div><div class="swatches">'+PAL.map(function(c,i){return '<button type="button" class="sw'+(pal(p)===c?' on':'')+'" data-sw="'+i+'" style="--a:'+c[1]+';--b:'+c[2]+'" aria-label="สีที่ '+(i+1)+'"></button>'}).join('')+'<button type="button" class="sw auto" data-sw="auto" title="สีอัตโนมัติ" aria-label="สีอัตโนมัติ">A</button></div><div class="ctxsep"></div>'+
@@ -886,6 +889,7 @@ function openCtx(x,y,p){
     if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
     if(c==='viewmsg'){closeCtx();openMsg(p);return}
     if(c==='copymsg'){closeCtx();copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');return}
+    if(c==='album'){closeCtx();albumGo(p);return}
     if(c==='copyphotos'){closeCtx();try{navigator.clipboard.write([new ClipboardItem({'image/png':collageBlob(p)})]).then(function(){toast('คัดลอกรูปรวมแล้ว วางใน LINE ได้เลย')},function(){toast('คัดลอกรูปไม่ได้ในเบราว์เซอร์นี้')})}catch(er){toast('คัดลอกรูปไม่ได้ในเบราว์เซอร์นี้')}return}
     if(c==='sent'){closeCtx();setSent(p,!isSent(p));toast(isSent(p)?'ทำเครื่องหมาย '+p.name+' ส่งแล้ว':'ยกเลิกเครื่องหมายส่งแล้ว');return}
     if(b.dataset.armed!=='1'){Array.prototype.forEach.call(ctx.querySelectorAll('[data-armed]'),function(o){o.removeAttribute('data-armed');o.textContent=o.dataset.t});b.dataset.t=b.textContent;b.dataset.armed='1';b.textContent='กดอีกครั้งเพื่อยืนยัน';return}
@@ -1038,7 +1042,7 @@ function heroHTML(p){
   return '<div class="fhero"><button type="button" class="fhbtn" data-fopen="'+esc(norm(p.name||p.id))+'" title="ดูเคสย้อนหลังและรูปทั้งหมดของ '+esc(p.name||'')+'" aria-label="เปิดโฟลเดอร์ '+esc(p.name||'')+'">'+folderArt(p,realN(p.cases)?realN(p.cases)+' เคส':'')+'</button><div><h2>'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</h2><p class="sub">'+thaiDate()+' · '+realN(p.cases)+' เคส · '+ph+' รูป</p></div></div>';
 }
 var tt;
-function toast(m){var el=document.getElementById('toast');el.textContent=m;el.hidden=false;document.body.classList.add('toast-on');clearTimeout(tt);tt=setTimeout(function(){el.hidden=true;document.body.classList.remove('toast-on')},2600)}
+function toast(m){var el=document.getElementById('toast');el.textContent=m;el.hidden=false;document.body.classList.add('toast-on');clearTimeout(tt);tt=setTimeout(function(){el.hidden=true;document.body.classList.remove('toast-on')},Math.min(9000,Math.max(2600,String(m).length*70)))}
 function copyText(text,okMsg){
   function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(er){}ta.remove();toast(ok?(okMsg||'คัดลอกข้อความแล้ว'):'คัดลอกไม่สำเร็จ ให้เลือกข้อความแล้วคัดลอกเอง')}
   try{navigator.clipboard.writeText(text).then(function(){toast(okMsg||'คัดลอกข้อความแล้ว วางใน LINE หรือ WhatsApp ได้เลย')},fb)}catch(er){fb()}
@@ -1254,6 +1258,32 @@ function normalLines(p){
   return c==='night'?[LINE_NIGHT]:c==='day'?[LINE_DAY]:[LINE_NIGHT,LINE_DAY];
 }
 function projPhotos(p){var out=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){out.push(x)})});return out}
+var IS_MOB=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
+/* album: every photo as its own file, sent or saved together (LINE groups several photos sent at once into an album) */
+function albumFiles(p){
+  var safe=String(p.name||'cctv').replace(/[\\/:*?"<>|\s]+/g,'-'),n=0,out=[];
+  sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){n++;out.push(dataFile(x.data,('0'+n).slice(-2)+'_'+safe+'_'+String(c.time||'').replace(':','')+'.jpg'))})});
+  return out;
+}
+function albumSave(p){
+  var fs=albumFiles(p);if(!fs.length){toast('โครงการนี้ยังไม่มีรูป');return}
+  var folder=thaiShort(R().repDate||store.date).replace(/\//g,'-')+'_'+String(p.name||'cctv').replace(/[\\/:*?"<>|]+/g,'-');
+  var done=function(where){toast('บันทึก '+fs.length+' รูปแล้ว'+(where?' ในโฟลเดอร์ "'+where+'"':'')+' → เลือกทั้งหมด (Ctrl+A) แล้วลากไปวางในแชท LINE จะส่งเป็นอัลบั้ม')};
+  if(window.showDirectoryPicker){
+    window.showDirectoryPicker({id:'cctv-album',mode:'readwrite'}).then(function(dir){
+      return dir.getDirectoryHandle(folder,{create:true}).then(function(sub){
+        return fs.reduce(function(pr,f){return pr.then(function(){return sub.getFileHandle(f.name,{create:true}).then(function(h){return h.createWritable()}).then(function(w){return w.write(f).then(function(){return w.close()})})})},Promise.resolve());
+      }).then(function(){done(folder)});
+    }).catch(function(er){if(er&&er.name==='AbortError')return;dlAll(fs);done('')});
+  }else{dlAll(fs);done('')}
+}
+function dlAll(fs){fs.forEach(function(f,i){setTimeout(function(){var a=document.createElement('a'),u=URL.createObjectURL(f);a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)},i*350)})}
+function albumGo(p){
+  var fs=albumFiles(p);if(!fs.length){toast('โครงการนี้ยังไม่มีรูป');return}
+  if(IS_MOB&&navigator.canShare&&navigator.canShare({files:fs})){
+    navigator.share({files:fs}).catch(function(er){if(er&&er.name!=='AbortError')albumSave(p)});
+  }else albumSave(p);
+}
 function dataFile(d,name){var a=d.split(','),bin=atob(a[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new File([u],name,{type:(a[0].match(/:(.*?);/)||[])[1]||'image/jpeg'})}
 var IS_MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
 var CAN_SHARE=(function(){try{return !!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.jpg',{type:'image/jpeg'})]}))}catch(e){return false}})();
@@ -1364,7 +1394,7 @@ function renderReport(){
       (quiet&&(p.mode||'')!=='night'&&(p.mode||'')!=='day'?'<div class="rowb"><span class="msg">ช่วงเวลาเหตุการณ์ปกติ</span><div class="seg" role="group" aria-label="ช่วงเวลาเหตุการณ์ปกติ">'+[['night','19.00–07.00'],['day','07.00–19.00'],['both','ทั้งสองช่วง']].concat(repPreset()==='custom'?[['range',hhmm(repRange().from)+'–'+hhmm(repRange().to)]]:[]).map(function(o){return '<button type="button" data-act="pnorm" data-v="'+o[0]+'" aria-pressed="'+(normalChoice(p)===o[0])+'">'+o[1]+'</button>'}).join('')+'</div></div>':'')+
       '<div class="mphead"><label class="msg" for="mp-'+p.id+'">ข้อความ แก้ไขได้</label><span class="ed tag">แก้ไขเอง</span><button type="button" class="ghost ed" data-act="resetmsg">ใช้ข้อความอัตโนมัติ</button></div>'+
       '<textarea class="mp" id="mp-'+p.id+'" data-msg="'+p.id+'" data-f="msg" spellcheck="false">'+esc(msgFinal(p))+'</textarea>'+
-      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img src="'+imgURL(o.x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
+      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip alb" data-act="album">'+(CAN_SHARE&&IS_MOB?'ส่งเป็นอัลบั้ม ('+phs.length+' รูป)':'บันทึกเป็นอัลบั้ม ('+phs.length+' รูป)')+'</button><button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img src="'+imgURL(o.x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
       '</section>';
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
@@ -1601,6 +1631,7 @@ app.addEventListener('click',function(e){
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
   else if(act==='jump'){var js=app.querySelector('.sp[data-p="'+b.dataset.to+'"]');if(js)js.scrollIntoView({behavior:'smooth',block:'start'})}
+  else if(act==='album'&&p){albumGo(p)}
   else if(act==='collage'&&p){
     try{navigator.clipboard.write([new ClipboardItem({'image/png':collageBlob(p)})]).then(function(){toast('คัดลอกรูปรวมแล้ว วางใน LINE ได้เลย')},function(){toast('คัดลอกรูปรวมไม่ได้ในเบราว์เซอร์นี้')})}catch(er){toast('คัดลอกรูปรวมไม่ได้ในเบราว์เซอร์นี้')}
   }
