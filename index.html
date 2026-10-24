@@ -1063,9 +1063,25 @@ function pending(){var s=store.sync;return dirtyIn(null)+Object.keys(s.dels).len
 function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c)}}
 function post(body){
   body.key=store.sync.key;
-  return fetch(store.sync.url,{method:'POST',body:JSON.stringify(body)})
-    .then(function(r){return r.json()},function(){throw new Error('เชื่อมต่ออินเทอร์เน็ตหรือลิงก์ไม่ได้')})
-    .then(function(j){if(!j||!j.ok)throw new Error((j&&j.error)||'ไม่มีการตอบกลับ');return j});
+  var url=String(store.sync.url||'').trim();
+  if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[^/]+\/exec$/.test(url))return Promise.reject(new Error('ลิงก์ต้องเป็นลิงก์ Web App ที่ลงท้ายด้วย /exec (ไม่ใช่ลิงก์ /dev หรือลิงก์หน้าแก้โค้ด)'));
+  return fetch(url,{method:'POST',body:JSON.stringify(body)})
+    .then(function(r){return r.text().then(function(t){return {status:r.status,text:t}})},function(){throw new Error('เชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ต หรือ Web App ยังไม่ได้ตั้ง "ผู้มีสิทธิ์เข้าถึง: ทุกคน"')})
+    .then(function(res){
+      var t=res.text||'',j=null;try{j=JSON.parse(t)}catch(e){}
+      /* explain what came back, so a wrong setup is easy to spot */
+      if(!j){
+        if(/<html|<!DOCTYPE/i.test(t)){
+          if(/accounts\.google|ServiceLogin|signin/i.test(t))throw new Error('Google ขอให้ล็อกอิน: ตอน Deploy ต้องเลือก "ผู้มีสิทธิ์เข้าถึง: ทุกคน"');
+          if(/doPost|Script function not found/i.test(t))throw new Error('สคริปต์ไม่มีฟังก์ชัน doPost: วางโค้ด Code.gs ไม่ครบ หรือ Deploy ก่อนวางโค้ด');
+          throw new Error('สคริปต์ตอบกลับเป็นหน้าเว็บ ไม่ใช่ข้อมูล (สถานะ '+res.status+'): ตรวจว่า Deploy เป็น "เว็บแอป" และ Deploy เวอร์ชันใหม่หลังวางโค้ด');
+        }
+        throw new Error('สคริปต์ไม่ได้ตอบกลับ (สถานะ '+res.status+')');
+      }
+      if(j.ok)return j;
+      if(j.error)throw new Error(j.error);
+      throw new Error('ลิงก์นี้ไม่ใช่สคริปต์ของ CCTV Report: ได้คำตอบ '+t.slice(0,80)+' ให้วางโค้ด Code.gs แล้ว Deploy เวอร์ชันใหม่');
+    });
 }
 function flush(){
   clearTimeout(SY.timer);
