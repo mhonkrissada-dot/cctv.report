@@ -650,6 +650,7 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .xlt td:first-child{text-align:center;white-space:nowrap;width:80px}
 .xlt td.bl{color:#C00000}
 .btn.xl.step{background:#0F3D24;border-color:#0F3D24}
+.xlhint{margin:0;padding:8px 16px;background:#FFF8E6;border-bottom:1px solid #F0DDB0;color:#7A5A00!important;font-size:12.5px;line-height:1.5}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -880,7 +881,7 @@ function xlHours(sh){var h=[],i;if(sh==='night'){for(i=19;i<24;i++)h.push(i);for
 function xlRows(p){
   var sh=xlShift(p),hrs=xlHours(sh),by={};
   sortCases(p.cases).forEach(function(c){if(isFixed(c)||!c.time)return;var h=+String(c.time).slice(0,2);(by[h]=by[h]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''))});
-  return hrs.map(function(h){var l=by[h];return {t:('0'+h).slice(-2)+'.00น.',v:l?l.join(' / '):xlBlank(p),blank:!l}});
+  return hrs.map(function(h){var l=by[h];return {t:('0'+h).slice(-2)+'.00น.',v:l?l.join(' / '):(store.xlempty?'':xlBlank(p)),blank:!l}});
 }
 function xlWithTime(){return !!store.xltime}
 function xlHTMLFor(list){
@@ -948,7 +949,9 @@ function openXL(p){
     d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>ตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
       '<div class="xlset"><label class="fld"><span>ข้อความช่องที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="ปกติ"></label>'+
       '<label class="msg xlchk"><input type="checkbox" id="xltime"'+(xlWithTime()?' checked':'')+'> คัดลอกคอลัมน์เวลาด้วย</label>'+
+      '<label class="msg xlchk"><input type="checkbox" id="xlempty"'+(store.xlempty?' checked':'')+'> เว้นช่องที่ไม่มีเหตุการณ์ให้ว่าง</label>'+
       '<span class="msg">ช่วงเวลา: '+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' (ตามปุ่มกลางวัน/กลางคืน)</span></div>'+
+      '<p class="xlhint msg"'+(store.xlempty?'':' hidden')+'>ช่องว่างที่วางจาก Ctrl+V ธรรมดาจะทับข้อความเดิมใน Excel ให้ข้อความเดิมหาย ถ้าอยากเก็บข้อความเดิมไว้: วางลงคอลัมน์ว่างก่อน → คัดลอกคอลัมน์นั้นใน Excel → คลิกช่อง 1 ของตาราง → คลิกขวา วางแบบพิเศษ (Ctrl+Alt+V) → ติ๊ก ข้ามช่องว่าง (Skip blanks) → ตกลง</p>'+
       '<div class="xlwrap"><table class="xlt"><thead><tr><th>เวลา</th><th>เหตุการณ์</th></tr></thead><tbody>'+
       rows.map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')+'</tbody></table></div>'+
       '<div class="mfoot"><span class="msg">ตัวแดง = ข้อความช่องว่าง (ใช้เฉพาะ "คัดลอกทั้ง 13 แถว")</span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn" data-m="xlfull">คัดลอกทั้ง '+rows.length+' แถว</button><button type="button" class="btn xl" data-m="xl">คัดลอกเฉพาะแถวที่มีเหตุการณ์</button></div></div>';
@@ -959,6 +962,7 @@ function openXL(p){
     if(e.target.id==='xlblank'){store.xlblank=store.xlblank||{};var v=e.target.value.trim();if(v)store.xlblank[xlKey(p)]=v;else delete store.xlblank[xlKey(p)];save();
       var tb=d.querySelector('.xlt tbody');if(tb)tb.innerHTML=xlRows(p).map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')}
     if(e.target.id==='xltime'){store.xltime=e.target.checked;save()}
+    if(e.target.id==='xlempty'){store.xlempty=e.target.checked;save();var tb2=d.querySelector('.xlt tbody');if(tb2)tb2.innerHTML=xlRows(p).map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('');var hint=d.querySelector('.xlhint');if(hint)hint.hidden=!store.xlempty}
   });
   d.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='xlblank'){e.target.blur()}});
 }
