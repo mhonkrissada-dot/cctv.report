@@ -705,6 +705,13 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .pln b{font-size:15px}
 .pla{display:flex;flex-wrap:wrap;gap:6px}
 .pla .btn{min-height:30px;font-size:13px}
+
+.pgx{margin-left:8px;font-weight:400;font-size:11.5px;opacity:.75}
+.plbox{width:min(760px,100%)}
+.plr{display:block;padding:12px 4px;border-bottom:1px solid var(--line2)}
+.plh{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.plm{margin:8px 0 0;padding:10px 12px;background:var(--fill);border:1px solid var(--line2);border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-size:13.5px;line-height:1.6;max-height:260px;overflow:auto}
+.plr.flash{animation:cardflash 1.4s ease}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1506,10 +1513,12 @@ function paintProg(){
   var un=ps.filter(function(p){return !isSent(p)}),dn=ps.filter(isSent);
   el.innerHTML=ps.length?'<div class="progtop"><b>ส่งแล้ว '+n+' จาก '+ps.length+' โครงการ</b>'+(n===ps.length?'<span class="okmsg">ส่งครบทุกโครงการแล้ว</span>':'<span class="left">เหลืออีก '+un.length+' โครงการ</span>')+'<span class="pct">'+pct+'%</span></div><div class="bar2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'
     +'<div class="ptabs"><button type="button" class="ptab wait" data-plist="wait"'+(un.length?'':' disabled')+'><span class="dot"></span>ยังไม่ส่ง<b>'+un.length+'</b></button>'
-    +'<button type="button" class="ptab ok" data-plist="ok"'+(dn.length?'':' disabled')+'><span class="dot"></span>ส่งแล้ว<b>'+dn.length+'</b></button></div>':'';
+    +'<button type="button" class="ptab ok" data-plist="ok"'+(dn.length?'':' disabled')+'><span class="dot"></span>ส่งแล้ว<b>'+dn.length+'</b></button></div>'
+    +(un.length?'<div class="pgrp wait"><div class="pgh">ยังไม่ส่ง <em>'+un.length+'</em><span class="pgx">กดชื่อเพื่อไปที่โครงการ</span></div><div class="chips">'+un.map(chip).join('')+'</div></div>':'')
+    +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em><span class="pgx">กดชื่อเพื่อดูข้อความ</span></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
 }
 /* popup list of projects: "ยังไม่ส่ง" or "ส่งแล้ว" */
-function openPList(kind){
+function openPList(kind,focusId){
   closeMsg();
   var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
   var paint=function(){
@@ -1517,21 +1526,21 @@ function openPList(kind){
     d.setAttribute('aria-label',kind==='ok'?'โครงการที่ส่งแล้ว':'โครงการที่ยังไม่ส่ง');
     d.innerHTML='<div class="mbox plbox"><div class="mhead"><b class="'+(kind==='ok'?'okc':'waitc')+'">'+(kind==='ok'?'ส่งแล้ว':'ยังไม่ส่ง')+' · '+list.length+' โครงการ</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
       '<div class="pl">'+(list.length?list.map(function(p){var n=realN(casesIn(p)),ph=projPhotos(p).length;
-        return '<div class="plr" data-pid="'+p.id+'"><div class="pln"><b>'+esc(p.name)+'</b><span class="msg">'+(SHORT[p.mode||'']?SHORT[p.mode||'']+' · ':'')+(n?n+' เคส':'เหตุการณ์ปกติ')+(ph?' · '+ph+' รูป':'')+'</span></div>'+
-          '<div class="pla"><button type="button" class="btn" data-pl="view">ดูข้อความ</button><button type="button" class="btn pri" data-pl="copy">คัดลอกข้อความ</button>'+
-          (kind==='ok'?'<button type="button" class="btn" data-pl="unsend">ย้ายกลับไปยังไม่ส่ง</button>':'<button type="button" class="btn sentb" data-pl="send">✓ ส่งแล้ว</button><button type="button" class="btn" data-pl="go">ไปที่การ์ด</button>')+'</div></div>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
-      '<div class="mfoot"><span class="msg">'+(kind==='ok'?'โครงการที่ส่งแล้วถูกซ่อนจากหน้ารายงาน เปิดดูหรือคัดลอกซ้ำได้ที่นี่':'กด ไปที่การ์ด เพื่อแก้ไขข้อความหรือรูปของโครงการนั้น')+'</span><button type="button" class="btn" data-m="close">ปิด</button></div></div>';
+        return '<section class="plr" data-pid="'+p.id+'"><div class="plh"><div class="pln"><b>'+esc(p.name)+'</b><span class="msg">'+(SHORT[p.mode||'']?SHORT[p.mode||'']+' · ':'')+(n?n+' เคส':'เหตุการณ์ปกติ')+(ph?' · '+ph+' รูป':'')+'</span></div>'+
+          '<div class="pla"><button type="button" class="btn pri" data-pl="copy">คัดลอกข้อความ</button>'+
+          (kind==='ok'?'<button type="button" class="btn" data-pl="unsend">ย้ายกลับไปยังไม่ส่ง</button>':'<button type="button" class="btn sentb" data-pl="send">✓ ส่งแล้ว</button><button type="button" class="btn" data-pl="go">แก้ไข</button>')+'</div></div>'+
+          '<pre class="plm">'+esc(msgFinal(p))+'</pre></section>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
+      '<div class="mfoot"><span class="msg">'+(kind==='ok'?'ข้อความของโครงการที่ส่งแล้ว คัดลอกซ้ำได้':'คัดลอกข้อความ = คัดลอกแล้วย้ายไปส่งแล้ว · แก้ไข = ไปที่การ์ดโครงการ')+'</span><button type="button" class="btn" data-m="close">ปิด</button></div></div>';
   };
   paint();document.body.appendChild(d);document.body.style.overflow='hidden';
+  if(focusId){var fr=d.querySelector('[data-pid="'+focusId+'"]');if(fr){fr.scrollIntoView({block:'start'});fr.classList.add('flash')}}
   d.addEventListener('click',function(e){
     var b=e.target.closest('[data-m]'),a=e.target.closest('[data-pl]');
     if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
     if(!a)return;var row=a.closest('[data-pid]'),p=R().projects.filter(function(q){return q.id===row.dataset.pid})[0];if(!p)return;
-    var act=a.dataset.pl;
-    if(act==='view'){closeMsg();openMsg(p);return}
-    if(act==='copy'){copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');if(kind!=='ok'){setSent(p,true);paint()}return}
-    if(act==='send'){setSent(p,true);paint();return}
-    if(act==='unsend'){setSent(p,false);paint();return}
+    var act=a.dataset.pl,pl=d.querySelector('.pl'),y=pl?pl.scrollTop:0;
+    if(act==='copy'){copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');if(kind!=='ok'){setSent(p,true);paint();var pl2=d.querySelector('.pl');if(pl2)pl2.scrollTop=y}return}
+    if(act==='send'||act==='unsend'){setSent(p,act==='send');paint();var pl3=d.querySelector('.pl');if(pl3)pl3.scrollTop=y;return}
     if(act==='go'){closeMsg();goToCard('.sp[data-p="'+p.id+'"]')}
   });
 }
@@ -1867,7 +1876,7 @@ app.addEventListener('click',function(e){
     }else copyText(ltx,'เลือกกลุ่มในหน้าต่าง LINE แล้วกดส่ง (ข้อความถูกคัดลอกไว้ด้วย)');
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
-  else if(act==='jump'){goToCard('.sp[data-p="'+b.dataset.to+'"]')}
+  else if(act==='jump'){var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
   else if(act==='xlfull'&&p){xlCopyProject(p)}
