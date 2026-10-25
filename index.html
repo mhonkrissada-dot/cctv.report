@@ -760,6 +760,10 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 
 /* case without photos: the tile shows the whole text instead */
 .tlr.nophoto .tlx{-webkit-line-clamp:unset;display:block;font-size:13px;line-height:1.5;background:#fff;border:1px solid var(--line2);border-radius:6px;padding:6px 8px;margin-top:4px;flex:1;min-height:calc(160px*.75 - 12px)}
+
+.case textarea.tplk{background-color:#EEF4FF!important;border-color:#C9DAF8!important;color:#1E3A8A}
+.tplret{grid-column:2 / 3;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-top:2px}
+.tplret input{height:28px;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:600;color:var(--accent-2);background:#fff}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -799,6 +803,28 @@ var SEED='โครงการ LV-SW-RM2 จำนวน 1 เคส\n♦️ �
 
 function uid(){return Math.random().toString(36).slice(2,10)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+/* fixed routine lines per project: wording is locked, both times can be changed */
+var TPLS={
+  'LPRM3RR':[
+    {k:'load',time:'00:00',ret:'01:37',shift:'night',tx:'♦️ เวลา {t}น.รปภ.โหลดดิ้ง ทำการจดรถ และกลับมาประจำจุดเวลา {r}น.'},
+    {k:'lobby',time:'02:00',ret:'06:23',shift:'night',tx:'♦️ เวลา {t}น. รปภ.ล็อบบี้ ทำการจดรถ และกลับมาป ประจำจุดเวลา {r}น'}
+  ]
+};
+function tplsFor(p){return TPLS[norm(p&&p.name||'')]||[]}
+function tplDef(p,c){return c&&c.tpl?tplsFor(p).filter(function(d){return d.k===c.tpl})[0]:null}
+function tplText(d,c){return d.tx.replace('{t}',hhmm(c.time)).replace('{r}',hhmm(c.ret||d.ret))}
+/* turn typed copies of the routine lines into locked ones, and add the missing ones */
+function ensureTpls(p,add){
+  var ds=tplsFor(p);if(!ds.length)return false;var ch=false;
+  ds.forEach(function(d){
+    var re=new RegExp('^'+d.tx.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace('\\{t\\}','(\\d{1,2})[.:](\\d{2})').replace('\\{r\\}','(\\d{1,2})[.:](\\d{2})').replace(/ /g,'\\s*')+'\\s*$');
+    var has=p.cases.filter(function(c){return c.tpl===d.k})[0];
+    if(!has)p.cases.forEach(function(c){if(has||c.tpl)return;var m=String(c.text||'').trim().match(re);if(m){c.tpl=d.k;c.time=('0'+m[1]).slice(-2)+':'+m[2];c.ret=('0'+m[3]).slice(-2)+':'+m[4];c.text=tplText(d,c);has=c;ch=true}});
+    if(!has&&add){p.cases.push({id:uid(),time:d.time,ret:d.ret,tpl:d.k,text:''});var nc=p.cases[p.cases.length-1];nc.text=tplText(d,nc);ch=true}
+  });
+  if(ch){p.cases.sort(byTime);markP(p)}
+  return ch;
+}
 function norm(s){return String(s).replace(/[\s\-_.,\/]+/g,'').toUpperCase()}
 
 /* ---------- parsing ---------- */
@@ -1435,7 +1461,8 @@ function caseHTML(c){
   return '<div class="case" data-c="'+c.id+'" data-drop>'+
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
     '<div class="ca"><button type="button" class="ghost" data-act="delcase">ลบ</button></div>'+
-    '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
+    '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':c.tpl?' readonly class="locked tplk" title="ข้อความประจำล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
+    (c.tpl?'<label class="tplret">กลับมาประจำจุดเวลา<input type="time" data-f="ret" value="'+esc(c.ret||'')+'" aria-label="เวลากลับมาประจำจุด"></label>':'')+
     '<div class="photos">'+th+'<div class="cacts"><label class="addph cab" title="แนบรูป (หรือคลิกที่เคสแล้วกด Ctrl+V / ลากรูปมาวาง)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h3l1.4-2h5.2l1.4 2h3v9.5H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="10" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label><button type="button" class="cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="4" width="11" height="13.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 4V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 12.5l2-2 1.5 1.5 2-2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>วางรูป</span></button></div></div></div>';
 }
 function projHTML(p){
@@ -1454,6 +1481,7 @@ function projHTML(p){
 function fit(el){if(!el.offsetWidth)return;el.style.height='0px';el.style.height=Math.max(el.classList.contains('mp')?100:30,el.scrollHeight+2)+'px'}
 function fitAll(){Array.prototype.forEach.call(app.querySelectorAll('textarea'),fit)}
 function renderEdit(){
+  R().projects.forEach(function(p){if(tplsFor(p).length)ensureTpls(p,false)});
   var ps=sortedProjects(),body='';
   if(sel==='all'){
     var withC=ps.filter(function(p){return p.cases.length&&inShift(p)}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
@@ -1814,7 +1842,7 @@ app.addEventListener('input',function(e){
   if(f==='rname'){p.rname=t.value;save();refreshMsgs();return}
   if(f==='name'){p.name=t.value}
   else if(f==='mode'){p.mode=t.value}
-  else{var c=findC(t,p);if(!c)return;if(f==='text'&&isFixed(c)&&t.readOnly)return;c[f]=t.value;if(f==='time'&&t.value&&!isFixed(c)&&TP.test(c.text||'')){c.text=c.text.replace(/เวลา\s*\d{1,2}\s*[.:]\s*\d{2}/,'เวลา'+hhmm(t.value));var tx2=document.getElementById('x-'+c.id);if(tx2)tx2.value=c.text}if(f==='text'){if(/^insertFrom/.test(e.inputType||'')&&applyTime(p,c,true))return;fit(t)}}
+  else{var c=findC(t,p);if(!c)return;if(f==='text'&&(isFixed(c)||c.tpl)&&t.readOnly)return;c[f]=t.value;var td=tplDef(p,c);if(td&&(f==='time'||f==='ret')&&t.value){c.text=tplText(td,c);var tx3=document.getElementById('x-'+c.id);if(tx3)tx3.value=c.text;markP(p);save();return}if(f==='time'&&t.value&&!isFixed(c)&&TP.test(c.text||'')){c.text=c.text.replace(/เวลา\s*\d{1,2}\s*[.:]\s*\d{2}/,'เวลา'+hhmm(t.value));var tx2=document.getElementById('x-'+c.id);if(tx2)tx2.value=c.text}if(f==='text'){if(/^insertFrom/.test(e.inputType||'')&&applyTime(p,c,true))return;fit(t)}}
   markP(p);save();refreshRail();refreshMsgs();
 });
 app.addEventListener('change',function(e){
@@ -1853,6 +1881,7 @@ app.addEventListener('click',function(e){
         if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;
         p.cases.push({id:uid(),time:tm,text:tx});p.cases.sort(byTime);markP(p);n++;
       });
+      R().projects.forEach(function(p){if(inShift(p)&&tplsFor(p).some(function(d){return d.shift===store.shift}))ensureTpls(p,true)});
       if(n)toast('ใส่ "'+tx.replace('♦️ ','')+'" ให้ '+n+' โครงการแล้ว');
     }
     save();render();return;
