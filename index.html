@@ -713,6 +713,11 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .plm{margin:8px 0 0;padding:10px 12px;background:var(--fill);border:1px solid var(--line2);border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-size:13.5px;line-height:1.6;max-height:260px;overflow:auto}
 .plr.flash{animation:cardflash 1.4s ease}
 .xlset .fld.fsm{flex:0 1 200px}.xlset .fld.fxs{flex:0 0 80px}
+
+.plph{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.plph img{width:72px;height:54px;object-fit:cover;border-radius:7px;cursor:zoom-in;border:1px solid var(--line2);transition:transform .12s}
+.plph img:hover{transform:scale(1.05)}
+#lb{z-index:90!important}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1535,13 +1540,15 @@ function openPList(kind,focusId){
         return '<section class="plr" data-pid="'+p.id+'"><div class="plh"><div class="pln"><b>'+esc(p.name)+'</b><span class="msg">'+(SHORT[p.mode||'']?SHORT[p.mode||'']+' · ':'')+(n?n+' เคส':'เหตุการณ์ปกติ')+(ph?' · '+ph+' รูป':'')+'</span></div>'+
           '<div class="pla"><button type="button" class="btn pri" data-pl="copy">คัดลอกข้อความ</button>'+
           (kind==='ok'?'<button type="button" class="btn" data-pl="unsend">ย้ายกลับไปยังไม่ส่ง</button>':'<button type="button" class="btn sentb" data-pl="send">✓ ส่งแล้ว</button><button type="button" class="btn" data-pl="go">แก้ไข</button>')+'</div></div>'+
-          '<pre class="plm">'+esc(msgFinal(p))+'</pre></section>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
+          '<pre class="plm">'+esc(msgFinal(p))+'</pre>'+
+          (ph?'<div class="plph">'+projPhotos(p).map(function(x){return '<img src="'+imgURL(x)+'" alt="รูปเหตุการณ์" loading="lazy" decoding="async" data-plz title="กดเพื่อดูรูปใหญ่">'}).join('')+'</div>':'')+'</section>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
       '<div class="mfoot"><span class="msg">'+(kind==='ok'?'ข้อความของโครงการที่ส่งแล้ว คัดลอกซ้ำได้':'คัดลอกข้อความ = คัดลอกแล้วย้ายไปส่งแล้ว · แก้ไข = ไปที่การ์ดโครงการ')+'</span><button type="button" class="btn" data-m="close">ปิด</button></div></div>';
   };
   paint();document.body.appendChild(d);document.body.style.overflow='hidden';
   if(focusId){var fr=d.querySelector('[data-pid="'+focusId+'"]');if(fr){fr.scrollIntoView({block:'start'});fr.classList.add('flash')}}
   d.addEventListener('click',function(e){
-    var b=e.target.closest('[data-m]'),a=e.target.closest('[data-pl]');
+    var b=e.target.closest('[data-m]'),a=e.target.closest('[data-pl]'),z=e.target.closest('[data-plz]');
+    if(z){var lb=document.getElementById('lb');lb.querySelector('img').src=z.src;lb.hidden=false;return}
     if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
     if(!a)return;var row=a.closest('[data-pid]'),p=R().projects.filter(function(q){return q.id===row.dataset.pid})[0];if(!p)return;
     var act=a.dataset.pl,pl=d.querySelector('.pl'),y=pl?pl.scrollTop:0;
