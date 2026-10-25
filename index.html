@@ -671,6 +671,21 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .sp,.proj{scroll-margin-top:110px}
 .sp.flash,.proj.flash{animation:cardflash 1.4s ease}
 @keyframes cardflash{0%,100%{box-shadow:none}25%{box-shadow:0 0 0 3px rgba(37,99,235,.35)}}
+
+/* report: folder for projects already sent */
+.sentbox{margin-top:18px;border-radius:14px;background:#EAF3FF;border:1px solid #CFE0F7;overflow:hidden}
+.sentbox>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.sentbox>summary::-webkit-details-marker{display:none}
+.sentbox>summary:hover{background:#E0EDFE}
+.sentbox .sbico{width:22px;height:18px;fill:#3B82F6;flex:none}
+.sentbox>summary b{font-size:15px;color:#1E3A8A}
+.sentbox .sbn{background:#fff;color:#1D4ED8;border-radius:999px;padding:1px 10px;font-size:12.5px;font-weight:600}
+.sentbox .sbh{margin-left:auto;color:#5B7BB4;font-size:12px}
+.sentbox>summary:after{content:'▾';color:#3B82F6;transition:transform .2s}
+.sentbox[open]>summary:after{transform:rotate(180deg)}
+.sentbox .sbody{padding:0 16px 8px;background:#F5F9FF;border-top:1px solid #CFE0F7}
+.sentbox .sp{border-bottom-color:#DCE8F8}
+.alldone{margin:16px 0 0;padding:14px;border-radius:12px;background:#E9F7EE;color:#1B7F3B;font-weight:600;text-align:center}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1464,7 +1479,7 @@ function addLine(v,line){
 function addLineEnd(v,line){var mk='\n\n  จึงเรียนมาเพื่อทราบ',ix=v.indexOf(mk);if(ix<0)return v.replace(/\s+$/,'')+'\n'+line;var head=v.slice(0,ix).replace(/\s+$/,'');return head+(/ดังต่อไปนี้$/.test(head)?'\n\n':'\n')+line+v.slice(ix)}
 function dropLine(v,line){return v.split('\n').filter(function(l){return l.trim()!==line}).join('\n')}
 function isSent(p){return !!(R().sent&&R().sent[p.id])}
-function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
+function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();if(mode==='report'){var y=window.scrollY;render();window.scrollTo(0,y);return}if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
 function paintProg(){
   var el=document.getElementById('prog');if(!el)return;
   var ps=reportProjects().ps,n=ps.filter(isSent).length,pct=ps.length?Math.round(n*100/ps.length):0;
@@ -1478,6 +1493,7 @@ function nextUnsent(p){var ps=reportProjects().ps,i=ps.indexOf(p);for(var k=1;k<
 /* scroll to a card: show every card at full size first so the position is exact */
 function goToCard(sel){
   var el=app.querySelector(sel);if(!el)return;
+  var dt=el.closest('details');if(dt&&!dt.open){dt.open=true;R().sentOpen=true;save()}
   document.body.classList.add('cvoff');
   requestAnimationFrame(function(){
     var top=el.getBoundingClientRect().top+window.scrollY-110;
@@ -1568,7 +1584,11 @@ function renderReport(){
       '</section>';
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
-  ps.forEach(function(p){h+=card(p,false)});
+  /* sent projects move into their own folder at the bottom, so the list only shows what is left to send */
+  var unsent=ps.filter(function(p){return !isSent(p)}),sentL=ps.filter(isSent);
+  unsent.forEach(function(p){h+=card(p,false)});
+  if(!unsent.length&&ps.length)h+='<div class="alldone">ส่งครบทุกโครงการแล้ว ✓</div>';
+  if(sentL.length)h+='<details class="sentbox"'+(R().sentOpen?' open':'')+'><summary><svg class="sbico" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></svg><b>ส่งแล้ว</b><span class="sbn">'+sentL.length+' โครงการ</span><span class="sbh">กดเพื่อเปิด/ปิด</span></summary><div class="sbody">'+sentL.map(function(p){return card(p,false)}).join('')+'</div></details>';
   if(none.length){
     h+='<section class="sp"><h3>ไม่พบเหตุการณ์<small>'+none.length+' โครงการ · ข้อความเหตุการณ์ปกติตามช่วงเวลาที่ดู</small></h3></section>';
     none.forEach(function(p){h+=card(p,true)});
@@ -1910,6 +1930,7 @@ loadPhotos().then(function(){render();schedule()});
 /* re-measure text boxes once the web font arrives and whenever the window width changes */
 try{document.fonts.ready.then(fitAll)}catch(e){}
 var rzT;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fitAll,120)});
+document.addEventListener('toggle',function(e){if(e.target.classList&&e.target.classList.contains('sentbox')){R().sentOpen=e.target.open;save()}},true);
 document.addEventListener('change',function(e){
   var t=e.target;if(!t.hasAttribute)return;
   if(t.hasAttribute('data-fph')){fonlyPh=t.checked;render();return}
