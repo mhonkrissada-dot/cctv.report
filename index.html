@@ -1528,10 +1528,13 @@ function tlItems(p){
     var c=cs.filter(function(k){return !used[k.id]&&t&&k.time===t})[0];
     if(!c){var bt=l.replace(/^♦️?\s*/,'');c=cs.filter(function(k){return !used[k.id]&&caseText(k).replace(/^♦️?\s*/,'')===bt})[0]}
     if(c)used[c.id]=1;
+    if((c&&c.tpl)||isTplLine(p,l))return;
     out.push({t:t?t.replace(':','.'):(c?hhmm(c.time):''),text:l.replace(/^♦️?\s*/,''),c:c});
   });
   return out;
 }
+function isTplLine(p,l){var x=String(l).replace(/^♦️?\s*/,'').replace(/\d{1,2}\s*[.:]\s*\d{2}/g,'#').replace(/\s+/g,'');
+  return tplsFor(p).some(function(d){return d.tx.replace(/^♦️?\s*/,'').replace(/\{[tr]\}/g,'#').replace(/\s+/g,'')===x})}
 function tlHTML(p,withCopy){
   var items=tlItems(p);
   if(!items.length)return '';
