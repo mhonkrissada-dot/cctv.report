@@ -649,6 +649,7 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .xlt td{border:1px solid #D1D5DB;padding:4px 8px}
 .xlt td:first-child{text-align:center;white-space:nowrap;width:80px}
 .xlt td.bl{color:#C00000}
+.btn.xl.step{background:#0F3D24;border-color:#0F3D24}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -907,6 +908,21 @@ function xlCopyProject(p){
   var rows=xlRows(p),n=rows.filter(function(r){return !r.blank}).length,sh=xlShift(p);
   xlCopy([{rows:rows}],'คัดลอก EXCEL แล้ว '+rows.length+' แถว ('+(sh==='night'?'19.00–07.00':'07.00–19.00')+', มีเหตุการณ์ '+n+' ชั่วโมง) → คลิกช่องแถว '+rows[0].t+' ใน Excel แล้วกด Ctrl+V');
 }
+/* copy only the hours that have incidents, one cell at a time, so the sheet's existing text stays untouched */
+var XLSTEP=null;
+function xlStepReset(){if(!XLSTEP)return;var b=document.querySelector('.proj[data-p="'+XLSTEP.id+'"] [data-act=xlcopy]');if(b){b.classList.remove('step');b.innerHTML=b.dataset.lbl||b.innerHTML}XLSTEP=null}
+function xlStep(p,btn){
+  if(!XLSTEP||XLSTEP.id!==p.id){xlStepReset();XLSTEP={id:p.id,rows:xlRows(p).filter(function(r){return !r.blank}),i:0};if(btn)btn.dataset.lbl=btn.innerHTML}
+  var st=XLSTEP;
+  if(!st.rows.length){toast('โครงการนี้ไม่มีเหตุการณ์ให้คัดลอก');xlStepReset();return}
+  var r=st.rows[st.i],nx=st.rows[st.i+1];
+  var html='<html><head><meta charset="utf-8"></head><body><table><tr><td style="mso-number-format:&quot;\\@&quot;;">'+esc(r.v)+'</td></tr></table></body></html>';
+  var msg='คัดลอกแถว '+r.t+' แล้ว ('+(st.i+1)+'/'+st.rows.length+') → คลิกช่องแถว '+r.t+' ใน Excel แล้วกด Ctrl+V'+(nx?' แล้วกดปุ่มอีกครั้งเพื่อคัดลอกแถว '+nx.t:'');
+  try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([r.v],{type:'text/plain'})})]).then(function(){toast(msg)},function(){copyText(r.v,msg)})}catch(e){copyText(r.v,msg)}
+  st.i++;
+  if(btn){if(nx){btn.classList.add('step');btn.textContent='คัดลอกแถว '+nx.t+' ('+(st.i+1)+'/'+st.rows.length+')'}else{xlStepReset()}}
+  else if(!nx)xlStepReset();
+}
 function xlCopyAll(){
   var ps=sortedProjects().filter(function(p){return p.cases.length});
   if(!ps.length){toast('ยังไม่มีโครงการที่มีเหตุการณ์');return}
@@ -923,10 +939,10 @@ function openXL(p){
       '<span class="msg">ช่วงเวลา: '+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' (ตามปุ่มกลางวัน/กลางคืน)</span></div>'+
       '<div class="xlwrap"><table class="xlt"><thead><tr><th>เวลา</th><th>เหตุการณ์</th></tr></thead><tbody>'+
       rows.map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')+'</tbody></table></div>'+
-      '<div class="mfoot"><span class="msg">ตัวแดง = ข้อความช่องว่าง</span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn xl" data-m="xl">คัดลอก EXCEL</button></div></div>';
+      '<div class="mfoot"><span class="msg">ตัวแดง = ข้อความช่องว่าง (ใช้เฉพาะ "คัดลอกทั้ง 13 แถว")</span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn" data-m="xlfull">คัดลอกทั้ง '+rows.length+' แถว</button><button type="button" class="btn xl" data-m="xl">คัดลอกเฉพาะแถวที่มีเหตุการณ์</button></div></div>';
   };
   paint();document.body.appendChild(d);document.body.style.overflow='hidden';
-  d.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}if(b&&b.dataset.m==='xl'){xlCopyProject(p);closeMsg()}});
+  d.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}if(b&&b.dataset.m==='xl'){closeMsg();xlStep(p,app.querySelector('.proj[data-p="'+p.id+'"] [data-act=xlcopy]'))}if(b&&b.dataset.m==='xlfull'){xlCopyProject(p);closeMsg()}});
   d.addEventListener('change',function(e){
     if(e.target.id==='xlblank'){store.xlblank=store.xlblank||{};var v=e.target.value.trim();if(v)store.xlblank[xlKey(p)]=v;else delete store.xlblank[xlKey(p)];save();
       var tb=d.querySelector('.xlt tbody');if(tb)tb.innerHTML=xlRows(p).map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')}
@@ -970,7 +986,7 @@ function openCtx(x,y,p){
     if(sw){store.fcolor=store.fcolor||{};var k=norm(p.name||'x');if(sw.dataset.sw==='auto')delete store.fcolor[k];else store.fcolor[k]=+sw.dataset.sw;save();closeCtx();render();toast('เปลี่ยนสีโฟลเดอร์ '+p.name+' แล้ว');return}
     var b=e.target.closest('button[data-c]');if(!b||b.disabled)return;var c=b.dataset.c;
     if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
-    if(c==='xlcopy'){closeCtx();xlCopyProject(p);return}
+    if(c==='xlcopy'){closeCtx();xlStep(p,app.querySelector('.proj[data-p="'+p.id+'"] [data-act=xlcopy]'));return}
     if(c==='xlview'){closeCtx();openXL(p);return}
     if(c==='viewmsg'){closeCtx();openMsg(p);return}
     if(c==='copymsg'){closeCtx();copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');return}
@@ -1535,6 +1551,7 @@ function render(){
   if(pasteCase){var pc=app.querySelector('.case[data-c="'+pasteCase+'"]');if(pc)pc.classList.add('target')}
 }
 function renderNow(){
+  if(XLSTEP&&typeof XLSTEP==='object'){var keep=XLSTEP;setTimeout(function(){var b=document.querySelector('.proj[data-p="'+keep.id+'"] [data-act=xlcopy]');if(b&&XLSTEP===keep&&keep.rows[keep.i]){b.dataset.lbl=b.dataset.lbl||b.innerHTML;b.classList.add('step');b.textContent='คัดลอกแถว '+keep.rows[keep.i].t+' ('+(keep.i+1)+'/'+keep.rows.length+')'}},0)}
   ensureProjects();
   if(sel!=='all'&&!R().projects.some(function(p){return p.id===sel}))sel='all';
   document.getElementById('date').value=store.date;
@@ -1718,7 +1735,7 @@ app.addEventListener('click',function(e){
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
   else if(act==='jump'){var js=app.querySelector('.sp[data-p="'+b.dataset.to+'"]');if(js)js.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(act==='album'&&p){albumGo(p)}
-  else if(act==='xlcopy'&&p){xlCopyProject(p)}
+  else if(act==='xlcopy'&&p){xlStep(p,b)}
   else if(act==='xlview'&&p){openXL(p)}
   else if(act==='xlall'){xlCopyAll()}
   else if(act==='collage'&&p){
