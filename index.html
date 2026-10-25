@@ -686,6 +686,25 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .sentbox .sbody{padding:0 16px 8px;background:#F5F9FF;border-top:1px solid #CFE0F7}
 .sentbox .sp{border-bottom-color:#DCE8F8}
 .alldone{margin:16px 0 0;padding:14px;border-radius:12px;background:#E9F7EE;color:#1B7F3B;font-weight:600;text-align:center}
+
+/* report: two big buttons that open project lists */
+.ptabs{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.ptab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid;font-weight:600;font-size:14.5px;cursor:pointer;min-width:170px;transition:transform .12s,box-shadow .15s}
+.ptab b{margin-left:auto;font-size:18px}
+.ptab .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+.ptab.wait{background:#FFF8E6;border-color:#F0D49A;color:#8A5300}
+.ptab.ok{background:#EAF3FF;border-color:#CFE0F7;color:#1D4ED8}
+.ptab:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,24,40,.1)}
+.ptab:disabled{opacity:.5;cursor:default}
+.plbox{width:min(720px,100%)}
+.mhead .waitc{color:#8A5300}.mhead .okc{color:#1D4ED8}
+.pl{overflow:auto;padding:6px 14px;flex:1 1 auto}
+.plr{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line2)}
+.plr:last-child{border-bottom:0}
+.pln{display:flex;flex-direction:column;min-width:140px;flex:1}
+.pln b{font-size:15px}
+.pla{display:flex;flex-wrap:wrap;gap:6px}
+.pla .btn{min-height:30px;font-size:13px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1486,8 +1505,35 @@ function paintProg(){
   var chip=function(p){return '<button type="button" class="chip'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'};
   var un=ps.filter(function(p){return !isSent(p)}),dn=ps.filter(isSent);
   el.innerHTML=ps.length?'<div class="progtop"><b>ส่งแล้ว '+n+' จาก '+ps.length+' โครงการ</b>'+(n===ps.length?'<span class="okmsg">ส่งครบทุกโครงการแล้ว</span>':'<span class="left">เหลืออีก '+un.length+' โครงการ</span>')+'<span class="pct">'+pct+'%</span></div><div class="bar2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'
-    +(un.length?'<div class="pgrp wait"><div class="pgh">ยังไม่ส่ง <em>'+un.length+'</em></div><div class="chips">'+un.map(chip).join('')+'</div></div>':'')
-    +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
+    +'<div class="ptabs"><button type="button" class="ptab wait" data-plist="wait"'+(un.length?'':' disabled')+'><span class="dot"></span>ยังไม่ส่ง<b>'+un.length+'</b></button>'
+    +'<button type="button" class="ptab ok" data-plist="ok"'+(dn.length?'':' disabled')+'><span class="dot"></span>ส่งแล้ว<b>'+dn.length+'</b></button></div>':'';
+}
+/* popup list of projects: "ยังไม่ส่ง" or "ส่งแล้ว" */
+function openPList(kind){
+  closeMsg();
+  var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
+  var paint=function(){
+    var ps=reportProjects().ps,list=ps.filter(function(p){return kind==='ok'?isSent(p):!isSent(p)});
+    d.setAttribute('aria-label',kind==='ok'?'โครงการที่ส่งแล้ว':'โครงการที่ยังไม่ส่ง');
+    d.innerHTML='<div class="mbox plbox"><div class="mhead"><b class="'+(kind==='ok'?'okc':'waitc')+'">'+(kind==='ok'?'ส่งแล้ว':'ยังไม่ส่ง')+' · '+list.length+' โครงการ</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
+      '<div class="pl">'+(list.length?list.map(function(p){var n=realN(casesIn(p)),ph=projPhotos(p).length;
+        return '<div class="plr" data-pid="'+p.id+'"><div class="pln"><b>'+esc(p.name)+'</b><span class="msg">'+(SHORT[p.mode||'']?SHORT[p.mode||'']+' · ':'')+(n?n+' เคส':'เหตุการณ์ปกติ')+(ph?' · '+ph+' รูป':'')+'</span></div>'+
+          '<div class="pla"><button type="button" class="btn" data-pl="view">ดูข้อความ</button><button type="button" class="btn pri" data-pl="copy">คัดลอกข้อความ</button>'+
+          (kind==='ok'?'<button type="button" class="btn" data-pl="unsend">ย้ายกลับไปยังไม่ส่ง</button>':'<button type="button" class="btn sentb" data-pl="send">✓ ส่งแล้ว</button><button type="button" class="btn" data-pl="go">ไปที่การ์ด</button>')+'</div></div>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
+      '<div class="mfoot"><span class="msg">'+(kind==='ok'?'โครงการที่ส่งแล้วถูกซ่อนจากหน้ารายงาน เปิดดูหรือคัดลอกซ้ำได้ที่นี่':'กด ไปที่การ์ด เพื่อแก้ไขข้อความหรือรูปของโครงการนั้น')+'</span><button type="button" class="btn" data-m="close">ปิด</button></div></div>';
+  };
+  paint();document.body.appendChild(d);document.body.style.overflow='hidden';
+  d.addEventListener('click',function(e){
+    var b=e.target.closest('[data-m]'),a=e.target.closest('[data-pl]');
+    if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
+    if(!a)return;var row=a.closest('[data-pid]'),p=R().projects.filter(function(q){return q.id===row.dataset.pid})[0];if(!p)return;
+    var act=a.dataset.pl;
+    if(act==='view'){closeMsg();openMsg(p);return}
+    if(act==='copy'){copyText(msgFinal(p),'คัดลอกข้อความรายงานของ '+p.name+' แล้ว วางใน LINE ได้เลย');if(kind!=='ok'){setSent(p,true);paint()}return}
+    if(act==='send'){setSent(p,true);paint();return}
+    if(act==='unsend'){setSent(p,false);paint();return}
+    if(act==='go'){closeMsg();goToCard('.sp[data-p="'+p.id+'"]')}
+  });
 }
 function nextUnsent(p){var ps=reportProjects().ps,i=ps.indexOf(p);for(var k=1;k<=ps.length;k++){var q=ps[(i+k)%ps.length];if(!isSent(q))return q}return null}
 /* scroll to a card: show every card at full size first so the position is exact */
@@ -1588,7 +1634,7 @@ function renderReport(){
   var unsent=ps.filter(function(p){return !isSent(p)}),sentL=ps.filter(isSent);
   unsent.forEach(function(p){h+=card(p,false)});
   if(!unsent.length&&ps.length)h+='<div class="alldone">ส่งครบทุกโครงการแล้ว ✓</div>';
-  if(sentL.length)h+='<details class="sentbox"'+(R().sentOpen?' open':'')+'><summary><svg class="sbico" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></svg><b>ส่งแล้ว</b><span class="sbn">'+sentL.length+' โครงการ</span><span class="sbh">กดเพื่อเปิด/ปิด</span></summary><div class="sbody">'+sentL.map(function(p){return card(p,false)}).join('')+'</div></details>';
+  if(false&&sentL.length)h+='<details class="sentbox"'+(R().sentOpen?' open':'')+'><summary><svg class="sbico" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></svg><b>ส่งแล้ว</b><span class="sbn">'+sentL.length+' โครงการ</span><span class="sbh">กดเพื่อเปิด/ปิด</span></summary><div class="sbody">'+sentL.map(function(p){return card(p,false)}).join('')+'</div></details>';
   if(none.length){
     h+='<section class="sp"><h3>ไม่พบเหตุการณ์<small>'+none.length+' โครงการ · ข้อความเหตุการณ์ปกติตามช่วงเวลาที่ดู</small></h3></section>';
     none.forEach(function(p){h+=card(p,true)});
@@ -1930,6 +1976,7 @@ loadPhotos().then(function(){render();schedule()});
 /* re-measure text boxes once the web font arrives and whenever the window width changes */
 try{document.fonts.ready.then(fitAll)}catch(e){}
 var rzT;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fitAll,120)});
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-plist]');if(t&&!t.disabled)openPList(t.dataset.plist)});
 document.addEventListener('toggle',function(e){if(e.target.classList&&e.target.classList.contains('sentbox')){R().sentOpen=e.target.open;save()}},true);
 document.addEventListener('change',function(e){
   var t=e.target;if(!t.hasAttribute)return;
