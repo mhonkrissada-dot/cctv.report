@@ -951,7 +951,7 @@ function xlRows(p){
   return hrs.map(function(h){var l=by[h],auto=l?l.join(' / '):xlBlank(p),e=ed[h];
     return {h:h,t:('0'+h).slice(-2)+'.00น.',v:e!=null?e:auto,auto:auto,blank:e!=null?false:!l,edited:e!=null,blankText:xlBlank(p)}});
 }
-function xlFmt(){var f=store.xlfmt||{};return {font:f.font||'Tahoma',size:+f.size||11,border:f.border!==false}}
+function xlFmt(){var f=store.xlfmt||{};return {font:f.font||'TH SarabunPSK',size:+f.size||18,border:f.border!==false}}
 function xlIsNormal(r){return r.blank||String(r.v).trim()===''||String(r.v).trim()===String(r.blankText||'').trim()}
 function xlWithTime(){return false}  /* time column is never copied */
 function xlHTMLFor(list){
