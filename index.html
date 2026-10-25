@@ -929,7 +929,7 @@ function xlCopy(list,msg){
 }
 function xlCopyProject(p){
   var rows=xlRows(p),n=rows.filter(function(r){return !r.blank}).length,sh=xlShift(p);
-  xlCopy([{rows:rows}],'คัดลอก EXCEL แล้ว '+rows.length+' แถว ('+(sh==='night'?'19.00–07.00':'07.00–19.00')+', มีเหตุการณ์ '+n+' ชั่วโมง) → คลิกช่องแถว '+rows[0].t+' ใน Excel แล้วกด Ctrl+V');
+  xlCopy([{rows:rows}],'คัดลอก EXCEL แล้ว '+rows.length+' แถว ('+(sh==='night'?'19.00–07.00':'07.00–19.00')+', มีเหตุการณ์ '+n+' ชั่วโมง) → คลิกช่องแถว '+rows[0].t+' ใน Excel แล้วกด Ctrl+Shift+V');
 }
 /* copy only the hours that have incidents, one cell at a time, so the sheet's existing text stays untouched */
 var XLSTEP=null;
@@ -952,7 +952,7 @@ function xlStep(p,btn){
   if(!st.rows.length){toast(p.cases.length?'โครงการนี้มีแค่บรรทัดเหตุการณ์ปกติ ไม่มีเหตุการณ์ให้คัดลอก':'โครงการนี้ยังไม่มีเหตุการณ์');xlStepReset();return}
   var r=st.rows[st.i],nx=st.rows[st.i+1];
   var html='<html><head><meta charset="utf-8"></head><body><table><tr><td style="mso-number-format:&quot;\\@&quot;;color:#C00000;">'+esc(r.v)+'</td></tr></table></body></html>';
-  var msg='คัดลอกแถว '+r.t+' แล้ว ('+(st.i+1)+'/'+st.rows.length+') → คลิกช่องแถว '+r.t+' ใน Excel แล้วกด Ctrl+V'+(nx?' แล้วกดปุ่มอีกครั้งเพื่อคัดลอกแถว '+nx.t:'');
+  var msg='คัดลอกแถว '+r.t+' แล้ว ('+(st.i+1)+'/'+st.rows.length+') → คลิกช่องแถว '+r.t+' ใน Excel แล้วกด Ctrl+Shift+V'+(nx?' แล้วกดปุ่มอีกครั้งเพื่อคัดลอกแถว '+nx.t:'');
   try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([r.v],{type:'text/plain'})})]).then(function(){toast(msg)},function(){copyText(r.v,msg)})}catch(e){copyText(r.v,msg)}
   st.i++;
   if(btn){if(nx){btn.classList.add('step');btn.textContent='คัดลอกแถว '+nx.t+' ('+(st.i+1)+'/'+st.rows.length+')'}else{xlStepReset()}}
@@ -961,7 +961,7 @@ function xlStep(p,btn){
 function xlCopyAll(){
   var ps=sortedProjects().filter(function(p){return p.cases.length});
   if(!ps.length){toast('ยังไม่มีโครงการที่มีเหตุการณ์');return}
-  xlCopy(ps.map(function(p){return {title:'โครงการ '+p.name,rows:xlRows(p)}}),'คัดลอก EXCEL แล้ว '+ps.length+' โครงการ (ชื่อโครงการอยู่บรรทัดแรกของแต่ละชุด) → วางใน Excel ด้วย Ctrl+V');
+  xlCopy(ps.map(function(p){return {title:'โครงการ '+p.name,rows:xlRows(p)}}),'คัดลอก EXCEL แล้ว '+ps.length+' โครงการ (ชื่อโครงการอยู่บรรทัดแรกของแต่ละชุด) → วางใน Excel ด้วย Ctrl+Shift+V');
 }
 function openXL(p){
   closeMsg();
@@ -1348,7 +1348,7 @@ function projHTML(p){
     (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+
       (projPhotos(p).length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+
       '<button type="button" class="btn pri" data-act="copymsg">'+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
-    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว แล้วคลิกช่องแรกใน Excel กด Ctrl+V"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไขตาราง</button></span>'+
+    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว แล้วคลิกช่องแรกใน Excel กด Ctrl+Shift+V"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไขตาราง</button></span>'+
     (p.cases.length?'<button type="button" class="ghost" data-act="clearcases">ล้างเหตุการณ์</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
     '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
