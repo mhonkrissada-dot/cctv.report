@@ -663,7 +663,7 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .xled textarea{width:100%;border:1px solid transparent;border-radius:6px;background:transparent;resize:none;overflow:hidden;font:inherit;line-height:1.45;padding:4px 6px;min-height:28px;display:block}
 .xled textarea:hover{border-color:#D1D5DB}
 .xled textarea:focus{border-color:#1D6F42;background:#fff;box-shadow:0 0 0 3px rgba(29,111,66,.15);outline:none}
-.xled tr.bl textarea{color:#C00000}
+.xled tr.ev textarea{color:#C00000}
 .xled tr.ed td{background:#EAF3FC}
 .mfoot .grow{flex:1}
 </style>
@@ -902,8 +902,9 @@ function xlRows(p){
     if(hh)(by[+hh]=by[+hh]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
   });
   return hrs.map(function(h){var l=by[h],auto=l?l.join(' / '):xlBlank(p),e=ed[h];
-    return {h:h,t:('0'+h).slice(-2)+'.00น.',v:e!=null?e:auto,auto:auto,blank:e!=null?false:!l,edited:e!=null}});
+    return {h:h,t:('0'+h).slice(-2)+'.00น.',v:e!=null?e:auto,auto:auto,blank:e!=null?false:!l,edited:e!=null,blankText:xlBlank(p)}});
 }
+function xlIsNormal(r){return r.blank||String(r.v).trim()===''||String(r.v).trim()===String(r.blankText||'').trim()}
 function xlWithTime(){return false}  /* time column is never copied */
 function xlHTMLFor(list){
   /* list: [{title?, rows}] ; text cells forced to text so Excel keeps "07.00น." as typed */
@@ -911,7 +912,7 @@ function xlHTMLFor(list){
   var h='<table>';
   list.forEach(function(o,i){
     if(o.title)h+='<tr><td colspan="'+(wt?2:1)+'" style="'+td+'font-weight:bold">'+esc(o.title)+'</td></tr>';
-    o.rows.forEach(function(r){h+='<tr>'+(wt?'<td style="'+td+'text-align:center">'+esc(r.t)+'</td>':'')+'<td style="'+td+(r.blank?'color:#C00000;':'')+'">'+esc(r.v)+'</td></tr>'});
+    o.rows.forEach(function(r){h+='<tr>'+(wt?'<td style="'+td+'text-align:center">'+esc(r.t)+'</td>':'')+'<td style="'+td+(xlIsNormal(r)?'':'color:#C00000;')+'">'+esc(r.v)+'</td></tr>'});
     if(o.title&&i<list.length-1)h+='<tr><td></td></tr>';
   });
   return '<html><head><meta charset="utf-8"></head><body>'+h+'</table></body></html>';
@@ -950,7 +951,7 @@ function xlStep(p,btn){
   var st=XLSTEP;
   if(!st.rows.length){toast(p.cases.length?'โครงการนี้มีแค่บรรทัดเหตุการณ์ปกติ ไม่มีเหตุการณ์ให้คัดลอก':'โครงการนี้ยังไม่มีเหตุการณ์');xlStepReset();return}
   var r=st.rows[st.i],nx=st.rows[st.i+1];
-  var html='<html><head><meta charset="utf-8"></head><body><table><tr><td style="mso-number-format:&quot;\\@&quot;;">'+esc(r.v)+'</td></tr></table></body></html>';
+  var html='<html><head><meta charset="utf-8"></head><body><table><tr><td style="mso-number-format:&quot;\\@&quot;;color:#C00000;">'+esc(r.v)+'</td></tr></table></body></html>';
   var msg='คัดลอกแถว '+r.t+' แล้ว ('+(st.i+1)+'/'+st.rows.length+') → คลิกช่องแถว '+r.t+' ใน Excel แล้วกด Ctrl+V'+(nx?' แล้วกดปุ่มอีกครั้งเพื่อคัดลอกแถว '+nx.t:'');
   try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([r.v],{type:'text/plain'})})]).then(function(){toast(msg)},function(){copyText(r.v,msg)})}catch(e){copyText(r.v,msg)}
   st.i++;
@@ -966,12 +967,12 @@ function openXL(p){
   closeMsg();
   var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','แก้ไขตาราง Excel '+(p.name||''));
   var body=function(){return xlRows(p).map(function(r){
-    return '<tr class="'+(r.edited?'ed':r.blank?'bl':'')+'"><td class="tm">'+esc(r.t)+'</td><td><textarea rows="1" data-h="'+r.h+'" aria-label="ข้อความแถว '+esc(r.t)+'">'+esc(r.v)+'</textarea></td><td class="rs">'+(r.edited?'<button type="button" class="ghost" data-undo="'+r.h+'" title="กลับไปใช้ข้อความอัตโนมัติ">↺</button>':'')+'</td></tr>'}).join('')};
+    return '<tr class="'+(r.edited?'ed ':'')+(xlIsNormal(r)?'nm':'ev')+'"><td class="tm">'+esc(r.t)+'</td><td><textarea rows="1" data-h="'+r.h+'" aria-label="ข้อความแถว '+esc(r.t)+'">'+esc(r.v)+'</textarea></td><td class="rs">'+(r.edited?'<button type="button" class="ghost" data-undo="'+r.h+'" title="กลับไปใช้ข้อความอัตโนมัติ">↺</button>':'')+'</td></tr>'}).join('')};
   var sh=xlShift(p);
   d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>แก้ไขตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
     '<div class="xlset"><label class="fld"><span>ข้อความแถวที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="เหตุการณ์ปกติ"></label>'+
     '</div>'+
-    '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · ตัวแดง = ไม่มีเหตุการณ์ · พื้นฟ้า = แก้ไขเอง</p>'+
+    '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · ตัวดำ = เหตุการณ์ปกติ · ตัวแดง = มีเหตุการณ์ · พื้นฟ้า = แก้ไขเอง</p>'+
     '<div class="xlwrap"><table class="xlt xled"><thead><tr><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody>'+body()+'</tbody></table></div>'+
     '<div class="mfoot"><button type="button" class="ghost" data-m="reset">ล้างการแก้ไขทั้งหมด</button><span class="grow"></span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn xl" data-m="xlfull">คัดลอก EXCEL</button></div></div>';
   var tb=d.querySelector('tbody');
@@ -993,7 +994,7 @@ function openXL(p){
     if(t.dataset&&t.dataset.h!=null){
       var h=+t.dataset.h,row=xlRows(p).filter(function(r){return r.h===h})[0],v2=t.value.replace(/\s*\n\s*/g,' ').trim();
       if(row&&v2===row.auto)delete xlEdits(p)[h];else xlEdits(p)[h]=v2;save();
-      var tr=t.closest('tr'),ed=xlEdits(p)[h]!=null;tr.className=ed?'ed':(row&&row.auto===xlBlank(p)?'bl':'');
+      var tr=t.closest('tr'),ed=xlEdits(p)[h]!=null;tr.className=(ed?'ed ':'')+(xlIsNormal({v:v2,blankText:xlBlank(p)})?'nm':'ev');
       tr.querySelector('.rs').innerHTML=ed?'<button type="button" class="ghost" data-undo="'+h+'" title="กลับไปใช้ข้อความอัตโนมัติ">↺</button>':'';
     }
   });
