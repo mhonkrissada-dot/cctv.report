@@ -757,6 +757,9 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .tlr .tlp .cpimg{font-size:10px;padding:0 6px;left:3px;bottom:3px}
 .tlr .tln{min-height:calc(160px*.75 - 12px);display:flex;align-items:center;justify-content:center;background:#EEF1F5;border-radius:6px;margin-top:4px}
 @media (max-width:420px){.tl{grid-template-columns:repeat(2,1fr)!important}}
+
+/* case without photos: the tile shows the whole text instead */
+.tlr.nophoto .tlx{-webkit-line-clamp:unset;display:block;font-size:13px;line-height:1.5;background:#fff;border:1px solid var(--line2);border-radius:6px;padding:6px 8px;margin-top:4px;flex:1;min-height:calc(160px*.75 - 12px)}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1492,8 +1495,8 @@ function tlHTML(p,withCopy){
   var cs=sortCases(casesIn(p),p).filter(function(c){return !isFixed(c)});
   if(!cs.length)return '';
   return '<div class="tl">'+cs.map(function(c){var ph=allPhotos(c);
-    return '<div class="tlr"><b class="tlt">'+hhmm(c.time)+'</b><div class="tlb"><div class="tlx" title="'+esc(bodyText(c))+'">'+esc(bodyText(c)||caseText(c).replace(/^\s*♦️?\s*/,''))+'</div>'+
-      (ph.length?'<div class="tlp">'+ph.map(function(x){return '<figure class="ph" data-c="'+c.id+'"><img src="'+imgURL(x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" '+(withCopy?'data-zoom':'data-plz')+'>'+(withCopy?'<button type="button" class="cpimg" data-act="copyphoto" data-pid="'+x.id+'">คัดลอกรูป</button>':'<button type="button" class="cpimg" data-plcopy="'+c.id+'|'+x.id+'">คัดลอกรูป</button>')+'</figure>'}).join('')+'</div>':'<div class="tln msg">ไม่มีรูป</div>')+
+    return '<div class="tlr'+(ph.length?'':' nophoto')+'"><b class="tlt">'+hhmm(c.time)+'</b><div class="tlb"><div class="tlx" title="'+esc(bodyText(c))+'">'+esc(bodyText(c)||caseText(c).replace(/^\s*♦️?\s*/,''))+'</div>'+
+      (ph.length?'<div class="tlp">'+ph.map(function(x){return '<figure class="ph" data-c="'+c.id+'"><img src="'+imgURL(x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" '+(withCopy?'data-zoom':'data-plz')+'>'+(withCopy?'<button type="button" class="cpimg" data-act="copyphoto" data-pid="'+x.id+'">คัดลอกรูป</button>':'<button type="button" class="cpimg" data-plcopy="'+c.id+'|'+x.id+'">คัดลอกรูป</button>')+'</figure>'}).join('')+'</div>':'')+
       '</div></div>'}).join('')+'</div>';
 }
 function sortCases(list,p){
