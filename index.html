@@ -712,6 +712,7 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .plh{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
 .plm{margin:8px 0 0;padding:10px 12px;background:var(--fill);border:1px solid var(--line2);border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f);font-size:13.5px;line-height:1.6;max-height:260px;overflow:auto}
 .plr.flash{animation:cardflash 1.4s ease}
+.xlset .fld.fsm{flex:0 1 200px}.xlset .fld.fxs{flex:0 0 80px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -950,11 +951,12 @@ function xlRows(p){
   return hrs.map(function(h){var l=by[h],auto=l?l.join(' / '):xlBlank(p),e=ed[h];
     return {h:h,t:('0'+h).slice(-2)+'.00น.',v:e!=null?e:auto,auto:auto,blank:e!=null?false:!l,edited:e!=null,blankText:xlBlank(p)}});
 }
+function xlFmt(){var f=store.xlfmt||{};return {font:f.font||'Tahoma',size:+f.size||11,border:f.border!==false}}
 function xlIsNormal(r){return r.blank||String(r.v).trim()===''||String(r.v).trim()===String(r.blankText||'').trim()}
 function xlWithTime(){return false}  /* time column is never copied */
 function xlHTMLFor(list){
   /* list: [{title?, rows}] ; text cells forced to text so Excel keeps "07.00น." as typed */
-  var wt=xlWithTime(),td='mso-number-format:&quot;\\@&quot;;';
+  var X=xlFmt(),wt=xlWithTime(),td='mso-number-format:&quot;\\@&quot;;font-family:&quot;'+esc(X.font)+'&quot;;font-size:'+X.size+'pt;vertical-align:middle;'+(X.border?'border:.5pt solid windowtext;':'');
   var h='<table>';
   list.forEach(function(o,i){
     if(o.title)h+='<tr><td colspan="'+(wt?2:1)+'" style="'+td+'font-weight:bold">'+esc(o.title)+'</td></tr>';
@@ -1018,6 +1020,9 @@ function openXL(p){
   var sh=xlShift(p);
   d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>แก้ไขตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
     '<div class="xlset"><label class="fld"><span>ข้อความแถวที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="เหตุการณ์ปกติ"></label>'+
+    '<label class="fld fsm"><span>ฟอนต์ให้ตรงกับตาราง</span><input id="xlfont" list="xlfonts" value="'+esc(xlFmt().font)+'"><datalist id="xlfonts"><option value="Tahoma"><option value="TH SarabunPSK"><option value="TH Sarabun New"><option value="Angsana New"><option value="Cordia New"><option value="Leelawadee UI"><option value="Calibri"></datalist></label>'+
+    '<label class="fld fxs"><span>ขนาด</span><input id="xlsize" type="number" min="6" max="48" value="'+xlFmt().size+'"></label>'+
+    '<label class="msg xlchk"><input type="checkbox" id="xlborder"'+(xlFmt().border?' checked':'')+'> ใส่เส้นขอบ</label>'+
     '</div>'+
     '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · พื้นฟ้า = แก้ไขเอง · วางใน Excel: Ctrl+V = พร้อมสี เหตุการณ์ตัวแดงชิดซ้าย · Ctrl+Shift+V = ข้อความล้วน</p>'+
     '<div class="xlwrap"><table class="xlt xled"><thead><tr><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody>'+body()+'</tbody></table></div>'+
@@ -1038,6 +1043,7 @@ function openXL(p){
     var t=e.target;
     if(t.id==='xlblank'){store.xlblank=store.xlblank||{};var v=t.value.trim();if(v)store.xlblank[xlKey(p)]=v;else delete store.xlblank[xlKey(p)];save();repaint();return}
     if(t.id==='xltime'){store.xltime=t.checked;save();return}
+    if(t.id==='xlfont'||t.id==='xlsize'||t.id==='xlborder'){var F=store.xlfmt=store.xlfmt||{};if(t.id==='xlfont')F.font=t.value.trim();if(t.id==='xlsize')F.size=+t.value;if(t.id==='xlborder')F.border=t.checked;save();toast('ตั้งรูปแบบ Excel แล้ว: '+xlFmt().font+' '+xlFmt().size+' pt');return}
     if(t.dataset&&t.dataset.h!=null){
       var h=+t.dataset.h,row=xlRows(p).filter(function(r){return r.h===h})[0],v2=t.value.replace(/\s*\n\s*/g,' ').trim();
       if(row&&v2===row.auto)delete xlEdits(p)[h];else xlEdits(p)[h]=v2;save();
