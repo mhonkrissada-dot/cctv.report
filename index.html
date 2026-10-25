@@ -666,6 +666,11 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .xled tr.ev textarea{color:#C00000}
 .xled tr.ed td{background:#EAF3FC}
 .mfoot .grow{flex:1}
+
+body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visibility:visible}
+.sp,.proj{scroll-margin-top:110px}
+.sp.flash,.proj.flash{animation:cardflash 1.4s ease}
+@keyframes cardflash{0%,100%{box-shadow:none}25%{box-shadow:0 0 0 3px rgba(37,99,235,.35)}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1078,14 +1083,14 @@ function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){var r=realN(
 function bodyText(c){return (c.text||'').replace(LEAD,'').replace(/^เวลา\s*\d{1,2}\s*[.:]\s*\d{2}\s*น?\.?\s*/,'').trim()}
 function caseText(c){var t=(c.text||'').replace(LEAD,'').trim();return '♦️ '+(/^เวลา\s*\d/.test(t)?t:'เวลา'+hhmm(c.time)+'น. '+t)}
 function projText(p){return 'โครงการ '+p.name+' จำนวน '+p.cases.length+' เคส\n'+p.cases.slice().sort(byTime).map(caseText).join('\n')}
-function reportProjects(){var all=sortedProjects();return{ps:all.filter(function(p){return casesIn(p).length}),none:[]}}
+function reportProjects(){var all=sortedProjects();return{ps:all.filter(function(p){return casesIn(p).length&&inShift(p)}),none:[]}}
 function plainText(){var r=reportProjects();return r.ps.concat(r.none).map(msgFinal).join('\n\n')}
 var PAL=[['#1B2B4B','#5D7AB5','#24385F',0,'#24385F'],['#8E2B2B','#F08A8A','#C94444',0,'#C94444'],['#1E6B45','#7FD3A4','#2E9B60',0,'#2E9B60'],['#9C3B6B','#F4A3C8','#D0578F',0,'#D0578F'],['#2b4a4c','#8fbdba','#3a6264',0,'#3a6264'],['#f09a6e','#ffb893','#f2733f',0,'#f2733f'],['#d6d9df','#f6f7f9','#e0e3e8',1,'#9aa0aa'],['#5b4b9a','#b3a7e6','#6b5bb5',0,'#7b6bc5'],['#e0a21a','#ffd777','#f0b429',0,'#f0b429'],['#2d4fb3','#97aef7','#4565d6',0,'#4565d6']];
 function pal(p){var fc=store.fcolor&&store.fcolor[norm(p&&p.name||'x')];if(fc!=null&&PAL[fc])return PAL[fc];var n=norm(p&&p.name||'x'),h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return PAL[4+h%6]}  /* automatic colours keep the original six */
 function folderIcon(p){var c=p?pal(p)[4]:'#E0A82E';return '<svg class="ficon" aria-hidden="true" style="fill:'+c+'"><use href="#fold"/></svg>'}
 function folderArt(p,pill){var c=pal(p);return '<span class="fart'+(c[3]?' lt':'')+'" style="--fb:'+c[0]+';--ft:'+c[1]+';--fu:'+c[2]+'"><i class="bk"></i><i class="p1"></i><i class="p2"></i><i class="ft"></i>'+(pill?'<span class="pl">'+pill+'</span>':'')+'</span>'}
 function foldersHTML(){
-  var ps=sortedProjects().filter(function(p){return p.cases.length||inShift(p)});
+  var ps=sortedProjects().filter(function(p){return inShift(p)});
   if(!ps.length)return '';
   return '<div class="frow"><button type="button" class="farr l" data-farr="-1" aria-label="เลื่อนไปทางซ้าย"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="fgrid" role="list" aria-label="โฟลเดอร์โครงการ">'+ps.map(function(p){
     var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
@@ -1121,7 +1126,7 @@ function fovCard(p){
     '<span class="nm">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span><span class="mt">'+(t.c?'รวม '+t.c+' เคส · '+t.ph+' รูป · '+t.days+' วัน':'')+'</span>'+st+'</button>';
 }
 function folderGroupsHTML(){
-  var tot=folderTotals(),all=sortedProjects().filter(function(p){return pq?pqMatch(p):inShift(p)||p.cases.length||tot[norm(p.name||p.id)]}),h='';
+  var tot=folderTotals(),all=sortedProjects().filter(function(p){return pq?pqMatch(p):inShift(p)}),h='';
   ORDER.forEach(function(m){
     var l=all.filter(function(p){return (p.mode||'')===m});if(!l.length)return;
     var withC=l.filter(function(p){return realN(p.cases)}).length;
@@ -1320,7 +1325,7 @@ function railHTML(){
   var all=sortedProjects(),n=counts();
   var h='<button type="button" class="f" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">รวมทุกโครงการ</span><span class="fm">'+n.c+' เคส · '+n.ph+' รูป</span></button>';
   ORDER.forEach(function(m){
-    var list=all.filter(function(p){return (p.mode||'')===m&&(pq?pqMatch(p):(p.cases.length||inShift(p)||sel===p.id))});
+    var list=all.filter(function(p){return (p.mode||'')===m&&(pq?pqMatch(p):(inShift(p)||sel===p.id))});
     if(!list.length)return;
     h+='<div class="gh"><span>'+MODES[m]+'</span><span>'+list.length+'</span></div>';
     list.forEach(function(p){
@@ -1358,7 +1363,7 @@ function fitAll(){Array.prototype.forEach.call(app.querySelectorAll('textarea'),
 function renderEdit(){
   var ps=sortedProjects(),body='';
   if(sel==='all'){
-    var withC=ps.filter(function(p){return p.cases.length}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
+    var withC=ps.filter(function(p){return p.cases.length&&inShift(p)}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
     body=foldersHTML()+(withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>');
     if(quiet.length){
       body+='<div class="quiet"><h3>ยังไม่มีเหตุการณ์วันนี้ ('+quiet.length+' โครงการ)</h3>';
@@ -1470,7 +1475,18 @@ function paintProg(){
     +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
 }
 function nextUnsent(p){var ps=reportProjects().ps,i=ps.indexOf(p);for(var k=1;k<=ps.length;k++){var q=ps[(i+k)%ps.length];if(!isSent(q))return q}return null}
-function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);var sc=app.querySelector('.proj[data-p="'+q.id+'"]');if(sc)sc.scrollIntoView({behavior:'smooth',block:'start'})}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
+/* scroll to a card: show every card at full size first so the position is exact */
+function goToCard(sel){
+  var el=app.querySelector(sel);if(!el)return;
+  document.body.classList.add('cvoff');
+  requestAnimationFrame(function(){
+    var top=el.getBoundingClientRect().top+window.scrollY-110;
+    window.scrollTo({top:top,behavior:'smooth'});
+    el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+    setTimeout(function(){document.body.classList.remove('cvoff')},1200);
+  });
+}
+function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);goToCard('.proj[data-p="'+q.id+'"],.sp[data-p="'+q.id+'"]')}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
 /* one picture with every photo of the project, labelled with its time */
 function collageBlob(p){return new Promise(function(res,rej){
   var list=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){list.push({x:x,t:c.time})})});
@@ -1785,7 +1801,7 @@ app.addEventListener('click',function(e){
     }else copyText(ltx,'เลือกกลุ่มในหน้าต่าง LINE แล้วกดส่ง (ข้อความถูกคัดลอกไว้ด้วย)');
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
-  else if(act==='jump'){var js=app.querySelector('.sp[data-p="'+b.dataset.to+'"]');if(js)js.scrollIntoView({behavior:'smooth',block:'start'})}
+  else if(act==='jump'){goToCard('.sp[data-p="'+b.dataset.to+'"]')}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
   else if(act==='xlfull'&&p){xlCopyProject(p)}
