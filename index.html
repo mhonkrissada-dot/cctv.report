@@ -958,7 +958,7 @@ function xlHTMLFor(list){
   var h='<table>';
   list.forEach(function(o,i){
     if(o.title)h+='<tr><td colspan="'+(wt?2:1)+'" style="'+td+'font-weight:bold">'+esc(o.title)+'</td></tr>';
-    o.rows.forEach(function(r){h+='<tr>'+(wt?'<td style="'+td+'text-align:center">'+esc(r.t)+'</td>':'')+'<td style="'+td+(xlIsNormal(r)?'':'color:#C00000;')+'">'+esc(r.v)+'</td></tr>'});
+    o.rows.forEach(function(r){h+='<tr>'+(wt?'<td style="'+td+'text-align:center">'+esc(r.t)+'</td>':'')+'<td style="'+td+(xlIsNormal(r)?'text-align:center;':'color:#C00000;text-align:left;')+'">'+esc(r.v)+'</td></tr>'});
     if(o.title&&i<list.length-1)h+='<tr><td></td></tr>';
   });
   return '<html><head><meta charset="utf-8"></head><body>'+h+'</table></body></html>';
@@ -974,9 +974,9 @@ function xlCopy(list,msg,withColour){
   try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]).then(function(){toast(msg)},function(){copyText(text,msg)})}
   catch(e){copyText(text,msg)}
 }
-function xlCopyProject(p,withColour){
+function xlCopyProject(p){var withColour=true;
   var rows=xlRows(p),n=rows.filter(function(r){return !r.blank}).length,sh=xlShift(p);
-  xlCopy([{rows:rows}],'คัดลอก EXCEL แล้ว '+rows.length+' แถว ('+(sh==='night'?'19.00–07.00':'07.00–19.00')+', มีเหตุการณ์ '+n+' ชั่วโมง) → คลิกช่องแถว '+rows[0].t+' ใน Excel แล้วกด Ctrl+V'+(withColour?' (พร้อมสี)':' (ข้อความล้วน ใช้รูปแบบเดิมของตาราง)'),withColour);
+  xlCopy([{rows:rows}],'คัดลอก EXCEL แล้ว '+rows.length+' แถว ('+(sh==='night'?'19.00–07.00':'07.00–19.00')+', มีเหตุการณ์ '+n+' ชั่วโมง) → คลิกช่องแถว '+rows[0].t+' ใน Excel แล้วกด Ctrl+V = พร้อมสี (เหตุการณ์ตัวแดงชิดซ้าย) หรือ Ctrl+Shift+V = ข้อความล้วนตามรูปแบบเดิมของตาราง',withColour);
 }
 /* copy only the hours that have incidents, one cell at a time, so the sheet's existing text stays untouched */
 var XLSTEP=null;
@@ -1019,9 +1019,9 @@ function openXL(p){
   d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>แก้ไขตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
     '<div class="xlset"><label class="fld"><span>ข้อความแถวที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="เหตุการณ์ปกติ"></label>'+
     '</div>'+
-    '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · พื้นฟ้า = แก้ไขเอง · ปุ่ม คัดลอก EXCEL ได้ข้อความล้วน วางด้วย Ctrl+V แล้วใช้รูปแบบเดิมของตาราง (เหมือน Ctrl+Shift+V)</p>'+
+    '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · พื้นฟ้า = แก้ไขเอง · วางใน Excel: Ctrl+V = พร้อมสี เหตุการณ์ตัวแดงชิดซ้าย · Ctrl+Shift+V = ข้อความล้วน</p>'+
     '<div class="xlwrap"><table class="xlt xled"><thead><tr><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody>'+body()+'</tbody></table></div>'+
-    '<div class="mfoot"><button type="button" class="ghost" data-m="reset">ล้างการแก้ไขทั้งหมด</button><span class="grow"></span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn xl2" data-m="xlcolour" title="วางแล้วเหตุการณ์อื่นเป็นตัวแดง เหตุการณ์ปกติเป็นตัวดำ">คัดลอกพร้อมสี</button><button type="button" class="btn xl" data-m="xlfull">คัดลอก EXCEL</button></div></div>';
+    '<div class="mfoot"><button type="button" class="ghost" data-m="reset">ล้างการแก้ไขทั้งหมด</button><span class="grow"></span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn xl" data-m="xlfull">คัดลอก EXCEL</button></div></div>';
   var tb=d.querySelector('tbody');
   var fitAllX=function(){Array.prototype.forEach.call(tb.querySelectorAll('textarea'),function(t){t.style.height='0px';t.style.height=Math.max(28,t.scrollHeight)+'px'})};
   var repaint=function(){tb.innerHTML=body();fitAllX()};
@@ -1031,7 +1031,7 @@ function openXL(p){
     if(u){delete xlEdits(p)[u.dataset.undo];save();repaint();return}
     if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
     if(b&&b.dataset.m==='reset'){R().xledit&&delete R().xledit[p.id];save();repaint();toast('ล้างการแก้ไขแล้ว');return}
-    if(b&&(b.dataset.m==='xlfull'||b.dataset.m==='xlcolour')){var a=document.activeElement;if(a&&a.blur)a.blur();xlCopyProject(p,b.dataset.m==='xlcolour');closeMsg()}
+    if(b&&b.dataset.m==='xlfull'){var a=document.activeElement;if(a&&a.blur)a.blur();xlCopyProject(p);closeMsg()}
   });
   d.addEventListener('input',function(e){var t=e.target;if(t.tagName==='TEXTAREA'){t.style.height='0px';t.style.height=Math.max(28,t.scrollHeight)+'px'}});
   d.addEventListener('change',function(e){
@@ -1394,7 +1394,7 @@ function projHTML(p){
     (p.cases.length||isLUMT(p)?'<button type="button" class="btn" data-act="viewmsg">ดูข้อความ</button>':'')+
     (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+
       '<button type="button" class="btn pri" data-act="copymsg">'+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
-    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว แล้วคลิกช่องแรกใน Excel กด Ctrl+V"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไขตาราง</button></span>'+
+    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว: ใน Excel กด Ctrl+V = พร้อมสี / Ctrl+Shift+V = ข้อความล้วน"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไขตาราง</button></span>'+
     (p.cases.length?'<button type="button" class="ghost" data-act="clearcases">ล้างเหตุการณ์</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
     '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
