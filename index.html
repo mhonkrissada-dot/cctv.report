@@ -1079,7 +1079,7 @@ function thaiDate(){return new Date(store.date+'T00:00:00').toLocaleDateString('
 /* fixed normal-period lines (19.00–07.00 / 07.00–19.00 เหตุการณ์ปกติ) are not counted as cases */
 function isFixed(c){return nkey(c)!=='2'}
 function realN(list){return list.filter(function(c){return !isFixed(c)}).length}
-function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){var r=realN(x.cases);if(r)p++;c+=r;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
+function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){if(!inShift(x))return;var r=realN(x.cases);if(r)p++;c+=r;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
 function bodyText(c){return (c.text||'').replace(LEAD,'').replace(/^เวลา\s*\d{1,2}\s*[.:]\s*\d{2}\s*น?\.?\s*/,'').trim()}
 function caseText(c){var t=(c.text||'').replace(LEAD,'').trim();return '♦️ '+(/^เวลา\s*\d/.test(t)?t:'เวลา'+hhmm(c.time)+'น. '+t)}
 function projText(p){return 'โครงการ '+p.name+' จำนวน '+p.cases.length+' เคส\n'+p.cases.slice().sort(byTime).map(caseText).join('\n')}
