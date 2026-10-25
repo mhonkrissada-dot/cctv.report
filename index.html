@@ -651,6 +651,21 @@ textarea.mp{border-radius:16px;padding:12px 16px}
 .xlt td.bl{color:#C00000}
 .btn.xl.step{background:#0F3D24;border-color:#0F3D24}
 .xlhint{margin:0;padding:8px 16px;background:#FFF8E6;border-bottom:1px solid #F0DDB0;color:#7A5A00!important;font-size:12.5px;line-height:1.5}
+
+.btn.xl2{display:inline-flex;align-items:center;gap:5px;background:#fff;border-color:#1D6F42;color:#1D6F42;font-weight:600}
+.btn.xl2:hover{background:#E8F3EC}
+.xlgrp{gap:6px}
+.xlgrp .btn.xl:first-child{border-radius:var(--r)}
+.xlnote{margin:0;padding:8px 16px;border-bottom:1px solid var(--line2);font-size:12.5px}
+.xled td{vertical-align:top}
+.xled td.tm{padding-top:8px}
+.xled td.rs{width:34px;text-align:center;padding:2px}
+.xled textarea{width:100%;border:1px solid transparent;border-radius:6px;background:transparent;resize:none;overflow:hidden;font:inherit;line-height:1.45;padding:4px 6px;min-height:28px;display:block}
+.xled textarea:hover{border-color:#D1D5DB}
+.xled textarea:focus{border-color:#1D6F42;background:#fff;box-shadow:0 0 0 3px rgba(29,111,66,.15);outline:none}
+.xled tr.bl textarea{color:#C00000}
+.xled tr.ed td{background:#EAF3FC}
+.mfoot .grow{flex:1}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -875,15 +890,21 @@ var ctx=null;
 /* popup with the full report message */
 /* ---------- Excel: hourly table, one row per hour of the shift ---------- */
 function xlKey(p){return norm(p.name||p.id)}
-function xlBlank(p){var b=store.xlblank&&store.xlblank[xlKey(p)];return b!=null&&b!==''?b:'ปกติ'}
+function xlBlank(p){var b=store.xlblank&&store.xlblank[xlKey(p)];return b!=null&&b!==''?b:'เหตุการณ์ปกติ'}
 function xlShift(p){var s=curShift();if(s==='night'||s==='day')return s;return (p.mode||'')==='night'?'night':'day'}
 function xlHours(sh){var h=[],i;if(sh==='night'){for(i=19;i<24;i++)h.push(i);for(i=0;i<=7;i++)h.push(i)}else for(i=7;i<=19;i++)h.push(i);return h}
+function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[p.id]||(m[p.id]={})}
 function xlRows(p){
-  var sh=xlShift(p),hrs=xlHours(sh),by={};
-  sortCases(p.cases).forEach(function(c){if(isFixed(c)||!c.time)return;var h=+String(c.time).slice(0,2);(by[h]=by[h]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''))});
-  return hrs.map(function(h){var l=by[h];return {t:('0'+h).slice(-2)+'.00น.',v:l?l.join(' / '):(store.xlempty?'':xlBlank(p)),blank:!l}});
+  var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[p.id]||{};
+  sortCases(p.cases).forEach(function(c){
+    if(isFixed(c))return;var hh=String(c.time||'').slice(0,2);
+    if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
+    if(hh)(by[+hh]=by[+hh]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
+  });
+  return hrs.map(function(h){var l=by[h],auto=l?l.join(' / '):xlBlank(p),e=ed[h];
+    return {h:h,t:('0'+h).slice(-2)+'.00น.',v:e!=null?e:auto,auto:auto,blank:e!=null?false:!l,edited:e!=null}});
 }
-function xlWithTime(){return !!store.xltime}
+function xlWithTime(){return false}  /* time column is never copied */
 function xlHTMLFor(list){
   /* list: [{title?, rows}] ; text cells forced to text so Excel keeps "07.00น." as typed */
   var wt=xlWithTime(),td='mso-number-format:&quot;\\@&quot;;';
@@ -943,28 +964,41 @@ function xlCopyAll(){
 }
 function openXL(p){
   closeMsg();
-  var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','ตาราง Excel '+(p.name||''));
-  var paint=function(){
-    var rows=xlRows(p),sh=xlShift(p);
-    d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>ตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
-      '<div class="xlset"><label class="fld"><span>ข้อความช่องที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="ปกติ"></label>'+
-      '<label class="msg xlchk"><input type="checkbox" id="xltime"'+(xlWithTime()?' checked':'')+'> คัดลอกคอลัมน์เวลาด้วย</label>'+
-      '<label class="msg xlchk"><input type="checkbox" id="xlempty"'+(store.xlempty?' checked':'')+'> เว้นช่องที่ไม่มีเหตุการณ์ให้ว่าง</label>'+
-      '<span class="msg">ช่วงเวลา: '+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' (ตามปุ่มกลางวัน/กลางคืน)</span></div>'+
-      '<p class="xlhint msg"'+(store.xlempty?'':' hidden')+'>ช่องว่างที่วางจาก Ctrl+V ธรรมดาจะทับข้อความเดิมใน Excel ให้ข้อความเดิมหาย ถ้าอยากเก็บข้อความเดิมไว้: วางลงคอลัมน์ว่างก่อน → คัดลอกคอลัมน์นั้นใน Excel → คลิกช่อง 1 ของตาราง → คลิกขวา วางแบบพิเศษ (Ctrl+Alt+V) → ติ๊ก ข้ามช่องว่าง (Skip blanks) → ตกลง</p>'+
-      '<div class="xlwrap"><table class="xlt"><thead><tr><th>เวลา</th><th>เหตุการณ์</th></tr></thead><tbody>'+
-      rows.map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')+'</tbody></table></div>'+
-      '<div class="mfoot"><span class="msg">ตัวแดง = ข้อความช่องว่าง (ใช้เฉพาะ "คัดลอกทั้ง 13 แถว")</span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn" data-m="xlfull">คัดลอกทั้ง '+rows.length+' แถว</button><button type="button" class="btn xl" data-m="xl">คัดลอกเฉพาะแถวที่มีเหตุการณ์</button></div></div>';
-  };
-  paint();document.body.appendChild(d);document.body.style.overflow='hidden';
-  d.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}if(b&&b.dataset.m==='xl'){closeMsg();xlStep(p,app.querySelector('.proj[data-p="'+p.id+'"] [data-act=xlcopy]'))}if(b&&b.dataset.m==='xlfull'){xlCopyProject(p);closeMsg()}});
-  d.addEventListener('change',function(e){
-    if(e.target.id==='xlblank'){store.xlblank=store.xlblank||{};var v=e.target.value.trim();if(v)store.xlblank[xlKey(p)]=v;else delete store.xlblank[xlKey(p)];save();
-      var tb=d.querySelector('.xlt tbody');if(tb)tb.innerHTML=xlRows(p).map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('')}
-    if(e.target.id==='xltime'){store.xltime=e.target.checked;save()}
-    if(e.target.id==='xlempty'){store.xlempty=e.target.checked;save();var tb2=d.querySelector('.xlt tbody');if(tb2)tb2.innerHTML=xlRows(p).map(function(r){return '<tr><td>'+esc(r.t)+'</td><td'+(r.blank?' class="bl"':'')+'>'+esc(r.v)+'</td></tr>'}).join('');var hint=d.querySelector('.xlhint');if(hint)hint.hidden=!store.xlempty}
+  var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','แก้ไขตาราง Excel '+(p.name||''));
+  var body=function(){return xlRows(p).map(function(r){
+    return '<tr class="'+(r.edited?'ed':r.blank?'bl':'')+'"><td class="tm">'+esc(r.t)+'</td><td><textarea rows="1" data-h="'+r.h+'" aria-label="ข้อความแถว '+esc(r.t)+'">'+esc(r.v)+'</textarea></td><td class="rs">'+(r.edited?'<button type="button" class="ghost" data-undo="'+r.h+'" title="กลับไปใช้ข้อความอัตโนมัติ">↺</button>':'')+'</td></tr>'}).join('')};
+  var sh=xlShift(p);
+  d.innerHTML='<div class="mbox xlbox"><div class="mhead"><b>แก้ไขตาราง EXCEL · '+esc(p.name||'')+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div>'+
+    '<div class="xlset"><label class="fld"><span>ข้อความแถวที่ไม่มีเหตุการณ์ (จำแยกตามโครงการ)</span><input id="xlblank" value="'+esc(xlBlank(p))+'" placeholder="เหตุการณ์ปกติ"></label>'+
+    '</div>'+
+    '<p class="xlnote msg">'+(sh==='night'?'กะกลางคืน 19.00–07.00':'กะกลางวัน 07.00–19.00')+' · คลิกที่ข้อความเพื่อแก้ไขได้ทุกแถว (แก้เฉพาะในตาราง Excel ไม่กระทบรายงาน LINE) · ตัวแดง = ไม่มีเหตุการณ์ · พื้นฟ้า = แก้ไขเอง</p>'+
+    '<div class="xlwrap"><table class="xlt xled"><thead><tr><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody>'+body()+'</tbody></table></div>'+
+    '<div class="mfoot"><button type="button" class="ghost" data-m="reset">ล้างการแก้ไขทั้งหมด</button><span class="grow"></span><button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn xl" data-m="xlfull">คัดลอก EXCEL</button></div></div>';
+  var tb=d.querySelector('tbody');
+  var fitAllX=function(){Array.prototype.forEach.call(tb.querySelectorAll('textarea'),function(t){t.style.height='0px';t.style.height=Math.max(28,t.scrollHeight)+'px'})};
+  var repaint=function(){tb.innerHTML=body();fitAllX()};
+  document.body.appendChild(d);document.body.style.overflow='hidden';fitAllX();
+  d.addEventListener('click',function(e){
+    var b=e.target.closest('[data-m]'),u=e.target.closest('[data-undo]');
+    if(u){delete xlEdits(p)[u.dataset.undo];save();repaint();return}
+    if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
+    if(b&&b.dataset.m==='reset'){R().xledit&&delete R().xledit[p.id];save();repaint();toast('ล้างการแก้ไขแล้ว');return}
+    if(b&&b.dataset.m==='xlfull'){var a=document.activeElement;if(a&&a.blur)a.blur();xlCopyProject(p);closeMsg()}
   });
-  d.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='xlblank'){e.target.blur()}});
+  d.addEventListener('input',function(e){var t=e.target;if(t.tagName==='TEXTAREA'){t.style.height='0px';t.style.height=Math.max(28,t.scrollHeight)+'px'}});
+  d.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.id==='xlblank'){store.xlblank=store.xlblank||{};var v=t.value.trim();if(v)store.xlblank[xlKey(p)]=v;else delete store.xlblank[xlKey(p)];save();repaint();return}
+    if(t.id==='xltime'){store.xltime=t.checked;save();return}
+    if(t.dataset&&t.dataset.h!=null){
+      var h=+t.dataset.h,row=xlRows(p).filter(function(r){return r.h===h})[0],v2=t.value.replace(/\s*\n\s*/g,' ').trim();
+      if(row&&v2===row.auto)delete xlEdits(p)[h];else xlEdits(p)[h]=v2;save();
+      var tr=t.closest('tr'),ed=xlEdits(p)[h]!=null;tr.className=ed?'ed':(row&&row.auto===xlBlank(p)?'bl':'');
+      tr.querySelector('.rs').innerHTML=ed?'<button type="button" class="ghost" data-undo="'+h+'" title="กลับไปใช้ข้อความอัตโนมัติ">↺</button>':'';
+    }
+  });
+  d.addEventListener('keydown',function(e){if(e.key==='Enter'&&(e.target.id==='xlblank'||e.target.tagName==='TEXTAREA')){e.preventDefault();e.target.blur()}});
+  var f=tb.querySelector('textarea');if(f)f.focus();
 }
 function openMsg(p){
   closeMsg();
@@ -985,7 +1019,7 @@ function closeCtx(){if(ctx){ctx.remove();ctx=null}}
 function openCtx(x,y,p){
   closeCtx();ctx=document.createElement('div');ctx.className='ctx';ctx.setAttribute('role','menu');
   ctx.innerHTML='<div class="ctxh">'+esc(p.name||'โครงการ')+'</div>'+
-    '<button type="button" role="menuitem" data-c="xlcopy">คัดลอก EXCEL</button><button type="button" role="menuitem" data-c="xlview">ดูตาราง EXCEL / ข้อความช่องว่าง</button>'+
+    '<button type="button" role="menuitem" data-c="xlfull">คัดลอก EXCEL (13 แถว)</button><button type="button" role="menuitem" data-c="xlview">✎ แก้ไขตาราง EXCEL</button>'+
     '<button type="button" role="menuitem" data-c="viewmsg">ดูข้อความรายงาน</button>'+
     '<button type="button" role="menuitem" data-c="copymsg"'+(p.cases.length?'':' disabled')+'>คัดลอกข้อความรายงาน</button>'+
     (projPhotos(p).length?'<button type="button" role="menuitem" data-c="album">'+(IS_MOB?'ส่งรูปเป็นอัลบั้ม':'บันทึกรูปเป็นอัลบั้ม')+' ('+projPhotos(p).length+' รูป)</button><button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
@@ -1002,6 +1036,7 @@ function openCtx(x,y,p){
     if(sw){store.fcolor=store.fcolor||{};var k=norm(p.name||'x');if(sw.dataset.sw==='auto')delete store.fcolor[k];else store.fcolor[k]=+sw.dataset.sw;save();closeCtx();render();toast('เปลี่ยนสีโฟลเดอร์ '+p.name+' แล้ว');return}
     var b=e.target.closest('button[data-c]');if(!b||b.disabled)return;var c=b.dataset.c;
     if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
+    if(c==='xlfull'){closeCtx();xlCopyProject(p);return}
     if(c==='xlcopy'){closeCtx();xlStep(p,app.querySelector('.proj[data-p="'+p.id+'"] [data-act=xlcopy]'));return}
     if(c==='xlview'){closeCtx();openXL(p);return}
     if(c==='viewmsg'){closeCtx();openMsg(p);return}
@@ -1312,7 +1347,7 @@ function projHTML(p){
     (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+
       (projPhotos(p).length&&CAN_SHARE?'<button type="button" class="btn" data-act="sharemsg">ส่งข้อความ + รูป</button>':'')+
       '<button type="button" class="btn pri" data-act="copymsg">'+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
-    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlcopy" title="คัดลอกเป็นตารางรายชั่วโมง วางใน Excel ด้วย Ctrl+V"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl more" data-act="xlview" title="ดูตาราง / ตั้งข้อความช่องว่าง" aria-label="ดูตาราง Excel และตั้งค่า">▾</button></span>'+
+    '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว แล้วคลิกช่องแรกใน Excel กด Ctrl+V"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไขตาราง</button></span>'+
     (p.cases.length?'<button type="button" class="ghost" data-act="clearcases">ล้างเหตุการณ์</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
     '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
@@ -1752,6 +1787,7 @@ app.addEventListener('click',function(e){
   else if(act==='jump'){var js=app.querySelector('.sp[data-p="'+b.dataset.to+'"]');if(js)js.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
+  else if(act==='xlfull'&&p){xlCopyProject(p)}
   else if(act==='xlview'&&p){openXL(p)}
   else if(act==='xlall'){xlCopyAll()}
   else if(act==='collage'&&p){
