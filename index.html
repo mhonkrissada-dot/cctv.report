@@ -735,6 +735,17 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .tlp .cpimg{position:absolute;left:4px;bottom:4px;right:auto;font-size:11px;padding:1px 7px}
 .tln{margin-top:2px;font-size:12px}
 .plr .tl{margin-top:8px}
+
+/* timeline laid out horizontally: one tile per case (time + text on top, photos below) */
+.tl{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(210px,calc(50% - 4px)),1fr));gap:8px!important}
+.tlr{display:flex!important;flex-direction:column;gap:4px!important;padding:8px!important}
+.tlr .tlt{font-size:15px}
+.tlr .tlx{font-size:13px;line-height:1.45}
+.tlr .tlp{margin-top:auto;padding-top:6px}
+.tlr .tlp img{width:100%;height:auto;aspect-ratio:4/3}
+.tlr .tlp .ph{flex:1 1 100%}
+.tlr .tlp .ph+.ph{flex-basis:calc(50% - 3px)}
+.tlr .tlp .ph:first-child:nth-last-child(n+2),.tlr .tlp .ph:first-child:nth-last-child(n+2)~.ph{flex:1 1 calc(50% - 3px)}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
