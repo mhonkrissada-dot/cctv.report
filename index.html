@@ -1491,12 +1491,25 @@ function isNightOrder(list,p){
   var t=list.map(function(c){return (c.text||'').trim()});return t.indexOf(LINE_NIGHT)>=0&&t.indexOf(LINE_DAY)<0;
 }
 /* timeline: time · text · photos, in shift order */
+/* tiles follow the report message above: one tile per "♦️ เวลา …" line, with the photos of the case at that time */
+function tlItems(p){
+  var cs=sortCases(casesIn(p),p).filter(function(c){return !isFixed(c)}),used={},out=[];
+  var lines=String(msgFinal(p)).split('\n').map(function(l){return l.trim()}).filter(function(l){return /^♦/.test(l)&&l!==LINE_NIGHT&&l!==LINE_DAY});
+  lines.forEach(function(l){
+    var m=l.match(/เวลา\s*(\d{1,2})\s*[.:]\s*(\d{2})/),t=m?('0'+m[1]).slice(-2)+':'+m[2]:'';
+    var c=cs.filter(function(k){return !used[k.id]&&t&&k.time===t})[0];
+    if(!c){var bt=l.replace(/^♦️?\s*/,'');c=cs.filter(function(k){return !used[k.id]&&caseText(k).replace(/^♦️?\s*/,'')===bt})[0]}
+    if(c)used[c.id]=1;
+    out.push({t:t?t.replace(':','.'):(c?hhmm(c.time):''),text:l.replace(/^♦️?\s*/,''),c:c});
+  });
+  return out;
+}
 function tlHTML(p,withCopy){
-  var cs=sortCases(casesIn(p),p).filter(function(c){return !isFixed(c)});
-  if(!cs.length)return '';
-  return '<div class="tl">'+cs.map(function(c){var ph=allPhotos(c);
-    return '<div class="tlr'+(ph.length?'':' nophoto')+'"><b class="tlt">'+hhmm(c.time)+'</b><div class="tlb"><div class="tlx" title="'+esc(bodyText(c))+'">'+esc(bodyText(c)||caseText(c).replace(/^\s*♦️?\s*/,''))+'</div>'+
-      (ph.length?'<div class="tlp">'+ph.map(function(x){return '<figure class="ph" data-c="'+c.id+'"><img src="'+imgURL(x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" '+(withCopy?'data-zoom':'data-plz')+'>'+(withCopy?'<button type="button" class="cpimg" data-act="copyphoto" data-pid="'+x.id+'">คัดลอกรูป</button>':'<button type="button" class="cpimg" data-plcopy="'+c.id+'|'+x.id+'">คัดลอกรูป</button>')+'</figure>'}).join('')+'</div>':'')+
+  var items=tlItems(p);
+  if(!items.length)return '';
+  return '<div class="tl">'+items.map(function(o){var c=o.c,ph=c?allPhotos(c):[];
+    return '<div class="tlr'+(ph.length?'':' nophoto')+'"><b class="tlt">'+esc(o.t)+'</b><div class="tlb"><div class="tlx" title="'+esc(o.text)+'">'+esc(o.text)+'</div>'+
+      (ph.length?'<div class="tlp">'+ph.map(function(x){return '<figure class="ph" data-c="'+c.id+'"><img src="'+imgURL(x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+esc(o.t)+'" '+(withCopy?'data-zoom':'data-plz')+'>'+(withCopy?'<button type="button" class="cpimg" data-act="copyphoto" data-pid="'+x.id+'">คัดลอกรูป</button>':'<button type="button" class="cpimg" data-plcopy="'+c.id+'|'+x.id+'">คัดลอกรูป</button>')+'</figure>'}).join('')+'</div>':'')+
       '</div></div>'}).join('')+'</div>';
 }
 function sortCases(list,p){
@@ -1797,7 +1810,7 @@ app.addEventListener('input',function(e){
   if(t.id==='repdate'){if(t.value){R().repDate=t.value;save();refreshMsgs()}return}
   if(!f)return;
   var p=findP(t);if(!p)return;
-  if(f==='msg'){edits()[p.id]=t.value;save();fit(t);var sec=t.closest('.sp');if(sec)sec.classList.add('edited');return}
+  if(f==='msg'){edits()[p.id]=t.value;save();fit(t);var sec=t.closest('.sp');if(sec){sec.classList.add('edited');var tw=sec.querySelector('.tl');if(tw){clearTimeout(tw._t);tw._t=setTimeout(function(){var nw=document.createElement('div');nw.innerHTML=tlHTML(p,true);var n=nw.firstChild;if(n)tw.replaceWith(n);else tw.innerHTML=''},400)}}return}
   if(f==='rname'){p.rname=t.value;save();refreshMsgs();return}
   if(f==='name'){p.name=t.value}
   else if(f==='mode'){p.mode=t.value}
