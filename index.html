@@ -911,10 +911,22 @@ function xlCopyProject(p){
 /* copy only the hours that have incidents, one cell at a time, so the sheet's existing text stays untouched */
 var XLSTEP=null;
 function xlStepReset(){if(!XLSTEP)return;var b=document.querySelector('.proj[data-p="'+XLSTEP.id+'"] [data-act=xlcopy]');if(b){b.classList.remove('step');b.innerHTML=b.dataset.lbl||b.innerHTML}XLSTEP=null}
+/* every hour that has an incident, whatever the shift button says (ordered by the shift, other hours after) */
+function xlHitRows(p){
+  var by={},order=xlHours(xlShift(p));
+  sortCases(p.cases).forEach(function(c){
+    if(isFixed(c))return;
+    var hh=String(c.time||'').slice(0,2);
+    if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
+    if(!hh)return;var h=+hh;(by[h]=by[h]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
+  });
+  var hs=Object.keys(by).map(Number).sort(function(a,b){var x=order.indexOf(a),y=order.indexOf(b);x=x<0?99+a:x;y=y<0?99+b:y;return x-y});
+  return hs.map(function(h){return {t:('0'+h).slice(-2)+'.00น.',v:by[h].join(' / '),blank:false}});
+}
 function xlStep(p,btn){
-  if(!XLSTEP||XLSTEP.id!==p.id){xlStepReset();XLSTEP={id:p.id,rows:xlRows(p).filter(function(r){return !r.blank}),i:0};if(btn)btn.dataset.lbl=btn.innerHTML}
+  if(!XLSTEP||XLSTEP.id!==p.id){xlStepReset();XLSTEP={id:p.id,rows:xlHitRows(p),i:0};if(btn)btn.dataset.lbl=btn.innerHTML}
   var st=XLSTEP;
-  if(!st.rows.length){toast('โครงการนี้ไม่มีเหตุการณ์ให้คัดลอก');xlStepReset();return}
+  if(!st.rows.length){toast(p.cases.length?'โครงการนี้มีแค่บรรทัดเหตุการณ์ปกติ ไม่มีเหตุการณ์ให้คัดลอก':'โครงการนี้ยังไม่มีเหตุการณ์');xlStepReset();return}
   var r=st.rows[st.i],nx=st.rows[st.i+1];
   var html='<html><head><meta charset="utf-8"></head><body><table><tr><td style="mso-number-format:&quot;\\@&quot;;">'+esc(r.v)+'</td></tr></table></body></html>';
   var msg='คัดลอกแถว '+r.t+' แล้ว ('+(st.i+1)+'/'+st.rows.length+') → คลิกช่องแถว '+r.t+' ใน Excel แล้วกด Ctrl+V'+(nx?' แล้วกดปุ่มอีกครั้งเพื่อคัดลอกแถว '+nx.t:'');
