@@ -723,6 +723,18 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .xlgrp{gap:4px}
 .xlgrp .btn.xl,.xlgrp .btn.xl2{padding:3px 10px;min-height:30px;font-size:13px;gap:4px}
 .xlgrp .btn.xl svg{width:14px;height:14px}
+
+/* report: timeline of cases with their photos */
+.tl{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.tlr{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;padding:8px 10px;background:var(--fill);border:1px solid var(--line2);border-radius:10px}
+.tlt{color:var(--accent-2);font-size:14px;padding-top:1px}
+.tlx{overflow-wrap:anywhere}
+.tlp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tlp .ph{position:relative;margin:0}
+.tlp img{width:116px;height:87px;object-fit:cover;border-radius:8px;display:block;cursor:zoom-in}
+.tlp .cpimg{position:absolute;left:4px;bottom:4px;right:auto;font-size:11px;padding:1px 7px}
+.tln{margin-top:2px;font-size:12px}
+.plr .tl{margin-top:8px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -781,7 +793,7 @@ function parse(text){
   return out;
 }
 function nkey(c){var t=(c.text||'').replace(/^[\s♦️◆]+/,'').trim();return t==='เวลา 19.00น.-07.00น. เหตุการณ์ปกติ'?'0':t==='เวลา 07.00น.-19.00น. เหตุการณ์ปกติ'?'1':'2'}
-function byTime(a,b){var x=nkey(a)+a.time,y=nkey(b)+b.time;return x<y?-1:x>y?1:0}
+function byTime(a,b){var n=curShift()==='night',f=function(c){var t=String(c.time||'');if(n&&/^\d\d:/.test(t)&&+t.slice(0,2)<12)t=(+t.slice(0,2)+24)+t.slice(2);return nkey(c)+t},x=f(a),y=f(b);return x<y?-1:x>y?1:0}
 
 /* ---------- state ---------- */
 var store=null;
@@ -953,7 +965,7 @@ function xlHours(sh){var h=[],i;if(sh==='night'){for(i=19;i<24;i++)h.push(i);for
 function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[p.id]||(m[p.id]={})}
 function xlRows(p){
   var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[p.id]||{};
-  sortCases(p.cases).forEach(function(c){
+  sortCases(p.cases,p).forEach(function(c){
     if(isFixed(c))return;var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
     if(hh)(by[+hh]=by[+hh]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
@@ -996,7 +1008,7 @@ function xlStepReset(){if(!XLSTEP)return;var b=document.querySelector('.proj[dat
 /* every hour that has an incident, whatever the shift button says (ordered by the shift, other hours after) */
 function xlHitRows(p){
   var by={},order=xlHours(xlShift(p));
-  sortCases(p.cases).forEach(function(c){
+  sortCases(p.cases,p).forEach(function(c){
     if(isFixed(c))return;
     var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
@@ -1222,7 +1234,7 @@ function renderFolderDetail(){
   if(!days.length)return app.innerHTML=h+'<div class="empty">'+(fFrom||fTo?'ไม่มีเคสในช่วง '+esc(rangeLabel())+' ลองเปลี่ยนช่วงวันที่':'ยังไม่มีเคสของโครงการนี้ในเบราว์เซอร์นี้')+'</div></div>';
   var shown=0;
   days.forEach(function(x,i){
-    var cs=sortCases(x.p.cases).filter(function(c){return !fonlyPh||allPhotos(c).length});if(!cs.length)return;
+    var cs=sortCases(x.p.cases,x.p).filter(function(c){return !fonlyPh||allPhotos(c).length});if(!cs.length)return;
     var dph=0;cs.forEach(function(c){dph+=allPhotos(c).length});
     h+='<details class="fday"'+(shown<5?' open':'')+'><summary><span class="dn">'+esc(thaiDateOf(x.d))+'</span><span class="dc">'+cs.length+' เคส</span>'+(dph?'<span class="dc ph">'+dph+' รูป</span>':'')+(x.d===store.date?'<span class="dc today">วันที่เปิดอยู่</span>':'')+
       '<button type="button" class="btn go" data-hist="'+x.d+'|'+x.p.id+'">เปิดวันนั้นในหน้าบันทึก</button></summary><div class="fcases">'+
@@ -1237,7 +1249,7 @@ function renderFolderDetail(){
 }
 function renderFolderGallery(){
   var days=folderDays(fsel),items=[];
-  days.forEach(function(x){sortCases(x.p.cases).forEach(function(c){allPhotos(c).forEach(function(ph){items.push({d:x.d,c:c,ph:ph})})})});
+  days.forEach(function(x){sortCases(x.p.cases,x.p).forEach(function(c){allPhotos(c).forEach(function(ph){items.push({d:x.d,c:c,ph:ph})})})});
   app.innerHTML='<div class="fov"><div class="fdtop"><button type="button" class="btn navy" data-fgalx>← กลับไปรายการเคส</button><div><h2 class="fgh">รูปทั้งหมด · '+esc((days[0]&&days[0].p.name)||'')+'</h2><p class="sub">'+items.length+' รูป เรียงจากวันล่าสุด</p></div></div>'+
     '<div class="fgal">'+items.map(function(o){return '<figure><img src="'+imgURL(o.ph)+'" decoding="async" alt="" data-zoom loading="lazy"><figcaption><b>'+esc(thaiShort(o.d))+'</b> · '+hhmm(o.c.time)+' น.<br><span>'+esc(bodyText(o.c).slice(0,60))+'</span></figcaption></figure>'}).join('')+'</div></div>';
 }
@@ -1448,8 +1460,23 @@ function settings(){
 }
 function senderName(S){return String((S.sender==='__other'?S.senderOther:S.sender)||'').replace(/\s*EOC$/i,'')+'EOC'}
 function thaiShort(iso){var a=String(iso).split('-');return (+a[2])+'/'+(+a[1])+'/'+(+a[0]+543)}
-function sortCases(list){
-  function k(c){return nkey(c)+c.time}
+function isNightOrder(list,p){
+  var m=p&&p.mode||'';if(m==='night')return true;if(m==='day')return false;
+  var s=curShift();if(s==='night')return true;if(s==='day')return false;
+  var t=list.map(function(c){return (c.text||'').trim()});return t.indexOf(LINE_NIGHT)>=0&&t.indexOf(LINE_DAY)<0;
+}
+/* timeline: time · text · photos, in shift order */
+function tlHTML(p,withCopy){
+  var cs=sortCases(casesIn(p),p).filter(function(c){return !isFixed(c)});
+  if(!cs.length)return '';
+  return '<div class="tl">'+cs.map(function(c){var ph=allPhotos(c);
+    return '<div class="tlr"><b class="tlt">'+hhmm(c.time)+'</b><div class="tlb"><div class="tlx">'+esc(bodyText(c)||caseText(c).replace(/^\s*♦️?\s*/,''))+'</div>'+
+      (ph.length?'<div class="tlp">'+ph.map(function(x){return '<figure class="ph" data-c="'+c.id+'"><img src="'+imgURL(x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" '+(withCopy?'data-zoom':'data-plz')+'>'+(withCopy?'<button type="button" class="cpimg" data-act="copyphoto" data-pid="'+x.id+'">คัดลอกรูป</button>':'<button type="button" class="cpimg" data-plcopy="'+c.id+'|'+x.id+'">คัดลอกรูป</button>')+'</figure>'}).join('')+'</div>':'<div class="tln msg">ไม่มีรูป</div>')+
+      '</div></div>'}).join('')+'</div>';
+}
+function sortCases(list,p){
+  var night=isNightOrder(list,p);
+  function k(c){var t=String(c.time||'');if(night&&/^\d\d:/.test(t)&&+t.slice(0,2)<12)t=(+t.slice(0,2)+24)+t.slice(2);return nkey(c)+t}
   return list.slice().sort(function(a,b){var x=k(a),y=k(b);return x<y?-1:x>y?1:0});
 }
 var LINE_NIGHT='♦️ เวลา 19.00น.-07.00น. เหตุการณ์ปกติ',LINE_DAY='♦️ เวลา 07.00น.-19.00น. เหตุการณ์ปกติ';
@@ -1472,12 +1499,12 @@ function normalLines(p){
   if(c==='range'&&g.from&&g.to)return ['♦️ เวลา '+hhmm(g.from)+'น.-'+hhmm(g.to)+'น. เหตุการณ์ปกติ'];
   return c==='night'?[LINE_NIGHT]:c==='day'?[LINE_DAY]:[LINE_NIGHT,LINE_DAY];
 }
-function projPhotos(p){var out=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){out.push(x)})});return out}
+function projPhotos(p){var out=[];sortCases(casesIn(p),p).forEach(function(c){allPhotos(c).forEach(function(x){out.push(x)})});return out}
 var IS_MOB=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
 /* album: every photo as its own file, sent or saved together (LINE groups several photos sent at once into an album) */
 function albumFiles(p){
   var safe=String(p.name||'cctv').replace(/[\\/:*?"<>|\s]+/g,'-'),n=0,out=[];
-  sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){n++;out.push(dataFile(x.data,('0'+n).slice(-2)+'_'+safe+'_'+String(c.time||'').replace(':','')+'.jpg'))})});
+  sortCases(casesIn(p),p).forEach(function(c){allPhotos(c).forEach(function(x){n++;out.push(dataFile(x.data,('0'+n).slice(-2)+'_'+safe+'_'+String(c.time||'').replace(':','')+'.jpg'))})});
   return out;
 }
 function albumSave(p){
@@ -1545,7 +1572,7 @@ function openPList(kind,focusId){
           '<div class="pla"><button type="button" class="btn pri" data-pl="copy">คัดลอกข้อความ</button>'+
           (kind==='ok'?'<button type="button" class="btn" data-pl="unsend">ย้ายกลับไปยังไม่ส่ง</button>':'<button type="button" class="btn sentb" data-pl="send">✓ ส่งแล้ว</button><button type="button" class="btn" data-pl="go">แก้ไข</button>')+'</div></div>'+
           '<pre class="plm">'+esc(msgFinal(p))+'</pre>'+
-          (ph?'<div class="plph">'+projPhotos(p).map(function(x){return '<img src="'+imgURL(x)+'" alt="รูปเหตุการณ์" loading="lazy" decoding="async" data-plz title="กดเพื่อดูรูปใหญ่">'}).join('')+'</div>':'')+'</section>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
+          (ph?tlHTML(p,false):'')+'</section>'}).join(''):'<div class="empty">'+(kind==='ok'?'ยังไม่มีโครงการที่ส่งแล้ว':'ส่งครบทุกโครงการแล้ว ✓')+'</div>')+'</div>'+
       '<div class="mfoot"><span class="msg">'+(kind==='ok'?'ข้อความของโครงการที่ส่งแล้ว คัดลอกซ้ำได้':'คัดลอกข้อความ = คัดลอกแล้วย้ายไปส่งแล้ว · แก้ไข = ไปที่การ์ดโครงการ')+'</span><button type="button" class="btn" data-m="close">ปิด</button></div></div>';
   };
   paint();document.body.appendChild(d);document.body.style.overflow='hidden';
@@ -1553,6 +1580,7 @@ function openPList(kind,focusId){
   d.addEventListener('click',function(e){
     var b=e.target.closest('[data-m]'),a=e.target.closest('[data-pl]'),z=e.target.closest('[data-plz]');
     if(z){var lb=document.getElementById('lb');lb.querySelector('img').src=z.src;lb.hidden=false;return}
+    var pc=e.target.closest('[data-plcopy]');if(pc){var ids=pc.dataset.plcopy.split('|'),rec=(photoMap[ids[0]]||[]).filter(function(r){return r.id===ids[1]})[0];if(rec)copyImage(rec.data);return}
     if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
     if(!a)return;var row=a.closest('[data-pid]'),p=R().projects.filter(function(q){return q.id===row.dataset.pid})[0];if(!p)return;
     var act=a.dataset.pl,pl=d.querySelector('.pl'),y=pl?pl.scrollTop:0;
@@ -1577,7 +1605,7 @@ function goToCard(sel){
 function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);goToCard('.proj[data-p="'+q.id+'"],.sp[data-p="'+q.id+'"]')}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
 /* one picture with every photo of the project, labelled with its time */
 function collageBlob(p){return new Promise(function(res,rej){
-  var list=[];sortCases(casesIn(p)).forEach(function(c){allPhotos(c).forEach(function(x){list.push({x:x,t:c.time})})});
+  var list=[];sortCases(casesIn(p),p).forEach(function(c){allPhotos(c).forEach(function(x){list.push({x:x,t:c.time})})});
   if(!list.length)return rej();
   var n=list.length,cols=n<=2?n:n<=4?2:3,rows=Math.ceil(n/cols),W=640,H=480,G=8,cv=document.createElement('canvas');
   cv.width=cols*W+(cols+1)*G;cv.height=rows*H+(rows+1)*G;var g=cv.getContext('2d');g.fillStyle='#FFFFFF';g.fillRect(0,0,cv.width,cv.height);
@@ -1596,7 +1624,7 @@ function isLUMT(p){return norm(p.name)===norm('LUM-T')}
 function msgShift(p){var s=curShift();if(s==='night'||s==='day')return s;var t=p.cases.map(function(c){return (c.text||'').trim()});return t.indexOf(LINE_DAY)>=0&&t.indexOf(LINE_NIGHT)<0?'day':'night'}
 function lumtText(p){
   var S=settings(),sh=msgShift(p),rng=sh==='night'?'19.00-07.00น.':'07.00-19.00น.';
-  var other=sortCases(p.cases).filter(function(c){var t=(c.text||'').trim();return t!==LINE_NIGHT&&t!==LINE_DAY}).map(caseText);
+  var other=sortCases(p.cases,p).filter(function(c){var t=(c.text||'').trim();return t!==LINE_NIGHT&&t!==LINE_DAY}).map(caseText);
   return '         '+S.salute+' @'+p.name+' '+S.particle+'\n'+
     'สรุปรายงานเหตุการณ์ประจำวันที่ '+thaiShort(R().repDate||store.date)+' จากระบบ CCTV เวลา '+rng+' ดังต่อไปนี้\n\n'+
     '♦️ ลิฟต์ตัว A - L\n'+
@@ -1609,7 +1637,7 @@ function msgText(p){
   var S=settings(),d=R().repDate||store.date;
   return S.salute+' @'+p.name+' '+S.particle+'\n'+
     'สรุปรายงานเหตุการณ์ประจำวันที่ '+thaiShort(d)+' จากระบบ CCTV ดังต่อไปนี้\n\n'+
-    (casesIn(p).length?extraLines(p).concat(sortCases(casesIn(p)).map(caseText)):normalLines(p)).join('\n')+
+    (casesIn(p).length?extraLines(p).concat(sortCases(casesIn(p),p).map(caseText)):normalLines(p)).join('\n')+
     '\n\n  จึงเรียนมาเพื่อทราบ\n  '+S.org+'\n     '+senderName(S);
 }
 function refreshMsgs(){
@@ -1645,14 +1673,14 @@ function renderReport(){
     '<div class="prog" id="prog"></div></header>';
   function card(p,quiet){
     var tag=SHORT[p.mode||''],phs=[];
-    sortCases(p.cases).forEach(function(c){allPhotos(c).forEach(function(x){phs.push({c:c,x:x})})});
+    sortCases(p.cases,p).forEach(function(c){allPhotos(c).forEach(function(x){phs.push({c:c,x:x})})});
     var o=nl(p);
     return '<section class="sp'+(quiet?' quiet3':'')+(isEdited(p)?' edited':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><h3>โครงการ <span data-pn>'+esc(p.name)+'</span><small>'+(tag?tag+' · ':'')+(quiet?'เหตุการณ์ปกติ':(realN(p.cases)?realN(p.cases)+' เคส':'เหตุการณ์ปกติ'))+'</small><span class="hbtn"><button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+'<button type="button" class="btn pri" data-act="copymsg">'+(phs.length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button></span></h3>'+
       '<div class="rn"><label for="rn-'+p.id+'">ชื่อโครงการ (ใช้หลัง @ ในข้อความ)</label><input id="rn-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'"></div>'+
       (quiet&&(p.mode||'')!=='night'&&(p.mode||'')!=='day'?'<div class="rowb"><span class="msg">ช่วงเวลาเหตุการณ์ปกติ</span><div class="seg" role="group" aria-label="ช่วงเวลาเหตุการณ์ปกติ">'+[['night','19.00–07.00'],['day','07.00–19.00'],['both','ทั้งสองช่วง']].concat(repPreset()==='custom'?[['range',hhmm(repRange().from)+'–'+hhmm(repRange().to)]]:[]).map(function(o){return '<button type="button" data-act="pnorm" data-v="'+o[0]+'" aria-pressed="'+(normalChoice(p)===o[0])+'">'+o[1]+'</button>'}).join('')+'</div></div>':'')+
       '<div class="mphead"><label class="msg" for="mp-'+p.id+'">ข้อความ แก้ไขได้</label><span class="ed tag">แก้ไขเอง</span><button type="button" class="ghost ed" data-act="resetmsg">ใช้ข้อความอัตโนมัติ</button></div>'+
       '<textarea class="mp" id="mp-'+p.id+'" data-msg="'+p.id+'" data-f="msg" spellcheck="false">'+esc(msgFinal(p))+'</textarea>'+
-      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip alb" data-act="album">'+(CAN_SHARE&&IS_MOB?'ส่งเป็นอัลบั้ม ('+phs.length+' รูป)':'บันทึกเป็นอัลบั้ม ('+phs.length+' รูป)')+'</button><button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div><div class="grid">'+phs.map(function(o){return '<figure class="ph" data-c="'+o.c.id+'"><img src="'+imgURL(o.x)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(o.c.time)+'" data-zoom><figcaption>เวลา '+hhmm(o.c.time)+' น.</figcaption><button type="button" class="cpimg" data-act="copyphoto" data-pid="'+o.x.id+'">คัดลอกรูป</button></figure>'}).join('')+'</div>':'')+
+      (phs.length?'<div class="rowb phh"><span class="msg">รูป '+phs.length+' รูป เรียงตามเวลา</span>'+(phs.length>1?'<button type="button" class="chip alb" data-act="album">'+(CAN_SHARE&&IS_MOB?'ส่งเป็นอัลบั้ม ('+phs.length+' รูป)':'บันทึกเป็นอัลบั้ม ('+phs.length+' รูป)')+'</button><button type="button" class="chip" data-act="collage">คัดลอกรูปรวมเป็นภาพเดียว</button>':'')+'</div>'+tlHTML(p,true):'')+
       '</section>';
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
