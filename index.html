@@ -2093,19 +2093,31 @@ document.addEventListener('mousedown',function(e){
 var pasteProj=null;
 function isTyping(t){return t&&t.closest&&!!t.closest('input,textarea,select,[contenteditable=""],[contenteditable=true]')}
 /* paste on an empty spot: a new case with the copied text and pictures */
+var pendCase=null; /* {id,need:'photo'|'text'}: a case made by pasting only half of it */
+function findCase(id){var r=null;R().projects.forEach(function(p){p.cases.forEach(function(c){if(c.id===id)r={p:p,c:c}})});return r}
 function pasteNewCase(text,imgs){
-  var pid=sel!=='all'?sel:pasteProj,p=R().projects.filter(function(q){return q.id===pid})[0];
-  if(!p){toast('เปิดโครงการก่อน (กดชื่อโครงการ) แล้วกด Ctrl+V ในที่ว่างอีกครั้ง');return}
   text=String(text||'').replace(/\r/g,'').replace(/^\s+|\s+$/g,'');
   var m=text.match(/เวลา\s*(\d{1,2})\s*[.:]\s*(\d{2})/),d=new Date(),
       t=m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
   if(text&&!/^♦/.test(text))text='♦️ '+text;
+  /* the other half of the last pasted case: picture after text, or text after picture */
+  var pc=pendCase&&findCase(pendCase.id);
+  if(pc&&((imgs.length&&!text&&pendCase.need==='photo')||(text&&!imgs.length&&pendCase.need==='text'))){
+    var oc=pc.c,op=pc.p;pendCase=null;
+    var fin=function(msg){render();pasteCase=oc.id;var n=app.querySelector('.case[data-c="'+oc.id+'"]');if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-120,behavior:'instant'})}toast(msg)};
+    if(imgs.length){addPhotos(oc.id,imgs).then(function(){fin('แนบรูปให้เหตุการณ์ '+hhmm(oc.time)+' แล้ว ('+imgs.length+' รูป)')})}
+    else{oc.text=text;if(m)oc.time=t;markP(op);save();fin('ใส่ข้อความให้เหตุการณ์ '+hhmm(oc.time)+' แล้ว')}
+    return;
+  }
+  var pid=sel!=='all'?sel:pasteProj,p=R().projects.filter(function(q){return q.id===pid})[0];
+  if(!p){toast('เปิดโครงการก่อน (กดชื่อโครงการ) แล้วกด Ctrl+V ในที่ว่างอีกครั้ง');return}
   var nc={id:uid(),time:t,text:text||'♦️ เวลา '+hhmm(t)+'น. '};
-  p.cases.push(nc);markP&&markP(p);save();
+  p.cases.push(nc);markP(p);save();
+  pendCase=imgs.length&&text?null:{id:nc.id,need:imgs.length?'text':'photo'};
   var done=function(){render();pasteCase=nc.id;var n=app.querySelector('.case[data-c="'+nc.id+'"]');
     if(n){n.classList.add('target');var top=n.getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top:top,behavior:'instant'});
       if(!text){var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}}
-    toast('เพิ่มเหตุการณ์ '+hhmm(t)+' ให้ '+p.name+(imgs.length?' พร้อมรูป '+imgs.length+' รูป':''))};
+    toast('เพิ่มเหตุการณ์ '+hhmm(t)+' ให้ '+p.name+(imgs.length&&text?' พร้อมรูป '+imgs.length+' รูป':imgs.length?' · คัดลอกข้อความมาวางต่อได้เลย':' · คัดลอกรูปมาวางต่อได้เลย'))};
   if(imgs.length)addPhotos(nc.id,imgs).then(done);else done();
 }
 document.addEventListener('paste',function(e){
