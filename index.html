@@ -543,6 +543,7 @@ img{image-rendering:auto}
 .replay.slidein .rside{animation:rspop .16s ease-out}
 @keyframes rspop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
 @media (max-width:900px){.replay.hid .rstab{display:none}}
+.pastehint{color:var(--muted);font-size:12px;align-self:center;margin-left:8px}
 @media (max-width:900px){.replay{grid-template-columns:minmax(0,1fr)}.rside{display:none}}
 </style>
 
@@ -1510,7 +1511,7 @@ function projHTML(p){
     '<span class="xlgrp"><button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว: ใน Excel กด Ctrl+V = พร้อมสี / Ctrl+Shift+V = ข้อความล้วน"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15M2.5 12.3h15M8 3.5v13" stroke="currentColor" stroke-width="1.4"/></svg>คัดลอก EXCEL</button><button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">✎ แก้ไข</button></span>'+
     (p.cases.length?'<button type="button" class="ghost" data-act="clearcases">ล้างเหตุการณ์</button>':'')+'</header>'+
     (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
-    '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
+    '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button><span class="pastehint">หรือคลิกที่ว่างแล้วกด Ctrl+V วางข้อความ + รูปเป็นเหตุการณ์ใหม่</span></div></section>';
 }
 function fit(el){if(!el.offsetWidth)return;el.style.height='0px';el.style.height=Math.max(el.classList.contains('mp')?100:30,el.scrollHeight+2)+'px'}
 function fitAll(){Array.prototype.forEach.call(app.querySelectorAll('textarea'),fit)}
@@ -2084,11 +2085,40 @@ document.addEventListener('mousedown',function(e){if(ctx&&!ctx.contains(e.target
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();closeMsg()}});
 window.addEventListener('scroll',closeCtx,{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
-app.addEventListener('mousedown',function(e){setPasteCase(e.target)});
+document.addEventListener('mousedown',function(e){
+  if(!e.target.closest)return;var pj=e.target.closest&&e.target.closest('.proj[data-p]');pasteProj=pj?pj.dataset.p:null;
+  if(e.target.closest&&e.target.closest('.case[data-c]'))setPasteCase(e.target);
+  else{pasteCase=null;Array.prototype.forEach.call(document.querySelectorAll('.case.target'),function(x){x.classList.remove('target')})}
+});
+var pasteProj=null;
+function isTyping(t){return t&&t.closest&&!!t.closest('input,textarea,select,[contenteditable=""],[contenteditable=true]')}
+/* paste on an empty spot: a new case with the copied text and pictures */
+function pasteNewCase(text,imgs){
+  var pid=sel!=='all'?sel:pasteProj,p=R().projects.filter(function(q){return q.id===pid})[0];
+  if(!p){toast('เปิดโครงการก่อน (กดชื่อโครงการ) แล้วกด Ctrl+V ในที่ว่างอีกครั้ง');return}
+  text=String(text||'').replace(/\r/g,'').replace(/^\s+|\s+$/g,'');
+  var m=text.match(/เวลา\s*(\d{1,2})\s*[.:]\s*(\d{2})/),d=new Date(),
+      t=m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  if(text&&!/^♦/.test(text))text='♦️ '+text;
+  var nc={id:uid(),time:t,text:text||'♦️ เวลา '+hhmm(t)+'น. '};
+  p.cases.push(nc);markP&&markP(p);save();
+  var done=function(){render();pasteCase=nc.id;var n=app.querySelector('.case[data-c="'+nc.id+'"]');
+    if(n){n.classList.add('target');var top=n.getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top:top,behavior:'instant'});
+      if(!text){var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}}
+    toast('เพิ่มเหตุการณ์ '+hhmm(t)+' ให้ '+p.name+(imgs.length?' พร้อมรูป '+imgs.length+' รูป':''))};
+  if(imgs.length)addPhotos(nc.id,imgs).then(done);else done();
+}
 document.addEventListener('paste',function(e){
   if(mode!=='edit')return;
-  var imgs=clipImages(e.clipboardData);if(!imgs.length)return;
-  var k=e.target&&e.target.closest&&e.target.closest('.case[data-c]'),id=k?k.dataset.c:pasteCase;
+  var imgs=clipImages(e.clipboardData);
+  var k=e.target&&e.target.closest&&e.target.closest('.case[data-c]');
+  if(!k&&!isTyping(e.target)&&!(pasteCase&&caseExists(pasteCase))){
+    var txt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
+    if(!imgs.length&&!txt.trim())return;
+    e.preventDefault();pasteNewCase(txt,imgs);return;
+  }
+  if(!imgs.length)return;
+  var id=k?k.dataset.c:pasteCase;
   if(!id||!caseExists(id)){toast('คลิกที่เคสที่ต้องการก่อน แล้วกด Ctrl+V อีกครั้ง');return}
   e.preventDefault();
   addPhotos(id,imgs).then(function(){toast('วางรูปแล้ว '+imgs.length+' รูป');var n=app.querySelector('.case[data-c="'+id+'"]');if(n){n.classList.add('target');pasteCase=id}});
