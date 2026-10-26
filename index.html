@@ -540,6 +540,7 @@ img{image-rendering:auto}
 .replay.hid.pop .rside{display:flex;position:fixed;left:max(14px,calc((100vw - 1600px)/2));top:92px;width:200px;height:auto;max-height:calc(100vh - 104px);z-index:45;margin:0;box-shadow:0 12px 40px rgba(16,24,40,.22);animation:rspop .12s ease-out}
 .replay.pop .rspin{display:inline-block}
 .replay.pop .rshide{display:none}
+.replay.slidein .rside{animation:rspop .16s ease-out}
 @keyframes rspop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
 @media (max-width:900px){.replay.hid .rstab{display:none}}
 @media (max-width:900px){.replay{grid-template-columns:minmax(0,1fr)}.rside{display:none}}
@@ -2033,7 +2034,7 @@ app.addEventListener('click',function(e){
     }else copyText(ltx,'เลือกกลุ่มในหน้าต่าง LINE แล้วกดส่ง (ข้อความถูกคัดลอกไว้ด้วย)');
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
-  else if(act==='rshide'||act==='rspin'||act==='rsopen'){rsSet(act==='rshide'?1:act==='rspin'?0:rsHid,act==='rsopen');return}
+  else if(act==='rshide'||act==='rspin'||act==='rsopen'){rsSet(act==='rshide'?1:0,false);var rr=app.querySelector('.replay');if(rr&&act!=='rshide'){rr.classList.remove('slidein');void rr.offsetWidth;rr.classList.add('slidein')}return}
   else if(act==='jump'){rsPop(false);var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
