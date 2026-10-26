@@ -522,6 +522,26 @@ img{image-rendering:auto}
 .rside .ri.sent{color:var(--muted)}
 .rside .ri.sent:hover{background:#F3FAF5;color:var(--ok)}
 .rse{margin:4px 8px;color:var(--muted);font-size:12px}
+
+.rstop{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 4px 6px 8px;margin-bottom:2px;border-bottom:1px solid var(--line2);font-size:12px;font-weight:600;color:var(--muted)}
+.rsb{display:flex;gap:4px}
+.rstop button{font:inherit;font-size:11.5px;font-weight:500;border:1px solid var(--line2);background:#fff;color:var(--muted);border-radius:999px;padding:1px 9px;cursor:pointer}
+.rstop button:hover{color:var(--accent-2);border-color:var(--accent)}
+.rspin{display:none}
+.rstab{display:none}
+.replay.hid{grid-template-columns:minmax(0,1fr)}
+.replay.hid .rside{display:none}
+.replay.hid .rstab{display:inline-flex;flex-direction:row;align-items:center;gap:6px;position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:44;border:1px solid var(--line2);border-left:0;background:var(--surface);box-shadow:var(--sh);border-radius:0 12px 12px 0;padding:10px 6px;writing-mode:vertical-rl;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink,#1f2937);cursor:pointer}
+.rstab svg{width:15px;height:15px;transform:rotate(90deg)}
+.rstab b{writing-mode:horizontal-tb;padding:1px 6px!important}
+.rstab b{background:#FFF1D6;color:#9A5B00;border-radius:999px;padding:0 7px;font-size:11.5px}
+.rstab:hover{border-color:var(--accent)}
+.replay.hid.pop .rstab{display:none}
+.replay.hid.pop .rside{display:flex;position:fixed;left:max(14px,calc((100vw - 1600px)/2));top:92px;width:200px;z-index:45;margin:0;box-shadow:0 12px 40px rgba(16,24,40,.22);animation:rspop .12s ease-out}
+.replay.pop .rspin{display:inline-block}
+.replay.pop .rshide{display:none}
+@keyframes rspop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+@media (max-width:900px){.replay.hid .rstab{display:none}}
 @media (max-width:900px){.replay{grid-template-columns:minmax(0,1fr)}.rside{display:none}}
 </style>
 
@@ -1630,6 +1650,11 @@ function addLineEnd(v,line){var mk='\n\n  จึงเรียนมาเพ�
 function dropLine(v,line){return v.split('\n').filter(function(l){return l.trim()!==line}).join('\n')}
 function isSent(p){return !!(R().sent&&R().sent[p.id])}
 function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();if(mode==='report'){var y=window.scrollY;render();window.scrollTo(0,y);return}if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
+var rsHid=0;try{rsHid=+localStorage.getItem('cctv-rside-hide')||0}catch(e){}
+function rsPop(on){var r=app.querySelector('.replay');if(r)r.classList.toggle('pop',!!on&&rsHid)}
+function rsSet(h,pop){rsHid=h?1:0;try{localStorage.setItem('cctv-rside-hide',rsHid)}catch(e){}var r=app.querySelector('.replay');if(!r)return;r.classList.toggle('hid',!!rsHid);rsPop(pop)}
+document.addEventListener('mousedown',function(e){var r=app.querySelector('.replay.pop');if(r&&!e.target.closest('.rside,.rstab'))rsPop(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')rsPop(false)});
 function paintProg(){
   var el=document.getElementById('prog');if(!el)return;
   var ps=reportProjects().ps,n=ps.filter(isSent).length,pct=ps.length?Math.round(n*100/ps.length):0;
@@ -1642,7 +1667,8 @@ function paintProg(){
     +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em><span class="pgx">กดชื่อเพื่อดูข้อความ</span></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
   var rs=document.getElementById('rside');
   if(rs){var it=function(p){return '<button type="button" class="ri'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'};
-    rs.innerHTML=ps.length?'<div class="rsh wait">ยังไม่ส่ง <em>'+un.length+'</em></div>'+(un.length?un.map(it).join(''):'<p class="rse">ส่งครบแล้ว</p>')+(dn.length?'<div class="rsh ok">ส่งแล้ว <em>'+dn.length+'</em></div>'+dn.map(it).join(''):''):'<p class="rse">ยังไม่มีโครงการ</p>'}
+    var tn=document.getElementById('rstabn');if(tn)tn.textContent=un.length;
+    rs.innerHTML='<div class="rstop"><span>รายชื่อโครงการ</span><span class="rsb"><button type="button" class="rspin" data-act="rspin" title="ปักแถบไว้ด้านซ้าย">ปักไว้</button><button type="button" class="rshide" data-act="rshide" title="ซ่อนแถบนี้" aria-label="ซ่อน">‹ ซ่อน</button></span></div>'+(ps.length?'<div class="rsh wait">ยังไม่ส่ง <em>'+un.length+'</em></div>'+(un.length?un.map(it).join(''):'<p class="rse">ส่งครบแล้ว</p>')+(dn.length?'<div class="rsh ok">ส่งแล้ว <em>'+dn.length+'</em></div>'+dn.map(it).join(''):''):'<p class="rse">ยังไม่มีโครงการ</p>')}
 }
 /* popup list of projects: "ยังไม่ส่ง" or "ส่งแล้ว" */
 function openPList(kind,focusId){
@@ -1778,7 +1804,7 @@ function renderReport(){
     h+='<section class="sp"><h3>ไม่พบเหตุการณ์<small>'+none.length+' โครงการ · ข้อความเหตุการณ์ปกติตามช่วงเวลาที่ดู</small></h3></section>';
     none.forEach(function(p){h+=card(p,true)});
   }
-  app.innerHTML='<div class="replay"><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
+  app.innerHTML='<div class="replay'+(rsHid?' hid':'')+'"><button type="button" class="rstab" data-act="rsopen" title="แสดงรายชื่อโครงการ"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>โครงการ<b id="rstabn"></b></button><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
   fitAll();paintProg();
 }
 
@@ -2007,7 +2033,8 @@ app.addEventListener('click',function(e){
     }else copyText(ltx,'เลือกกลุ่มในหน้าต่าง LINE แล้วกดส่ง (ข้อความถูกคัดลอกไว้ด้วย)');
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
-  else if(act==='jump'){var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
+  else if(act==='rshide'||act==='rspin'||act==='rsopen'){rsSet(act==='rshide'?1:act==='rspin'?0:rsHid,act==='rsopen');return}
+  else if(act==='jump'){rsPop(false);var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
   else if(act==='xlfull'&&p){xlCopyProject(p)}
