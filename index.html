@@ -1682,7 +1682,7 @@ function goToCard(sel){
   document.body.classList.add('cvoff');
   requestAnimationFrame(function(){
     var top=el.getBoundingClientRect().top+window.scrollY-110;
-    window.scrollTo({top:top,behavior:'smooth'});
+    window.scrollTo({top:top,behavior:'instant'});
     el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
     setTimeout(function(){document.body.classList.remove('cvoff')},1200);
   });
