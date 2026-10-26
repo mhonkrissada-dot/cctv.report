@@ -510,6 +510,18 @@ img{image-rendering:auto}
 .fstats b{font-weight:700;color:#0F172A}
 .fov{border-radius:18px;padding:20px 22px 24px}
 .fovtop h2{letter-spacing:-.015em}
+.replay{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;max-width:1420px;margin:0 auto;align-items:start}
+.replay>.sheet{max-width:none;margin:8px 0 0;min-width:0}
+.rside{position:sticky;top:100px;margin-top:8px;max-height:calc(100vh - 116px);overflow:auto;display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--sh);padding:8px;scrollbar-width:thin}
+.rsh{display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding:6px 8px 4px;color:#9A5B00}
+.rsh.ok{color:var(--ok);margin-top:8px;border-top:1px solid var(--line2);padding-top:10px}
+.rsh em{font-style:normal}
+.rside .ri{text-align:left;background:transparent;border:0;border-radius:10px;padding:6px 10px;font:inherit;cursor:pointer;color:inherit;overflow-wrap:anywhere;line-height:1.3}
+.rside .ri:hover{background:#FFF1D6;color:#7A4800}
+.rside .ri.sent{color:var(--muted)}
+.rside .ri.sent:hover{background:#F3FAF5;color:var(--ok)}
+.rse{margin:4px 8px;color:var(--muted);font-size:12px}
+@media (max-width:900px){.replay{grid-template-columns:minmax(0,1fr)}.rside{display:none}}
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1627,6 +1639,9 @@ function paintProg(){
     +'<button type="button" class="ptab ok" data-plist="ok"'+(dn.length?'':' disabled')+'><span class="dot"></span>ส่งแล้ว<b>'+dn.length+'</b></button></div>'
     +(un.length?'<div class="pgrp wait"><div class="pgh">ยังไม่ส่ง <em>'+un.length+'</em><span class="pgx">กดชื่อเพื่อไปที่โครงการ</span></div><div class="chips">'+un.map(chip).join('')+'</div></div>':'')
     +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em><span class="pgx">กดชื่อเพื่อดูข้อความ</span></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
+  var rs=document.getElementById('rside');
+  if(rs){var it=function(p){return '<button type="button" class="ri'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'};
+    rs.innerHTML=ps.length?'<div class="rsh wait">ยังไม่ส่ง <em>'+un.length+'</em></div>'+(un.length?un.map(it).join(''):'<p class="rse">ส่งครบแล้ว</p>')+(dn.length?'<div class="rsh ok">ส่งแล้ว <em>'+dn.length+'</em></div>'+dn.map(it).join(''):''):'<p class="rse">ยังไม่มีโครงการ</p>'}
 }
 /* popup list of projects: "ยังไม่ส่ง" or "ส่งแล้ว" */
 function openPList(kind,focusId){
@@ -1762,7 +1777,7 @@ function renderReport(){
     h+='<section class="sp"><h3>ไม่พบเหตุการณ์<small>'+none.length+' โครงการ · ข้อความเหตุการณ์ปกติตามช่วงเวลาที่ดู</small></h3></section>';
     none.forEach(function(p){h+=card(p,true)});
   }
-  app.innerHTML=h+'</article>';
+  app.innerHTML='<div class="replay"><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
   fitAll();paintProg();
 }
 
