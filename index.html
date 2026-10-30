@@ -811,6 +811,21 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .tlp .ph:not(:only-child) .cpimg{font-size:0;padding:6px;gap:0;left:50%;transform:translateX(-50%)}
 .tlp .ph:not(:only-child) .cpimg::before{width:15px;height:15px}
 .tlp .ph:not(:only-child) .cpimg:active{transform:translateX(-50%) scale(.94)}
+
+.rail.dense,.rail.dense2{scrollbar-gutter:auto}
+.rail.dense button.f{padding:2px 8px;gap:0 8px;grid-template-columns:16px minmax(0,1fr) auto}
+.rail.dense .fn{font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail.dense .fm{font-size:11px}
+.rail.dense .ficon,.rail.dense2 .ficon{width:16px;height:13px}
+.rail.dense .gh{padding:4px 8px 0}
+.rail.dense2{display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:1px 2px}
+.rail.dense2 .gh,.rail.dense2 button.f[data-sel=all],.rail.dense2 .addp{grid-column:1/-1}
+.rail.dense2 .gh{padding:5px 6px 1px}
+.rail.dense2 button.f{padding:3px 6px;gap:0 5px;grid-template-columns:14px minmax(0,1fr)}
+.rail.dense2 button.f:not([data-sel=all]) .fm{display:none}
+.rail.dense2 .fn{font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail>*{flex-shrink:0}
+.rail.dense2 button.f[data-sel=all]{grid-template-columns:14px minmax(0,1fr) auto}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1862,7 +1877,17 @@ function render(){
   if(ae&&ae!==document.body&&app.contains(ae)&&ae.blur){RENDERING=true;try{ae.blur()}finally{RENDERING=false}}
   RENDERING=true;try{renderNow()}finally{RENDERING=false}
   if(pasteCase){var pc=app.querySelector('.case[data-c="'+pasteCase+'"]');if(pc)pc.classList.add('target')}
+  fitRail();
 }
+/* fit the project list in the side panel without scrolling: compact rows, then two columns */
+function fitRail(){
+  var r=app.querySelector('.rail');if(!r||window.innerWidth<=900){if(r)r.classList.remove('dense','dense2');return}
+  var y=r.scrollTop;r.classList.remove('dense','dense2');
+  if(r.scrollHeight>r.clientHeight+1){r.classList.add('dense');if(r.scrollHeight>r.clientHeight+1){r.classList.remove('dense');r.classList.add('dense2')}}
+  r.scrollTop=y;
+  Array.prototype.forEach.call(r.querySelectorAll('button.f'),function(b){var n=b.querySelector('.fn'),m=b.querySelector('.fm');if(n)b.title=n.textContent+(m?' · '+m.textContent:'')});
+}
+window.addEventListener('resize',function(){clearTimeout(fitRail.t);fitRail.t=setTimeout(fitRail,120)});
 function renderNow(){
   if(XLSTEP&&typeof XLSTEP==='object'){var keep=XLSTEP;setTimeout(function(){var b=document.querySelector('.proj[data-p="'+keep.id+'"] [data-act=xlcopy]');if(b&&XLSTEP===keep&&keep.rows[keep.i]){b.dataset.lbl=b.dataset.lbl||b.innerHTML;b.classList.add('step');b.textContent='คัดลอกแถว '+keep.rows[keep.i].t+' ('+(keep.i+1)+'/'+keep.rows.length+')'}},0)}
   ensureProjects();
@@ -1883,7 +1908,7 @@ function renderNow(){
 /* ---------- events ---------- */
 function findP(el){var s=el.closest('[data-p]');return s&&R().projects.filter(function(p){return p.id===s.dataset.p})[0]}
 function findC(el,p){var s=el.closest('[data-c]');return s&&p.cases.filter(function(c){return c.id===s.dataset.c})[0]}
-function refreshRail(){var r=app.querySelector('.rail');if(r)r.innerHTML=railHTML();var sb=app.querySelector('#shiftbox');if(sb)sb.innerHTML=shiftHTML();renderTotals()}
+function refreshRail(){var r=app.querySelector('.rail');if(r){r.innerHTML=railHTML();fitRail()}var sb=app.querySelector('#shiftbox');if(sb)sb.innerHTML=shiftHTML();renderTotals()}
 function arm(btn,label){
   if(btn.dataset.armed){return true}
   btn.dataset.armed='1';btn.dataset.old=btn.textContent;btn.textContent=label;btn.classList.add('armed');
