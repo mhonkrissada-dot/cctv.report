@@ -2161,10 +2161,18 @@ function matchProj(tok){
   for(var i=0;i<tiers.length;i++){var r=ps.filter(tiers[i]);if(r.length)return r}
   return [];
 }
-function pickProj(tok,list,cb){
+function isCodeLike(t){t=String(t).replace(/^@/,'');return /^[A-Za-z0-9][A-Za-z0-9\-_.\/]{0,15}$/.test(t)&&/[A-Za-z0-9]{2,}/.test(t)}
+function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++){d[i]=[i]}for(j=1;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+/* closest projects for a mistyped code */
+function nearProj(tok){var T=norm(String(tok).replace(/^@/,''));
+  return R().projects.filter(function(p){return p.name}).map(function(p){
+    var segs=String(p.name).split(/[\s\-_.\/]+/).map(norm).concat([norm(p.name)]);
+    var srt=function(z){return z.split('').sort().join('')},sc=Math.min.apply(null,segs.map(function(x){var tl=x.slice(-T.length);return Math.min(lev(T,x),lev(T,tl),srt(T)===srt(tl)?0.5:9)+(x.indexOf(T)>=0?-1:0)}));
+    return {p:p,sc:sc}}).sort(function(a,b){return a.sc-b.sc}).slice(0,8).map(function(x){return x.p})}
+function pickProj(tok,list,cb,miss){
   var old=document.getElementById('pickp');if(old)old.remove();
   var d=document.createElement('div');d.id='pickp';d.setAttribute('role','dialog');
-  d.innerHTML='<div class="pkbox"><p><b>'+esc(tok)+'</b> ตรงกับหลายโครงการ เลือกโครงการ:</p><div class="pkl">'+list.map(function(p){return '<button type="button" class="btn" data-pk="'+p.id+'">'+esc(p.name)+'</button>'}).join('')+'</div><button type="button" class="ghost" data-pk="">ยกเลิก</button></div>';
+  d.innerHTML='<div class="pkbox"><p>'+(miss?'ไม่พบโครงการ <b>'+esc(tok)+'</b> พิมพ์ผิดหรือเปล่า? เลือกโครงการ:':'<b>'+esc(tok)+'</b> ตรงกับหลายโครงการ เลือกโครงการ:')+'</p><div class="pkl">'+list.map(function(p){return '<button type="button" class="btn" data-pk="'+p.id+'">'+esc(p.name)+'</button>'}).join('')+'</div><button type="button" class="ghost" data-pk="">ยกเลิก</button></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b&&e.target!==d)return;d.remove();if(b&&b.dataset.pk)cb(list.filter(function(p){return p.id===b.dataset.pk})[0]);else if(!b)return;});
 }
@@ -2175,9 +2183,9 @@ function splitPaste(text){
   lines.forEach(function(raw){
     var l=raw.trim();if(!l){return}
     var m=l.match(/^@?([^\s♦]{1,20})\s+(?=♦|เวลา\s*\d)/);
-    if(m&&matchProj(m[1]).length){code=m[1];l=l.slice(m[0].length)}
+    if(m&&(matchProj(m[1]).length||isCodeLike(m[1]))){code=m[1];l=l.slice(m[0].length)}
     if(/^(♦|เวลา\s*\d)/.test(l)){cur={code:code,text:l};out.push(cur);return}
-    if(!/\s/.test(l)&&l.length<=20&&!/เวลา/.test(l)&&matchProj(l).length){code=l;cur=null;return}
+    if(!/\s/.test(l)&&l.length<=20&&!/เวลา/.test(l)&&(matchProj(l).length||isCodeLike(l))){code=l;cur=null;return}
     if(cur)cur.text+='\n'+l;else{cur={code:code,text:l};out.push(cur)}
   });
   return out;
@@ -2204,6 +2212,7 @@ function pasteNewCase(text,imgs){
     if(cache[pt.code]){pt.p=cache[pt.code];i++;return next()}
     var l=matchProj(pt.code);
     if(l.length===1){pt.p=cache[pt.code]=l[0];pt.text=pt.text;i++;return next()}
+    if(!l.length){pickProj(pt.code,nearProj(pt.code),function(p){pt.p=cache[pt.code]=p;i++;next()},true);return}
     pickProj(pt.code,l,function(p){pt.p=cache[pt.code]=p;i++;next()});
   })();
   function make(){
