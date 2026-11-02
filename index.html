@@ -826,6 +826,11 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .rail.dense2 .fn{font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rail>*{flex-shrink:0}
 .rail.dense2 button.f[data-sel=all]{grid-template-columns:14px minmax(0,1fr) auto}
+
+#pickp{position:fixed;inset:0;z-index:80;background:rgba(16,24,40,.28);display:flex;align-items:center;justify-content:center}
+#pickp .pkbox{background:var(--surface);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(16,24,40,.3);max-width:420px;width:calc(100% - 32px)}
+#pickp p{margin:0 0 10px}
+#pickp .pkl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1745,7 +1750,7 @@ function goToCard(sel){
     setTimeout(function(){document.body.classList.remove('cvoff')},1200);
   });
 }
-function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('ส่ง '+p.name+' ครบแล้ว ไปโครงการถัดไป: '+q.name);goToCard('.proj[data-p="'+q.id+'"],.sp[data-p="'+q.id+'"]')}else toast('ส่งครบทุกโครงการแล้ว')},1500)}
+function finishProject(p){setSent(p,true);var q=nextUnsent(p);setTimeout(function(){if(q){toast('คัดลอกแล้ว · ส่ง '+p.name+' แล้ว → '+q.name);if(mode==='edit'&&sel!=='all'){sel=q.id;render();window.scrollTo({top:0,behavior:'instant'})}else goToCard('.proj[data-p="'+q.id+'"],.sp[data-p="'+q.id+'"]')}else toast('คัดลอกแล้ว · ส่งครบทุกโครงการแล้ว')},350)}
 /* one picture with every photo of the project, labelled with its time */
 function collageBlob(p){return new Promise(function(res,rej){
   var list=[];sortCases(casesIn(p),p).forEach(function(c){allPhotos(c).forEach(function(x){list.push({x:x,t:c.time})})});
@@ -2133,38 +2138,94 @@ document.addEventListener('mousedown',function(e){
 var pasteProj=null;
 function isTyping(t){return t&&t.closest&&!!t.closest('input,textarea,select,[contenteditable=""],[contenteditable=true]')}
 /* paste on an empty spot: a new case with the copied text and pictures */
-var pendCase=null; /* {id,need:'photo'|'text'}: a case made by pasting only half of it */
+var pend=[]; /* cases made by pasting text (waiting for a picture) or a picture (waiting for text), oldest first */
 function findCase(id){var r=null;R().projects.forEach(function(p){p.cases.forEach(function(c){if(c.id===id)r={p:p,c:c}})});return r}
+function nowHM(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+function timeOf(text){var m=String(text).match(/เวลา\s*(\d{1,2})\s*[.:]\s*(\d{2})/);return m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:''}
+/* a short project code typed in the message: "ASK", "65", "@LC-EC48" ... */
+function matchProj(tok){
+  var T=norm(String(tok).replace(/^@/,''));if(!T||T.length<2||/^\d{1,2}$/.test(T)&&T.length<2)return [];
+  var ps=R().projects.filter(function(p){return p.name}),tiers=[
+    function(p){return norm(p.name)===T},
+    function(p){return String(p.name).split(/[\s\-_.\/]+/).some(function(x){return norm(x)===T})},
+    function(p){return norm(p.name).slice(-T.length)===T},
+    function(p){return T.length>=3&&norm(p.name).indexOf(T)>=0}];
+  for(var i=0;i<tiers.length;i++){var r=ps.filter(tiers[i]);if(r.length)return r}
+  return [];
+}
+function pickProj(tok,list,cb){
+  var old=document.getElementById('pickp');if(old)old.remove();
+  var d=document.createElement('div');d.id='pickp';d.setAttribute('role','dialog');
+  d.innerHTML='<div class="pkbox"><p><b>'+esc(tok)+'</b> ตรงกับหลายโครงการ เลือกโครงการ:</p><div class="pkl">'+list.map(function(p){return '<button type="button" class="btn" data-pk="'+p.id+'">'+esc(p.name)+'</button>'}).join('')+'</div><button type="button" class="ghost" data-pk="">ยกเลิก</button></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b&&e.target!==d)return;d.remove();if(b&&b.dataset.pk)cb(list.filter(function(p){return p.id===b.dataset.pk})[0]);else if(!b)return;});
+}
+/* split pasted text into cases: each ♦ line starts a case; a code line (or a code before ♦) picks the project */
+function splitPaste(text){
+  var lines=String(text).replace(/\r/g,'').split('\n'),out=[],cur=null,code=null,hasDia=/(^|\n)\s*(@?\S{1,20}\s+)?(♦|เวลา\s*\d)/.test(text);
+  if(!hasDia)return [{code:null,text:text.trim()}];
+  lines.forEach(function(raw){
+    var l=raw.trim();if(!l){return}
+    var m=l.match(/^@?([^\s♦]{1,20})\s+(?=♦|เวลา\s*\d)/);
+    if(m&&matchProj(m[1]).length){code=m[1];l=l.slice(m[0].length)}
+    if(/^(♦|เวลา\s*\d)/.test(l)){cur={code:code,text:l};out.push(cur);return}
+    if(!/\s/.test(l)&&l.length<=20&&!/เวลา/.test(l)&&matchProj(l).length){code=l;cur=null;return}
+    if(cur)cur.text+='\n'+l;else{cur={code:code,text:l};out.push(cur)}
+  });
+  return out;
+}
 function pasteNewCase(text,imgs){
   text=String(text||'').replace(/\r/g,'').replace(/^\s+|\s+$/g,'');
-  var m=text.match(/เวลา\s*(\d{1,2})\s*[.:]\s*(\d{2})/),d=new Date(),
-      t=m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
-  if(text&&!/^♦/.test(text))text='♦️ '+text;
-  /* the other half of the last pasted case: picture after text, or text after picture */
-  var pc=pendCase&&findCase(pendCase.id);
-  if(pc&&((imgs.length&&!text&&pendCase.need==='photo')||(text&&!imgs.length&&pendCase.need==='text'))){
-    var oc=pc.c,op=pc.p;pendCase=null;
-    var fin=function(msg){render();pasteCase=oc.id;var n=app.querySelector('.case[data-c="'+oc.id+'"]');if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-120,behavior:'instant'})}toast(msg)};
-    if(imgs.length){addPhotos(oc.id,imgs).then(function(){fin('แนบรูปให้เหตุการณ์ '+hhmm(oc.time)+' แล้ว ('+imgs.length+' รูป)')})}
-    else{oc.text=text;if(m)oc.time=t;markP(op);save();fin('ใส่ข้อความให้เหตุการณ์ '+hhmm(oc.time)+' แล้ว')}
+  /* the other half of an earlier paste: a picture for the next case waiting for one, or text for a picture */
+  pend=pend.filter(function(x){return findCase(x.id)});
+  var nx=pend[0];
+  if(nx&&((imgs.length&&!text&&nx.need==='photo')||(text&&!imgs.length&&nx.need==='text'&&splitPaste(text).length===1&&!splitPaste(text)[0].code))){
+    pend.shift();var pc=findCase(nx.id),oc=pc.c,op=pc.p;
+    var fin=function(msg){if(sel!=='all'&&sel!==op.id)sel=op.id;render();var w=pend[0]&&findCase(pend[0].id);pasteCase=w?null:oc.id;var n=app.querySelector('.case[data-c="'+oc.id+'"]');if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-120,behavior:'instant'})}
+      toast(msg+(w&&pend[0].need==='photo'?' · รูปถัดไปจะเข้า '+hhmm(w.c.time):''))};
+    if(imgs.length){addPhotos(oc.id,imgs).then(function(){fin('แนบรูปให้ '+op.name+' '+hhmm(oc.time)+' แล้ว')})}
+    else{var t0=timeOf(text);oc.text=/^♦/.test(text)?text:'♦️ '+text;if(t0)oc.time=t0;markP(op);save();fin('ใส่ข้อความให้ '+op.name+' '+hhmm(oc.time)+' แล้ว')}
     return;
   }
-  var pid=sel!=='all'?sel:pasteProj,p=R().projects.filter(function(q){return q.id===pid})[0];
-  if(!p){toast('เปิดโครงการก่อน (กดชื่อโครงการ) แล้วกด Ctrl+V ในที่ว่างอีกครั้ง');return}
-  var nc={id:uid(),time:t,text:text||'♦️ เวลา '+hhmm(t)+'น. '};
-  p.cases.push(nc);markP(p);save();
-  pendCase=imgs.length&&text?null:{id:nc.id,need:imgs.length?'text':'photo'};
-  var done=function(){render();pasteCase=nc.id;var n=app.querySelector('.case[data-c="'+nc.id+'"]');
-    if(n){n.classList.add('target');var top=n.getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top:top,behavior:'instant'});
-      if(!text){var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}}
-    toast('เพิ่มเหตุการณ์ '+hhmm(t)+' ให้ '+p.name+(imgs.length&&text?' พร้อมรูป '+imgs.length+' รูป':imgs.length?' · คัดลอกข้อความมาวางต่อได้เลย':' · คัดลอกรูปมาวางต่อได้เลย'))};
-  if(imgs.length)addPhotos(nc.id,imgs).then(done);else done();
+  var parts=text?splitPaste(text):[{code:null,text:''}],fallback=R().projects.filter(function(q){return q.id===(sel!=='all'?sel:pasteProj)})[0];
+  /* resolve each code to a project, asking when a code fits several */
+  var i=0,cache={};
+  (function next(){
+    if(i>=parts.length)return make();
+    var pt=parts[i];if(!pt.code){pt.p=fallback;i++;return next()}
+    if(cache[pt.code]){pt.p=cache[pt.code];i++;return next()}
+    var l=matchProj(pt.code);
+    if(l.length===1){pt.p=cache[pt.code]=l[0];pt.text=pt.text;i++;return next()}
+    pickProj(pt.code,l,function(p){pt.p=cache[pt.code]=p;i++;next()});
+  })();
+  function make(){
+    if(parts.some(function(x){return !x.p})){toast('ไม่รู้ว่าเป็นโครงการไหน เปิดโครงการก่อน หรือใส่ชื่อย่อ เช่น ASK นำหน้า แล้ววางอีกครั้ง');return}
+    var made=[],projs={};
+    parts.forEach(function(pt){
+      var tx=pt.text,t=timeOf(tx)||nowHM();if(tx&&!/^♦/.test(tx))tx='♦️ '+tx;
+      var nc={id:uid(),time:t,text:tx||'♦️ เวลา '+hhmm(t)+'น. '};pt.p.cases.push(nc);projs[pt.p.id]=pt.p;made.push({c:nc,p:pt.p,hasText:!!tx});
+    });
+    Object.keys(projs).forEach(function(k){markP(projs[k])});save();
+    pend=[];
+    var first=made[0];
+    if(imgs.length){made.slice(1).forEach(function(x){pend.push({id:x.c.id,need:'photo'})});if(!first.hasText)pend=[{id:first.c.id,need:'text'}]}
+    else made.forEach(function(x){pend.push({id:x.c.id,need:'photo'})});
+    var ids=Object.keys(projs);if(sel!=='all'&&ids.length===1)sel=ids[0];else if(sel!=='all'&&ids.length>1)sel='all';
+    var done=function(){render();var tgt=imgs.length?first.c:made[0].c;pasteCase=made.length===1?first.c.id:null;
+      var n=app.querySelector('.case[data-c="'+tgt.id+'"]');
+      if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-120,behavior:'instant'});
+        if(!first.hasText&&made.length===1){var x=document.getElementById('x-'+first.c.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}}
+      var names=ids.map(function(k){return projs[k].name}).join(', ');
+      toast(made.length>1?'เพิ่ม '+made.length+' เหตุการณ์ให้ '+names+(pend.length?' · วางรูปต่อได้เลย รูปแรกเข้า '+hhmm(findCase(pend[0].id).c.time):''):
+        'เพิ่มเหตุการณ์ '+hhmm(first.c.time)+' ให้ '+names+(imgs.length&&first.hasText?' พร้อมรูป '+imgs.length+' รูป':imgs.length?' · คัดลอกข้อความมาวางต่อได้เลย':' · คัดลอกรูปมาวางต่อได้เลย'))};
+    if(imgs.length)addPhotos(first.c.id,imgs).then(done);else done();
+  }
 }
 document.addEventListener('paste',function(e){
   if(mode!=='edit')return;
   var imgs=clipImages(e.clipboardData);
   var k=e.target&&e.target.closest&&e.target.closest('.case[data-c]');
-  if(!k&&!isTyping(e.target)&&!(pasteCase&&caseExists(pasteCase))){
+  if(!k&&!isTyping(e.target)&&(!(pasteCase&&caseExists(pasteCase))||pend.length)){
     var txt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
     if(!imgs.length&&!txt.trim())return;
     e.preventDefault();pasteNewCase(txt,imgs);return;
