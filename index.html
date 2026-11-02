@@ -831,6 +831,12 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 #pickp .pkbox{background:var(--surface);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(16,24,40,.3);max-width:420px;width:calc(100% - 32px)}
 #pickp p{margin:0 0 10px}
 #pickp .pkl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
+.qbox{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--sh);padding:8px 10px 8px 14px;margin-bottom:10px}
+.qbox svg{width:18px;height:18px;color:var(--accent);flex:none}
+.qbox textarea{flex:1;min-width:0;border:0;background:var(--fill);border-radius:10px;padding:8px 12px;font:inherit;resize:none;min-height:20px;max-height:140px;outline:none}
+.qbox textarea:focus{box-shadow:0 0 0 2px var(--accent-soft),inset 0 0 0 1px var(--accent)}
+.qbox .btn{flex:none}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1565,7 +1571,7 @@ function renderEdit(){
   }else{
     body=ps.filter(function(p){return p.id===sel}).map(function(p){return heroHTML(p)+projHTML(p)}).join('');
   }
-  app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav></div><div id="main">'+body+'</div></div>';
+  app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav></div><div id="main">'+quickHTML()+body+'</div></div>';
   fitAll();paintArrows();
 }
 /* ---------- executive report: message form ---------- */
@@ -1692,6 +1698,7 @@ function rsPop(on){var r=app.querySelector('.replay');if(r)r.classList.toggle('p
 function rsSet(h,pop){rsHid=h?1:0;try{localStorage.setItem('cctv-rside-hide',rsHid)}catch(e){}var r=app.querySelector('.replay');if(!r)return;r.classList.toggle('hid',!!rsHid);rsPop(pop)}
 document.addEventListener('mousedown',function(e){var r=app.querySelector('.replay.pop');if(r&&!e.target.closest('.rside,.rstab'))rsPop(false)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')rsPop(false)});
+document.addEventListener('keydown',function(e){if(e.target&&e.target.id==='qpaste'&&e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();var b=document.querySelector('[data-act=qadd]');if(b)b.click()}});
 function paintProg(){
   var el=document.getElementById('prog');if(!el)return;
   var ps=reportProjects().ps,n=ps.filter(isSent).length,pct=ps.length?Math.round(n*100/ps.length):0;
@@ -2081,6 +2088,7 @@ app.addEventListener('click',function(e){
   }
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
   else if(act==='rshide'||act==='rspin'||act==='rsopen'){rsSet(act==='rshide'?1:0,false);var rr=app.querySelector('.replay');if(rr&&act!=='rshide'){rr.classList.remove('slidein');void rr.offsetWidth;rr.classList.add('slidein')}return}
+  else if(act==='qadd'){var q=document.getElementById('qpaste');if(q&&q.value.trim()){var v=q.value;q.value='';pasteCase=null;pasteNewCase(v,[])}else{toast('พิมพ์หรือวางข้อความในช่องก่อน');if(q)q.focus()}return}
   else if(act==='jump'){rsPop(false);var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
@@ -2221,8 +2229,18 @@ function pasteNewCase(text,imgs){
     if(imgs.length)addPhotos(first.c.id,imgs).then(done);else done();
   }
 }
+function quickHTML(){
+  return '<div class="qbox"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3" width="10" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5h4V2H8z" fill="currentColor"/></svg>'+
+    '<textarea id="qpaste" rows="1" placeholder="วางเหตุการณ์ที่นี่ (Ctrl+V) · ข้อความ / รูป / หลายบรรทัด ♦️ · ใส่ชื่อย่อนำหน้าได้ เช่น ASK, 65"></textarea>'+
+    '<button type="button" class="btn" data-act="qadd">เพิ่ม</button></div>';
+}
 document.addEventListener('paste',function(e){
   if(mode!=='edit')return;
+  if(e.target&&e.target.id==='qpaste'){
+    var qi=clipImages(e.clipboardData),qt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
+    if(!qi.length&&!qt.trim())return;
+    e.preventDefault();pasteCase=null;pasteNewCase(qt,qi);setTimeout(function(){var q=document.getElementById('qpaste');if(q)q.focus()},60);return;
+  }
   var imgs=clipImages(e.clipboardData);
   var k=e.target&&e.target.closest&&e.target.closest('.case[data-c]');
   if(!k&&!isTyping(e.target)&&(!(pasteCase&&caseExists(pasteCase))||pend.length)){
