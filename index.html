@@ -830,7 +830,8 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 #pickp{position:fixed;inset:0;z-index:80;background:rgba(16,24,40,.28);display:flex;align-items:center;justify-content:center}
 #pickp .pkbox{background:var(--surface);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(16,24,40,.3);max-width:420px;width:calc(100% - 32px)}
 #pickp p{margin:0 0 10px}
-#pickp .pkl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#pickp .pkl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;max-height:60vh;overflow:auto}
+#pickp .pkbox{max-width:620px!important}
 
 .qbox{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--sh);padding:8px 10px 8px 14px;margin-bottom:10px}
 .qbox svg{width:18px;height:18px;color:var(--accent);flex:none}
@@ -2172,7 +2173,7 @@ function nearProj(tok){var T=norm(String(tok).replace(/^@/,''));
 function pickProj(tok,list,cb,miss){
   var old=document.getElementById('pickp');if(old)old.remove();
   var d=document.createElement('div');d.id='pickp';d.setAttribute('role','dialog');
-  d.innerHTML='<div class="pkbox"><p>'+(miss?'ไม่พบโครงการ <b>'+esc(tok)+'</b> พิมพ์ผิดหรือเปล่า? เลือกโครงการ:':'<b>'+esc(tok)+'</b> ตรงกับหลายโครงการ เลือกโครงการ:')+'</p><div class="pkl">'+list.map(function(p){return '<button type="button" class="btn" data-pk="'+p.id+'">'+esc(p.name)+'</button>'}).join('')+'</div><button type="button" class="ghost" data-pk="">ยกเลิก</button></div>';
+  d.innerHTML='<div class="pkbox"><p>'+(miss==='ask'?'<b>เหตุการณ์นี้ของโครงการไหน?</b> กดเลือกได้เลย':miss?'ไม่พบโครงการ <b>'+esc(tok)+'</b> พิมพ์ผิดหรือเปล่า? เลือกโครงการ:':'<b>'+esc(tok)+'</b> ตรงกับหลายโครงการ เลือกโครงการ:')+'</p><div class="pkl">'+list.map(function(p){return '<button type="button" class="btn" data-pk="'+p.id+'">'+esc(p.name)+'</button>'}).join('')+'</div><button type="button" class="ghost" data-pk="">ยกเลิก</button></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b&&e.target!==d)return;d.remove();if(b&&b.dataset.pk)cb(list.filter(function(p){return p.id===b.dataset.pk})[0]);else if(!b)return;});
 }
@@ -2208,7 +2209,10 @@ function pasteNewCase(text,imgs){
   var i=0,cache={};
   (function next(){
     if(i>=parts.length)return make();
-    var pt=parts[i];if(!pt.code){pt.p=fallback;i++;return next()}
+    var pt=parts[i];if(!pt.code&&fallback){pt.p=fallback;i++;return next()}
+    if(!pt.code){if(cache['']){pt.p=cache[''];i++;return next()}
+      var all=sortedProjects().filter(function(q){return q.name&&inShift(q)});if(!all.length)all=sortedProjects().filter(function(q){return q.name});
+      pickProj('',all,function(p){pt.p=cache['']=p;i++;next()},'ask');return}
     if(cache[pt.code]){pt.p=cache[pt.code];i++;return next()}
     var l=matchProj(pt.code);
     if(l.length===1){pt.p=cache[pt.code]=l[0];pt.text=pt.text;i++;return next()}
