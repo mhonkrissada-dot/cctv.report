@@ -838,6 +838,10 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .qbox textarea{flex:1;min-width:0;border:0;background:var(--fill);border-radius:10px;padding:8px 12px;font:inherit;resize:none;min-height:20px;max-height:140px;outline:none}
 .qbox textarea:focus{box-shadow:0 0 0 2px var(--accent-soft),inset 0 0 0 1px var(--accent)}
 .qbox .btn{flex:none}
+
+.rail .rl{display:flex;flex-direction:column;flex-shrink:0}
+.rail.dense2 .rl{grid-column:1/-1;display:block;columns:2;column-gap:2px}
+.rail.dense2 .rl button.f{width:100%;break-inside:avoid;margin-bottom:1px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1523,16 +1527,19 @@ function searchHTML(id){return '<label class="psearch" for="'+id+'"><svg viewBox
 function railHTML(){
   var all=sortedProjects(),n=counts();
   var h='<button type="button" class="f" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">รวมทุกโครงการ</span><span class="fm">'+n.c+' เคส · '+n.ph+' รูป</span></button>';
-  ORDER.forEach(function(m){
-    var list=all.filter(function(p){return (p.mode||'')===m&&(pq?pqMatch(p):(inShift(p)||sel===p.id))});
-    if(!list.length)return;
-    h+='<div class="gh"><span>'+MODES[m]+'</span><span>'+list.length+'</span></div>';
+  /* one list in the PC folder order, whatever the shift */
+  var shown=0;
+  [''].forEach(function(){
+    var list=all.filter(function(p){return pq?pqMatch(p):(inShift(p)||sel===p.id)});
+    shown=list.length;if(!list.length)return;
+    h+='<div class="gh"><span>โครงการ</span><span>'+list.length+'</span></div><div class="rl">';
     list.forEach(function(p){
       var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
       h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon(p)+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+(isSent(p)?' <span class="sentok">✓ ส่งแล้ว</span>':'')+'</span><span class="fm">'+(realN(p.cases)?realN(p.cases)+' เคส · '+ph+' รูป':p.cases.length?'ปกติ':'ยังไม่มีเหตุการณ์')+'</span></button>';
     });
+    h+='</div>';
   });
-  if(pq&&h.indexOf('class="gh"')<0)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
+  if(pq&&!shown)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
   return h+'<button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button>';
 }
 function caseHTML(c){
