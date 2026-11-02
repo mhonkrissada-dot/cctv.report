@@ -1075,9 +1075,10 @@ function xlKey(p){return norm(p.name||p.id)}
 function xlBlank(p){var b=store.xlblank&&store.xlblank[xlKey(p)];return b!=null&&b!==''?b:'เหตุการณ์ปกติ'}
 function xlShift(p){var s=curShift();if(s==='night'||s==='day')return s;return (p.mode||'')==='night'?'night':'day'}
 function xlHours(sh){var h=[],i;if(sh==='night'){for(i=19;i<24;i++)h.push(i);for(i=0;i<=7;i++)h.push(i)}else for(i=7;i<=19;i++)h.push(i);return h}
-function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[p.id]||(m[p.id]={})}
+function xlKey(p){return p.id+'@'+xlShift(p)}
+function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[xlKey(p)]||(m[xlKey(p)]={})}
 function xlRows(p){
-  var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[p.id]||{};
+  var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[xlKey(p)]||{};
   sortCases(p.cases,p).forEach(function(c){
     if(isFixed(c))return;var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
@@ -1170,7 +1171,7 @@ function openXL(p){
     var b=e.target.closest('[data-m]'),u=e.target.closest('[data-undo]');
     if(u){delete xlEdits(p)[u.dataset.undo];save();repaint();return}
     if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();return}
-    if(b&&b.dataset.m==='reset'){R().xledit&&delete R().xledit[p.id];save();repaint();toast('ล้างการแก้ไขแล้ว');return}
+    if(b&&b.dataset.m==='reset'){R().xledit&&delete R().xledit[xlKey(p)];save();repaint();toast('ล้างการแก้ไขแล้ว');return}
     if(b&&b.dataset.m==='xlfull'){var a=document.activeElement;if(a&&a.blur)a.blur();xlCopyProject(p);closeMsg()}
   });
   d.addEventListener('input',function(e){var t=e.target;if(t.tagName==='TEXTAREA'){t.style.height='0px';t.style.height=Math.max(28,t.scrollHeight)+'px'}});
@@ -1661,8 +1662,8 @@ function dataFile(d,name){var a=d.split(','),bin=atob(a[1]),u=new Uint8Array(bin
 var IS_MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform));
 var CAN_SHARE=(function(){try{return !!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.jpg',{type:'image/jpeg'})]}))}catch(e){return false}})();
 function edits(){return R().msgs||(R().msgs={})}
-function isEdited(p){return typeof edits()[p.id]==='string'}
-function msgFinal(p){return isEdited(p)?edits()[p.id]:msgText(p)}
+function isEdited(p){return typeof edits()[sk(p)]==='string'}
+function msgFinal(p){return isEdited(p)?edits()[sk(p)]:msgText(p)}
 function nl(p){var m=(R().nl=R().nl||{});return m[p.id]||(m[p.id]={night:false,day:false})}
 function extraLines(p){return []}
 function addLine(v,line){
@@ -1677,8 +1678,10 @@ function addLine(v,line){
 }
 function addLineEnd(v,line){var mk='\n\n  จึงเรียนมาเพื่อทราบ',ix=v.indexOf(mk);if(ix<0)return v.replace(/\s+$/,'')+'\n'+line;var head=v.slice(0,ix).replace(/\s+$/,'');return head+(/ดังต่อไปนี้$/.test(head)?'\n\n':'\n')+line+v.slice(ix)}
 function dropLine(v,line){return v.split('\n').filter(function(l){return l.trim()!==line}).join('\n')}
-function isSent(p){return !!(R().sent&&R().sent[p.id])}
-function setSent(p,on){(R().sent=R().sent||{})[p.id]=!!on;if(!on)delete R().sent[p.id];save();if(mode==='report'){var y=window.scrollY;render();window.scrollTo(0,y);return}if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
+/* sent marks, edited messages and Excel edits are kept per shift (day / night / all) */
+function sk(p){var s=curShift();return p.id+(s==='day'||s==='night'?'@'+s:'')}
+function isSent(p){return !!(R().sent&&R().sent[sk(p)])}
+function setSent(p,on){(R().sent=R().sent||{})[sk(p)]=!!on;if(!on)delete R().sent[sk(p)];save();if(mode==='report'){var y=window.scrollY;render();window.scrollTo(0,y);return}if(typeof refreshRail==='function')refreshRail();var sec=app.querySelector('.proj[data-p="'+p.id+'"]')||app.querySelector('.sp[data-p="'+p.id+'"]');if(sec){sec.classList.toggle('done',!!on);var sb=sec.querySelector('[data-act=sent]');if(sb){sb.setAttribute('aria-pressed',!!on);sb.textContent=on?'ส่งแล้ว':'ยังไม่ส่ง'}}paintProg()}
 var rsHid=0;try{rsHid=+localStorage.getItem('cctv-rside-hide')||0}catch(e){}
 function rsPop(on){var r=app.querySelector('.replay');if(r)r.classList.toggle('pop',!!on&&rsHid)}
 function rsSet(h,pop){rsHid=h?1:0;try{localStorage.setItem('cctv-rside-hide',rsHid)}catch(e){}var r=app.querySelector('.replay');if(!r)return;r.classList.toggle('hid',!!rsHid);rsPop(pop)}
@@ -1922,7 +1925,7 @@ app.addEventListener('input',function(e){
   if(t.id==='repdate'){if(t.value){R().repDate=t.value;save();refreshMsgs()}return}
   if(!f)return;
   var p=findP(t);if(!p)return;
-  if(f==='msg'){edits()[p.id]=t.value;save();fit(t);var sec=t.closest('.sp');if(sec){sec.classList.add('edited');var tw=sec.querySelector('.tl');if(tw){clearTimeout(tw._t);tw._t=setTimeout(function(){var nw=document.createElement('div');nw.innerHTML=tlHTML(p,true);var n=nw.firstChild;if(n)tw.replaceWith(n);else tw.innerHTML=''},400)}}return}
+  if(f==='msg'){edits()[sk(p)]=t.value;save();fit(t);var sec=t.closest('.sp');if(sec){sec.classList.add('edited');var tw=sec.querySelector('.tl');if(tw){clearTimeout(tw._t);tw._t=setTimeout(function(){var nw=document.createElement('div');nw.innerHTML=tlHTML(p,true);var n=nw.firstChild;if(n)tw.replaceWith(n);else tw.innerHTML=''},400)}}return}
   if(f==='rname'){p.rname=t.value;save();refreshMsgs();return}
   if(f==='name'){p.name=t.value}
   else if(f==='mode'){p.mode=t.value}
@@ -2056,7 +2059,7 @@ app.addEventListener('click',function(e){
   else if(act==='tline'&&p){
     var w=b.dataset.v,line=w==='night'?LINE_NIGHT:LINE_DAY,o2=nl(p),on=!o2[w];o2[w]=on;
     var tt=app.querySelector('#mp-'+p.id);
-    if(isEdited(p)){var v2=on?addLine(edits()[p.id],line):dropLine(edits()[p.id],line);edits()[p.id]=v2;if(tt){tt.value=v2;fit(tt)}}
+    if(isEdited(p)){var v2=on?addLine(edits()[sk(p)],line):dropLine(edits()[sk(p)],line);edits()[sk(p)]=v2;if(tt){tt.value=v2;fit(tt)}}
     else if(tt){tt.value=msgText(p);fit(tt)}
     b.setAttribute('aria-pressed',on);save();
   }
@@ -2083,7 +2086,7 @@ app.addEventListener('click',function(e){
     try{navigator.clipboard.write([new ClipboardItem({'image/png':collageBlob(p)})]).then(function(){toast('คัดลอกรูปรวมแล้ว วางใน LINE ได้เลย')},function(){toast('คัดลอกรูปรวมไม่ได้ในเบราว์เซอร์นี้')})}catch(er){toast('คัดลอกรูปรวมไม่ได้ในเบราว์เซอร์นี้')}
   }
   else if(act==='reprange'){var r=b.dataset.r,RR=R();if(r==='day'){RR.repFrom='07:00';RR.repTo='19:00'}else if(r==='night'){RR.repFrom='19:00';RR.repTo='07:00'}else{delete RR.repFrom;delete RR.repTo}save();render()}
-  else if(act==='resetmsg'&&p){delete edits()[p.id];save();var rt=app.querySelector('#mp-'+p.id),sc=b.closest('.sp');if(sc)sc.classList.remove('edited');if(rt){rt.value=msgText(p);fit(rt)}toast('กลับไปใช้ข้อความอัตโนมัติแล้ว')}
+  else if(act==='resetmsg'&&p){delete edits()[sk(p)];save();var rt=app.querySelector('#mp-'+p.id),sc=b.closest('.sp');if(sc)sc.classList.remove('edited');if(rt){rt.value=msgText(p);fit(rt)}toast('กลับไปใช้ข้อความอัตโนมัติแล้ว')}
   else if(act==='insline'&&p){
     var ta=app.querySelector('#mp-'+p.id);if(!ta)return;
     var line=b.dataset.line==='night'?LINE_NIGHT:LINE_DAY,v=ta.value;
@@ -2091,7 +2094,7 @@ app.addEventListener('click',function(e){
     var mk='\n\n  จึงเรียนมาเพื่อทราบ',ix=v.indexOf(mk);
     if(ix>=0){var head=v.slice(0,ix).replace(/\s+$/,''),top=/ดังต่อไปนี้$/.test(head);v=head+(top?'\n\n':'\n')+line+v.slice(ix)}
     else v=v.replace(/\s+$/,'')+'\n'+line;
-    ta.value=v;edits()[p.id]=v;save();fit(ta);var se=b.closest('.sp');if(se)se.classList.add('edited');
+    ta.value=v;edits()[sk(p)]=v;save();fit(ta);var se=b.closest('.sp');if(se)se.classList.add('edited');
   }
   else if(act==='pastephoto'&&c){pasteFromClipboard(c.id)}
   else if(act==='copyphoto'&&c){var rec=allPhotos(c).filter(function(r){return r.id===b.dataset.pid})[0];if(rec)copyImage(rec.data)}
