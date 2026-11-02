@@ -2178,15 +2178,21 @@ function pickProj(tok,list,cb,miss){
   d.addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b&&e.target!==d)return;d.remove();if(b&&b.dataset.pk)cb(list.filter(function(p){return p.id===b.dataset.pk})[0]);else if(!b)return;});
 }
 /* split pasted text into cases: each ♦ line starts a case; a code line (or a code before ♦) picks the project */
+/* "ASK ♦️ เวลา…", "-RM9-เวลา…", "@LC-EC48: เวลา…" → code + the rest */
+var CODE_PRE=/^[\s\-–—@#•*]*([A-Za-z0-9][A-Za-z0-9._\/]*(?:-[A-Za-z0-9._\/]+)*?)\s*[\-–—:：,|]*\s*(?=♦|เวลา\s*\d)/;
+function cleanCode(l){return String(l).replace(/^[\s\-–—@#•*]+|[\s\-–—:：,|]+$/g,'')}
 function splitPaste(text){
-  var lines=String(text).replace(/\r/g,'').split('\n'),out=[],cur=null,code=null,hasDia=/(^|\n)\s*(@?\S{1,20}\s+)?(♦|เวลา\s*\d)/.test(text);
+  var lines=String(text).replace(/\r/g,'').split('\n'),out=[],cur=null,code=null;
+  var hasDia=lines.some(function(l){l=l.trim();return /^[\s\-–—•*]*(♦|เวลา\s*\d)/.test(l)||CODE_PRE.test(l)});
   if(!hasDia)return [{code:null,text:text.trim()}];
   lines.forEach(function(raw){
     var l=raw.trim();if(!l){return}
-    var m=l.match(/^@?([^\s♦]{1,20})\s+(?=♦|เวลา\s*\d)/);
+    var m=l.match(CODE_PRE);
     if(m&&(matchProj(m[1]).length||isCodeLike(m[1]))){code=m[1];l=l.slice(m[0].length)}
+    else l=l.replace(/^[\-–—•*]+\s*(?=♦|เวลา\s*\d)/,'');
     if(/^(♦|เวลา\s*\d)/.test(l)){cur={code:code,text:l};out.push(cur);return}
-    if(!/\s/.test(l)&&l.length<=20&&!/เวลา/.test(l)&&(matchProj(l).length||isCodeLike(l))){code=l;cur=null;return}
+    var cl=cleanCode(l);
+    if(cl&&!/\s/.test(cl)&&cl.length<=20&&!/เวลา/.test(cl)&&(matchProj(cl).length||isCodeLike(cl))){code=cl;cur=null;return}
     if(cur)cur.text+='\n'+l;else{cur={code:code,text:l};out.push(cur)}
   });
   return out;
