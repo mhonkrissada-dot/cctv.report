@@ -842,6 +842,10 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .rail .rl{display:flex;flex-direction:column;flex-shrink:0}
 .rail.dense2 .rl{grid-column:1/-1;display:block;columns:2;column-gap:2px}
 .rail.dense2 .rl button.f{width:100%;break-inside:avoid;margin-bottom:1px}
+
+.qbox .qimg{display:inline-flex;align-items:center;gap:6px;flex:none;cursor:pointer}
+.qbox .qimg svg{width:16px;height:16px;color:currentColor}
+.qbox.over{box-shadow:0 0 0 2px var(--accent)}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1967,6 +1971,7 @@ app.addEventListener('change',function(e){
   if(t.id==='rep-from'||t.id==='rep-to'){var fr=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;if(fr&&to){if(fr===to){toast('เวลาเริ่มกับเวลาสิ้นสุดต้องไม่เท่ากัน');return}R().repFrom=fr;R().repTo=to;save();render()}return}
   if(t.dataset&&t.dataset.f==='text'&&t.readOnly)return;
   if(t.dataset&&t.dataset.f==='text'){var p0=findP(t),c0=p0&&findC(t,p0);if(c0&&!applyTime(p0,c0,false)){tidy(c0);t.value=c0.text;markP(p0);save();fit(t)}return}
+  if(t.dataset&&t.dataset.qfiles!==undefined){if(t.files.length)bulkPhotos(t.files);t.value='';return}
   if(t.dataset&&t.dataset.act==='file'){
     var p=findP(t),c=p&&findC(t,p);if(c&&t.files.length)addPhotos(c.id,t.files);
   }
@@ -2262,13 +2267,53 @@ function pasteNewCase(text,imgs){
 function quickHTML(){
   return '<div class="qbox"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3" width="10" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5h4V2H8z" fill="currentColor"/></svg>'+
     '<textarea id="qpaste" rows="1" placeholder="วางเหตุการณ์ที่นี่ (Ctrl+V) · ข้อความ / รูป / หลายบรรทัด ♦️ · ใส่ชื่อย่อนำหน้าได้ เช่น ASK, 65"></textarea>'+
-    '<button type="button" class="btn" data-act="qadd">เพิ่ม</button></div>';
+    '<button type="button" class="btn" data-act="qadd">เพิ่ม</button>'+
+    '<label class="btn qimg" title="เลือกรูปหลายรูปพร้อมกัน แอปจะใส่ให้แต่ละเหตุการณ์ตามเวลา (หรือลากรูปมาวางที่ช่องนี้)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="8.5" r="1.5" fill="currentColor"/><path d="M3 15l4.5-4 3 2.5 3-3 4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>ใส่รูปทีเดียว<input type="file" accept="image/*" multiple data-qfiles hidden></label></div>';
+}
+/* many pictures at once: each goes to the case with the closest time (from the file name or the file's time),
+   the rest in order; cases are the ones just pasted, else the open project's cases that have no picture yet */
+function fileClock(f){
+  var m=String(f.name||'').match(/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})[ _T-]?(\d{2})[-_.:]?(\d{2})[-_.:]?(\d{2})?/);
+  if(m&&+m[4]<24&&+m[5]<60)return +m[4]*60+ +m[5];
+  if(f.lastModified){var d=new Date(f.lastModified);return d.getHours()*60+d.getMinutes()}
+  return null;
+}
+function hm2min(t){var a=String(t||'').split(':');return a.length===2?+a[0]*60+ +a[1]:null}
+function bulkPhotos(files){
+  var imgs=Array.prototype.filter.call(files,function(f){return /^image\//.test(f.type)});
+  if(!imgs.length){toast('ไม่มีไฟล์รูป');return}
+  imgs.sort(function(a,b){return (a.lastModified||0)-(b.lastModified||0)||String(a.name).localeCompare(String(b.name),undefined,{numeric:true})});
+  pend=pend.filter(function(x){return findCase(x.id)});
+  var targets=pend.filter(function(x){return x.need==='photo'}).map(function(x){return findCase(x.id)});
+  if(!targets.length){
+    var p=R().projects.filter(function(q){return q.id===(sel!=='all'?sel:pasteProj)})[0];
+    if(p)targets=sortCases(p.cases,p).filter(function(c){return !isFixed(c)&&!c.tpl&&!allPhotos(c).length}).map(function(c){return{p:p,c:c}});
+  }
+  if(!targets.length){toast('ไม่มีเหตุการณ์ที่รอรูป วางข้อความก่อน หรือเปิดโครงการที่มีเหตุการณ์ยังไม่มีรูป');return}
+  var fm=imgs.map(fileClock),tm=targets.map(function(x){return hm2min(x.c.time)}),dist=function(a,b){if(a==null||b==null)return 9999;var d=Math.abs(a-b)%1440;return Math.min(d,1440-d)};
+  var asg=imgs.map(function(){return -1}),used=targets.map(function(){return false}),pairs=[],byTime=0;
+  imgs.forEach(function(f,i){targets.forEach(function(t,j){var d=dist(fm[i],tm[j]);if(d<=30)pairs.push([d,i,j])})});
+  pairs.sort(function(a,b){return a[0]-b[0]});
+  pairs.forEach(function(x){if(asg[x[1]]<0&&!used[x[2]]){asg[x[1]]=x[2];used[x[2]]=true;byTime++}});
+  var freeT=targets.map(function(t,j){return j}).filter(function(j){return !used[j]}),k=0;
+  imgs.forEach(function(f,i){if(asg[i]<0&&k<freeT.length){asg[i]=freeT[k++];used[asg[i]]=true}});
+  imgs.forEach(function(f,i){if(asg[i]<0){var best=0,bd=1e9;targets.forEach(function(t,j){var d=dist(fm[i],tm[j]);if(d<bd){bd=d;best=j}});asg[i]=fm[i]==null?targets.length-1:best}});
+  var groups={};imgs.forEach(function(f,i){(groups[asg[i]]=groups[asg[i]]||[]).push(f)});
+  var ids=Object.keys(groups),chain=Promise.resolve();
+  ids.forEach(function(j){chain=chain.then(function(){return addPhotos(targets[j].c.id,groups[j])})});
+  chain.then(function(){
+    var filled={};ids.forEach(function(j){filled[targets[j].c.id]=1});
+    pend=pend.filter(function(x){return !(x.need==='photo'&&filled[x.id])});
+    var left=targets.filter(function(t){return !filled[t.c.id]}).length;
+    toast('ใส่รูป '+imgs.length+' รูป ให้ '+ids.length+' เหตุการณ์'+(byTime?' (ตามเวลา '+byTime+')':'')+(left?' · ยังไม่มีรูปอีก '+left+' เหตุการณ์':''));
+  });
 }
 document.addEventListener('paste',function(e){
   if(mode!=='edit')return;
   if(e.target&&e.target.id==='qpaste'){
     var qi=clipImages(e.clipboardData),qt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
     if(!qi.length&&!qt.trim())return;
+    if(qi.length>1&&!qt.trim()){e.preventDefault();bulkPhotos(qi);return}
     e.preventDefault();pasteCase=null;pasteNewCase(qt,qi);setTimeout(function(){var q=document.getElementById('qpaste');if(q)q.focus()},60);return;
   }
   var imgs=clipImages(e.clipboardData);
@@ -2303,9 +2348,10 @@ window.addEventListener('mousemove',function(e){if(!drag)return;var dx=e.clientX
 window.addEventListener('mouseup',function(){if(!drag)return;var d=drag;drag=null;d.g.classList.remove('dragging');if(d.moved){var stop=function(ev){ev.stopPropagation();ev.preventDefault();window.removeEventListener('click',stop,true)};window.addEventListener('click',stop,true);setTimeout(function(){window.removeEventListener('click',stop,true)},0)}});
 /* mouse wheel scrolls the folder row sideways */
 app.addEventListener('wheel',function(e){var g=e.target.closest('.fgrid');if(!g||g.scrollWidth<=g.clientWidth||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;var max=g.scrollWidth-g.clientWidth;if((e.deltaY<0&&g.scrollLeft<=0)||(e.deltaY>0&&g.scrollLeft>=max-1))return;e.preventDefault();g.scrollLeft+=e.deltaY},{passive:false});
-app.addEventListener('dragover',function(e){var d=e.target.closest('[data-drop]');if(d){e.preventDefault();d.classList.add('over')}});
-app.addEventListener('dragleave',function(e){var d=e.target.closest('[data-drop]');if(d)d.classList.remove('over')});
+app.addEventListener('dragover',function(e){var qb=e.target.closest('.qbox');if(qb){e.preventDefault();qb.classList.add('over');return}var d=e.target.closest('[data-drop]');if(d){e.preventDefault();d.classList.add('over')}});
+app.addEventListener('dragleave',function(e){var qb=e.target.closest('.qbox');if(qb)qb.classList.remove('over');var d=e.target.closest('[data-drop]');if(d)d.classList.remove('over')});
 app.addEventListener('drop',function(e){
+  var qb=e.target.closest('.qbox');if(qb&&e.dataTransfer.files.length){e.preventDefault();qb.classList.remove('over');bulkPhotos(e.dataTransfer.files);return}
   var d=e.target.closest('[data-drop]');if(!d)return;e.preventDefault();d.classList.remove('over');
   var p=findP(d),c=p&&findC(d,p);if(c&&e.dataTransfer.files.length)addPhotos(c.id,e.dataTransfer.files);
 });
