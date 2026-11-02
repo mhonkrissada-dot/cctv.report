@@ -1262,9 +1262,13 @@ function shiftHTML(){
 }
 function regIdx(p){for(var i=0;i<REG.length;i++)if(norm(REG[i][0])===p.key)return i;return 999}
 function inReg(p){return regIdx(p)!==999}
+/* order of the picture folders on the PC (1.LPARK-PH32, 2.LV-SW RM2 …); names are not changed */
+var FOLDER_ORDER=['LPARK-PH32','LV-SW RM2','LP-RM3 RR','LP-RM4 RD','LV-CC','LV-SK101-1','TPS','IDRS','LSL-CS65','LUM-T','LV-SK109','AN-ID-ASK','LP-SH','U-CENTER','LC-EC48','LPARK-RM9','CHOD-AP-RYG','LPARK-VC','TIJ','AN-ID-LSL','LP-RM3 RV','ELDN','CHOD-JWKM16','SPC-RM3','LPN-T','TRR','VL168WG'].map(norm);
+var FOLDER_ALIAS={LPNT:'LTLPN'};
+function folderIdx(p){var k=norm(p.name||'');for(var i=0;i<FOLDER_ORDER.length;i++){var f=FOLDER_ORDER[i];if(f===k||FOLDER_ALIAS[f]===k)return i}return 999}
 function sortedProjects(){
   return R().projects.map(function(p,i){return{p:p,i:i}}).sort(function(a,b){
-    return ORDER.indexOf(a.p.mode||'')-ORDER.indexOf(b.p.mode||'')||regIdx(a.p)-regIdx(b.p)||a.i-b.i;
+    return folderIdx(a.p)-folderIdx(b.p)||ORDER.indexOf(a.p.mode||'')-ORDER.indexOf(b.p.mode||'')||regIdx(a.p)-regIdx(b.p)||a.i-b.i;
   }).map(function(x){return x.p});
 }
 
