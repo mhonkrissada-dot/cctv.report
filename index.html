@@ -2266,7 +2266,7 @@ function pasteNewCase(text,imgs){
 }
 function quickHTML(){
   return '<div class="qbox"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3" width="10" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5h4V2H8z" fill="currentColor"/></svg>'+
-    '<textarea id="qpaste" rows="1" placeholder="วางเหตุการณ์ที่นี่ (Ctrl+V) · ข้อความ / รูป / หลายบรรทัด ♦️ · ใส่ชื่อย่อนำหน้าได้ เช่น ASK, 65"></textarea>'+
+    '<textarea id="qpaste" rows="1" placeholder="วางที่นี่ (Ctrl+V) · ข้อความหลายบรรทัด ♦️ (ชื่อย่อนำหน้าได้ เช่น ASK, 65) · รูปหลายไฟล์: เลือกในโฟลเดอร์ Ctrl+C แล้ว Ctrl+V"></textarea>'+
     '<button type="button" class="btn" data-act="qadd">เพิ่ม</button>'+
     '<label class="btn qimg" title="เลือกรูปหลายรูปพร้อมกัน แอปจะใส่ให้แต่ละเหตุการณ์ตามเวลา (หรือลากรูปมาวางที่ช่องนี้)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="8.5" r="1.5" fill="currentColor"/><path d="M3 15l4.5-4 3 2.5 3-3 4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>ใส่รูปทีเดียว<input type="file" accept="image/*" multiple data-qfiles hidden></label></div>';
 }
@@ -2321,7 +2321,7 @@ document.addEventListener('paste',function(e){
   if(!k&&!isTyping(e.target)&&(!(pasteCase&&caseExists(pasteCase))||pend.length)){
     var txt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
     if(!imgs.length&&!txt.trim())return;
-    e.preventDefault();pasteNewCase(txt,imgs);return;
+    e.preventDefault();if(imgs.length>1&&!txt.trim()){bulkPhotos(imgs);return}pasteNewCase(txt,imgs);return;
   }
   if(!imgs.length)return;
   var id=k?k.dataset.c:pasteCase;
