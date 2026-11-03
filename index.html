@@ -1100,7 +1100,7 @@ function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[xlKey(p)]||(m[xlK
 function xlRows(p){
   var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[xlKey(p)]||{};
   sortCases(p.cases,p).forEach(function(c){
-    if(isFixed(c))return;var hh=String(c.time||'').slice(0,2);
+    if(isRoutine(c))return;var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
     if(hh)(by[+hh]=by[+hh]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
   });
@@ -1143,7 +1143,7 @@ function xlStepReset(){if(!XLSTEP)return;var b=document.querySelector('.proj[dat
 function xlHitRows(p){
   var by={},order=xlHours(xlShift(p));
   sortCases(p.cases,p).forEach(function(c){
-    if(isFixed(c))return;
+    if(isRoutine(c))return;
     var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
     if(!hh)return;var h=+hh;(by[h]=by[h]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
@@ -1285,7 +1285,9 @@ function hhmm(t){return t.replace(':','.')}
 function thaiDate(){return new Date(store.date+'T00:00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
 /* fixed normal-period lines (19.00–07.00 / 07.00–19.00 เหตุการณ์ปกติ) are not counted as cases */
 function isFixed(c){return nkey(c)!=='2'}
-function realN(list){return list.filter(function(c){return !isFixed(c)}).length}
+/* routine lines (เหตุการณ์ปกติ, LP-RM3 RR โหลดดิ้ง/ล็อบบี้) are not counted as cases */
+function isRoutine(c){return isFixed(c)||!!c.tpl}
+function realN(list){return list.filter(function(c){return !isRoutine(c)}).length}
 function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){if(!inShift(x))return;var r=realN(x.cases);if(r)p++;c+=r;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
 function bodyText(c){return (c.text||'').replace(LEAD,'').replace(/^เวลา\s*\d{1,2}\s*[.:]\s*\d{2}\s*น?\.?\s*/,'').trim()}
 function caseText(c){var t=(c.text||'').replace(LEAD,'').trim();return '♦️ '+(/^เวลา\s*\d/.test(t)?t:'เวลา'+hhmm(c.time)+'น. '+t)}
@@ -1365,7 +1367,7 @@ function folderDays(key){
 function renderFolderDetail(){
   var days=folderDays(fsel),cur=sortedProjects().filter(function(p){return norm(p.name||p.id)===fsel})[0]||(days[0]&&days[0].p);
   var name=cur?cur.name:fsel,nc=0,nph=0;
-  days.forEach(function(x){x.p.cases.forEach(function(c){if(!isFixed(c))nc++;nph+=allPhotos(c).length})});
+  days.forEach(function(x){x.p.cases.forEach(function(c){if(!isRoutine(c))nc++;nph+=allPhotos(c).length})});
   var h='<div class="fov"><div class="fdtop"><button type="button" class="btn navy" data-fback>← ภาพรวมโฟลเดอร์</button>'+
     '<div class="fdhero">'+folderArt(cur||{name:name},nc?nc+' เคส':'')+'<div><h2>'+esc(name)+'</h2><p class="sub">'+(cur&&cur.mode?MODES[cur.mode]+' · ':'')+esc(rangeLabel())+' · '+days.length+' วัน · '+nc+' เคส · '+nph+' รูป</p></div></div>'+
     '<div class="fdtools">'+rangeHTML()+'<label class="msg fdchk"><input type="checkbox" data-fph'+(fonlyPh?' checked':'')+'> เฉพาะเคสที่มีรูป</label>'+(nph?'<button type="button" class="btn" data-fgal>ดูรูปทั้งหมด ('+nph+')</button>':'')+'</div></div>';
@@ -1428,7 +1430,7 @@ function markDel(c){delete store.sync.dirty[c.id];store.sync.dels[c.id]=1;schedu
 function schedule(){clearTimeout(SY.timer);if(syOn())SY.timer=setTimeout(flush,2500);paintSync()}
 function caseIndex(){var m={};allCases(function(c,p,d){m[c.id]={c:c,p:p,d:d}});return m}
 function unsyncedPhotos(dates){var idx=caseIndex(),out=[];Object.keys(photoMap).forEach(function(k){var o=idx[k];if(!o||(dates&&dates.indexOf(o.d)<0))return;photoMap[k].forEach(function(x){if(!x.fileId)out.push({x:x,o:o})})});return out}
-function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)&&!isFixed(o.c)&&(!dates||dates.indexOf(o.d)>=0))n++});return n}
+function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)&&!isRoutine(o.c)&&(!dates||dates.indexOf(o.d)>=0))n++});return n}
 function pending(){var s=store.sync;return dirtyIn(null)+Object.keys(s.dels).length+Object.keys(s.pdels).length+unsyncedPhotos().length}
 function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c)}}
 function post(body){
@@ -1460,7 +1462,7 @@ function flush(){
   SY.busy=true;SY.err='';paintSync();
   var s=store.sync;
   /* "เหตุการณ์ปกติ" lines are not kept in the sheet: rows sent before are removed once */
-  if(!s.noFixed){s.noFixed=1;var ix0=caseIndex();Object.keys(ix0).forEach(function(i){if(isFixed(ix0[i].c)){s.dels[i]=1;delete s.dirty[i]}});save()}
+  if(!s.noRoutine){s.noFixed=s.noRoutine=1;var ix0=caseIndex();Object.keys(ix0).forEach(function(i){if(isRoutine(ix0[i].c)){s.dels[i]=1;delete s.dirty[i]}});save()}
   return Promise.resolve().then(function(){
     var ids=Object.keys(s.dels);if(!ids.length)return;
     return post({action:'deleteCases',ids:ids}).then(function(){ids.forEach(function(i){delete s.dels[i]});save()});
@@ -1469,7 +1471,7 @@ function flush(){
     return post({action:'deletePhotos',ids:ids}).then(function(){ids.forEach(function(i){delete s.pdels[i]});save()});
   }).then(function(){
     var idx=caseIndex(),list=[],stamp={},chain=Promise.resolve();
-    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&isFixed(o.c)){delete s.dirty[i];return}if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
+    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&isRoutine(o.c)){delete s.dirty[i];return}if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
     for(var k=0;k<list.length;k+=150)(function(part){chain=chain.then(function(){return post({action:'upsertCases',cases:part}).then(function(){part.forEach(function(r){if(s.dirty[r.id]===stamp[r.id])delete s.dirty[r.id]});save();paintSync()})})})(list.slice(k,k+150));
     return chain;
   }).then(function(){
