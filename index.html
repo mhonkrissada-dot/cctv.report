@@ -1602,7 +1602,7 @@ function settings(){
   return o;
 }
 function senderName(S){return String((S.sender==='__other'?S.senderOther:S.sender)||'').replace(/\s*EOC$/i,'')+'EOC'}
-function thaiShort(iso){var a=String(iso).split('-');return (+a[2])+'/'+(+a[1])+'/'+(+a[0]+543)}
+function thaiShort(iso){var a=String(iso).split('-');return ('0'+(+a[2])).slice(-2)+'/'+('0'+(+a[1])).slice(-2)+'/'+(+a[0]+543)}
 function isNightOrder(list,p){
   var m=p&&p.mode||'';if(m==='night')return true;if(m==='day')return false;
   var s=curShift();if(s==='night')return true;if(s==='day')return false;
