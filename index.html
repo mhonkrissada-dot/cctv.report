@@ -1428,7 +1428,7 @@ function markDel(c){delete store.sync.dirty[c.id];store.sync.dels[c.id]=1;schedu
 function schedule(){clearTimeout(SY.timer);if(syOn())SY.timer=setTimeout(flush,2500);paintSync()}
 function caseIndex(){var m={};allCases(function(c,p,d){m[c.id]={c:c,p:p,d:d}});return m}
 function unsyncedPhotos(dates){var idx=caseIndex(),out=[];Object.keys(photoMap).forEach(function(k){var o=idx[k];if(!o||(dates&&dates.indexOf(o.d)<0))return;photoMap[k].forEach(function(x){if(!x.fileId)out.push({x:x,o:o})})});return out}
-function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)&&(!dates||dates.indexOf(o.d)>=0))n++});return n}
+function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)&&!isFixed(o.c)&&(!dates||dates.indexOf(o.d)>=0))n++});return n}
 function pending(){var s=store.sync;return dirtyIn(null)+Object.keys(s.dels).length+Object.keys(s.pdels).length+unsyncedPhotos().length}
 function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c)}}
 function post(body){
@@ -1459,6 +1459,8 @@ function flush(){
   if(SY.busy){SY.again=true;return Promise.resolve()}
   SY.busy=true;SY.err='';paintSync();
   var s=store.sync;
+  /* "เหตุการณ์ปกติ" lines are not kept in the sheet: rows sent before are removed once */
+  if(!s.noFixed){s.noFixed=1;var ix0=caseIndex();Object.keys(ix0).forEach(function(i){if(isFixed(ix0[i].c)){s.dels[i]=1;delete s.dirty[i]}});save()}
   return Promise.resolve().then(function(){
     var ids=Object.keys(s.dels);if(!ids.length)return;
     return post({action:'deleteCases',ids:ids}).then(function(){ids.forEach(function(i){delete s.dels[i]});save()});
@@ -1467,7 +1469,7 @@ function flush(){
     return post({action:'deletePhotos',ids:ids}).then(function(){ids.forEach(function(i){delete s.pdels[i]});save()});
   }).then(function(){
     var idx=caseIndex(),list=[],stamp={},chain=Promise.resolve();
-    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
+    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&isFixed(o.c)){delete s.dirty[i];return}if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
     for(var k=0;k<list.length;k+=150)(function(part){chain=chain.then(function(){return post({action:'upsertCases',cases:part}).then(function(){part.forEach(function(r){if(s.dirty[r.id]===stamp[r.id])delete s.dirty[r.id]});save();paintSync()})})})(list.slice(k,k+150));
     return chain;
   }).then(function(){
