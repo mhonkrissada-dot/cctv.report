@@ -856,34 +856,54 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .brandwrap{display:flex;align-items:center;gap:10px}
 .brandwrap.hasnote{flex:1 1 100%}
 .notebtn.inrow{margin-left:auto}
-#notep{position:fixed;z-index:60;top:96px;right:max(14px,calc((100vw - 1600px)/2 + 14px));width:min(760px,calc(100vw - 28px));height:min(70vh,640px);min-height:220px;display:flex;flex-direction:column;background:#FFFCF2;border:1px solid #F0DFAE;border-radius:16px;box-shadow:0 18px 50px rgba(16,24,40,.18);resize:both;overflow:hidden;animation:npop .12s ease-out}
+
+
+/* --- note pad colours (yellow / blue / green / pink / gray) --- */
+#notep{--n-bg:#FFFCF2;--n-hd:#FFF3CF;--n-bd:#F0DFAE;--n-ln:#F3E6BF;--n-ink:#5C3D00;--n-mu:#A08440;--n-ac:#E8B53A;--n-tx:#2B2410}
+#notep[data-c=blue]{--n-bg:#F5F9FF;--n-hd:#E4EEFF;--n-bd:#C9DAF8;--n-ln:#DCE7FA;--n-ink:#1B3E7A;--n-mu:#6A84B5;--n-ac:#4C7FE0;--n-tx:#14213D}
+#notep[data-c=green]{--n-bg:#F4FBF6;--n-hd:#E1F4E7;--n-bd:#BFE3CB;--n-ln:#D5EEDC;--n-ink:#14532D;--n-mu:#5E9474;--n-ac:#2FA35B;--n-tx:#10261A}
+#notep[data-c=pink]{--n-bg:#FFF6F8;--n-hd:#FFE4EA;--n-bd:#F6C6D2;--n-ln:#F9DAE2;--n-ink:#7A1F3A;--n-mu:#B56D84;--n-ac:#E0577D;--n-tx:#33101C}
+#notep[data-c=gray]{--n-bg:#FAFAFB;--n-hd:#EEF0F3;--n-bd:#D9DDE3;--n-ln:#E6E9ED;--n-ink:#2A3140;--n-mu:#7C8595;--n-ac:#6B7686;--n-tx:#1C2230}
+#notep{position:fixed;z-index:60;top:96px;right:max(14px,calc((100vw - 1600px)/2 + 14px));width:min(760px,calc(100vw - 28px));height:min(70vh,640px);min-height:220px;display:flex;flex-direction:column;background:var(--n-bg);border:1px solid var(--n-bd);border-radius:16px;box-shadow:0 18px 50px rgba(16,24,40,.18);resize:both;overflow:hidden;animation:npop .12s ease-out}
 #notep[hidden]{display:none}
 @keyframes npop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-#notep .nh{display:flex;align-items:center;gap:8px;padding:10px 12px 8px 16px;border-bottom:1px solid #F3E6BF}
-#notep .nh b{font-size:14px;color:#5C3D00}
-#notep .nst{font-size:11.5px;color:#A08440}
+#notep .nh{display:flex;align-items:center;gap:8px;padding:8px 10px 7px 14px;border-bottom:1px solid var(--n-ln)}
+#notep .nh b{font-size:14px;color:var(--n-ink)}
+#notep .nst{font-size:11.5px;color:var(--n-mu)}
 #notep .grow{flex:1}
-#notep .nb{font:inherit;font-size:12px;border:1px solid #EAD9A6;background:#fff;color:#6B4C00;border-radius:999px;padding:3px 11px;cursor:pointer}
-#notep .nb:hover{background:#FFF3CF}
+#notep .nb{font:inherit;font-size:12px;border:1px solid var(--n-bd);background:#fff;color:var(--n-ink);border-radius:999px;padding:3px 11px;cursor:pointer}
+#notep .nb:hover{background:var(--n-hd)}
 #notep .nx{padding:3px 9px}
-#notetxt{flex:1;width:100%;box-sizing:border-box;border:0;background:transparent;resize:none;padding:12px 16px;font:inherit;font-size:14px;line-height:1.7;color:#2B2410;outline:none}
-
+#notep .nsw{display:flex;gap:5px;margin-right:4px}
+#notep .nsw button{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:0}
+#notep .nsw button[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--n-ac)}
 #notep .ntw{flex:1;overflow:auto;position:relative}
-.ntab{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13.5px}
-.ntab col.c1{width:118px}.ntab col.c2{width:66px}.ntab col.c4{width:30px}
-.ntab th{position:sticky;top:0;z-index:1;background:#FFF3CF;color:#6B4C00;font-size:12px;font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid #EAD9A6}
-.ntab td{border-bottom:1px solid #F3E6BF;vertical-align:top;padding:0}
-.ntab td>div{padding:6px 8px;min-height:20px;line-height:1.5;outline:none;overflow-wrap:anywhere;color:#2B2410}
-.ntab td>div:focus{background:#fff;box-shadow:inset 0 0 0 2px #E8B53A;border-radius:4px}
-.ntab td.np>div{font-weight:600;color:#5C3D00}
-.ntab td.nt>div{font-variant-numeric:tabular-nums;color:#7A5A10}
-.ntab tr:hover td{background:rgba(255,243,207,.45)}
-.ntab td.nd{text-align:center}
-.ntab td.nd button{border:0;background:none;color:#C9A962;cursor:pointer;font-size:12px;padding:6px 4px;opacity:0;transition:opacity .1s}
-.ntab tr:hover td.nd button,.ntab td.nd button:focus{opacity:1}
-.ntab td.nd button:hover{color:#B42318}
-.nempty{margin:22px 16px;color:#A08440;font-size:13px;line-height:1.7;text-align:center}
+.ntab{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+.ntab col.c1{width:104px}.ntab col.c2{width:60px}.ntab col.c4{width:52px}
+.ntab th{position:sticky;top:0;z-index:1;background:var(--n-hd);color:var(--n-ink);font-size:11.5px;font-weight:600;text-align:left;padding:5px 8px;border-bottom:1px solid var(--n-bd)}
+.ntab td{border-bottom:1px solid var(--n-ln);vertical-align:top;padding:0}
+.ntab td>div{padding:3px 8px;min-height:18px;line-height:1.45;outline:none;overflow-wrap:anywhere;color:var(--n-tx)}
+.ntab td>div:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--n-ac);border-radius:4px}
+.ntab td.np>div{font-weight:600;color:var(--n-ink)}
+.ntab td.nt>div{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--n-mu)}
+.ntab tr:hover td{background:color-mix(in srgb,var(--n-hd) 55%,transparent)}
+.ntab td.nd{white-space:nowrap;text-align:right;padding-right:4px}
+.ntab td.nd button{border:0;background:none;color:var(--n-mu);cursor:pointer;padding:3px 4px;border-radius:6px;line-height:0;vertical-align:top}
+.ntab td.nd button svg{width:14px;height:14px}
+.ntab td.nd .ndl{opacity:0;transition:opacity .1s}
+.ntab tr:hover td.nd .ndl,.ntab td.nd .ndl:focus{opacity:1}
+.ntab td.nd .ncp:hover{color:var(--n-ac);background:#fff}
+.ntab td.nd .ndl:hover{color:#B42318;background:#fff}
+.ntab td.nd .ncp.ok{color:#2FA35B}
+.nempty{margin:22px 16px;color:var(--n-mu);font-size:13px;line-height:1.7;text-align:center}
 .nempty[hidden]{display:none}
+
+#notep .nq{display:flex;align-items:center;gap:6px;margin-left:6px;background:#fff;border:1px solid var(--n-bd);border-radius:999px;padding:0 10px;height:28px;color:var(--n-mu);min-width:0;flex:0 1 220px}
+#notep .nq svg{width:14px;height:14px;flex:none}
+#notep .nq input{border:0;outline:none;background:transparent;font:inherit;font-size:12.5px;color:var(--n-tx);width:100%;min-width:0}
+#notep .nq:focus-within{border-color:var(--n-ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--n-ac) 25%,transparent)}
+.ntab td.nnone{padding:18px;text-align:center;color:var(--n-mu)}
+@media (max-width:600px){#notep .nh{flex-wrap:wrap}#notep .nq{order:9;flex:1 1 100%;margin:4px 0 0}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -909,7 +929,9 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
     </div>
   </div></div>
   <div id="notep" role="dialog" aria-label="โน้ต" hidden>
-    <div class="nh"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span>
+    <div class="nh"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span>
+      <label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><span class="grow"></span>
+      <span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span>
       <button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
     <div class="ntw" id="ntw"><table class="ntab"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
       <thead><tr><th>โครงการ</th><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody id="nbody"></tbody></table>
@@ -2364,14 +2386,14 @@ function bulkPhotos(files){
   function load(){try{rows=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){rows=null}
     if(!Array.isArray(rows)){rows=[];try{var o=localStorage.getItem(OLD);if(o&&o.trim())rows=parse(o)}catch(e){}}
     rows=rows.map(function(r){return [r[0]||'',r[1]||'',nodia(r[2])]})}
-  function nodia(x){return String(x||'').replace(/♦\uFE0F?\s*/g,'').trim()}
+  function nodia(x){return String(x||'').replace(/(?:♦|◆|🔶|🔸|💠)\uFE0F?\s*/g,'').trim()}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(rows));st.textContent='บันทึกแล้ว · '+rows.length+' แถว'}catch(e){st.textContent='บันทึกไม่ได้'}dot()}
   function later(){st.textContent='กำลังบันทึก…';clearTimeout(t);t=setTimeout(save,350)}
   function dot(){btn.querySelector('.ndot').hidden=!rows.length;emp.hidden=!!rows.length}
   function tm(x){var m=String(x||'').match(/(\d{1,2})\s*[.:]\s*(\d{2})/);return m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:''}
   /* a line from the sheet: project, view, time, text — or project, time, text — or just the text */
   function parse(text){
-    return String(text).replace(/♦\uFE0F?\s*/g,'').replace(/\r/g,'').split('\n').filter(function(l){return l.trim()}).map(function(l){
+    return String(text).replace(/(?:♦|◆|🔶|🔸|💠)\uFE0F?\s*/g,'').replace(/\r/g,'').split('\n').filter(function(l){return l.trim()}).map(function(l){
       var c=l.split('\t').map(function(x){return x.trim()});
       if(c.length>=4)return [c[0],tm(c[2])||c[2],c.slice(3).join(' ')];
       if(c.length===3)return tm(c[1])?[c[0],tm(c[1]),c[2]]:[c[0],tm(c[2]),c[1]+' '+c[2]];
@@ -2380,17 +2402,33 @@ function bulkPhotos(files){
     });
   }
   function cell(v,i,k,cls){return '<td class="'+cls+'"><div contenteditable="plaintext-only" spellcheck="false" data-r="'+i+'" data-k="'+k+'">'+esc(v||'')+'</div></td>'}
+  var nq=document.getElementById('nq'),qv='';
+  function hit(r){if(!qv)return true;var h=(r[0]+' '+r[1]+' '+r[2]).toLowerCase().replace(/\s+/g,'');return qv.split(/\s+/).every(function(w){return !w||h.indexOf(w)>=0})}
   function paint(){
-    body.innerHTML=rows.map(function(r,i){return '<tr>'+cell(r[0],i,0,'np')+cell(r[1],i,1,'nt')+cell(r[2],i,2,'ne')+'<td class="nd"><button type="button" data-del="'+i+'" aria-label="ลบแถว" title="ลบแถว">✕</button></td></tr>'}).join('');
-    dot();st.textContent=rows.length?rows.length+' แถว':'บันทึกอัตโนมัติ';
+    var shown=0;
+    body.innerHTML=rows.map(function(r,i){if(!hit(r))return '';shown++;return '<tr>'+cell(r[0],i,0,'np')+cell(r[1],i,1,'nt')+cell(r[2],i,2,'ne')+'<td class="nd"><button type="button" class="ncp" data-cp="'+i+'" aria-label="คัดลอกเหตุการณ์" title="คัดลอกเหตุการณ์"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9.5" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 12.5V5a1.5 1.5 0 0 1 1.5-1.5H13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button type="button" class="ndl" data-del="'+i+'" aria-label="ลบแถว" title="ลบแถว"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></td></tr>'}).join('');
+    dot();st.textContent=rows.length?(qv?'พบ '+shown+' จาก '+rows.length+' แถว':rows.length+' แถว'):'บันทึกอัตโนมัติ';
+    if(qv&&!shown&&rows.length){body.innerHTML='<tr><td colspan="4" class="nnone">ไม่พบ “'+esc(nq.value)+'”</td></tr>'}
   }
+  nq.addEventListener('input',function(){qv=nq.value.trim().toLowerCase();clearTimeout(nq.t);nq.t=setTimeout(paint,120)});
+  nq.addEventListener('keydown',function(e){if(e.key==='Escape'&&nq.value){e.stopPropagation();nq.value='';qv='';paint()}});
   load();paint();
   body.addEventListener('input',function(e){var d=e.target.closest('[data-r]');if(!d)return;rows[+d.dataset.r][+d.dataset.k]=d.textContent;later()});
   body.addEventListener('keydown',function(e){var d=e.target.closest('[data-r]');if(!d)return;
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();var i=+d.dataset.r,k=+d.dataset.k;
       if(k<2){var n=body.querySelector('[data-r="'+i+'"][data-k="'+(k+1)+'"]');if(n)n.focus()}
       else{if(i===rows.length-1){rows.push(['','',''])};save();paint();var n2=body.querySelector('[data-r="'+(i+1)+'"][data-k="0"]');if(n2)n2.focus()}}});
-  body.addEventListener('click',function(e){var b=e.target.closest('[data-del]');if(!b)return;rows.splice(+b.dataset.del,1);save();paint()});
+  body.addEventListener('click',function(e){
+    var c=e.target.closest('[data-cp]');
+    if(c){var v=String(rows[+c.dataset.cp][2]||'').trim();if(!v){toast('แถวนี้ยังไม่มีข้อความ');return}
+      var ok=function(){c.classList.add('ok');setTimeout(function(){c.classList.remove('ok')},900);toast('คัดลอกแล้ว')};
+      (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(ok,function(){var x=document.createElement('textarea');x.value=v;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove();ok()});return}
+    var b=e.target.closest('[data-del]');if(!b)return;rows.splice(+b.dataset.del,1);save();paint()});
+  /* note colour */
+  var CK='cctv-note-color';
+  function setColor(c){pane.dataset.c=c;Array.prototype.forEach.call(document.querySelectorAll('#nsw [data-nc]'),function(b){b.setAttribute('aria-pressed',b.dataset.nc===c?'true':'false')});try{localStorage.setItem(CK,c)}catch(e){}}
+  var c0='yellow';try{c0=localStorage.getItem(CK)||'yellow'}catch(e){}setColor(c0);
+  document.getElementById('nsw').addEventListener('click',function(e){var b=e.target.closest('[data-nc]');if(b)setColor(b.dataset.nc)});
   pane.addEventListener('paste',function(e){
     var tx=e.clipboardData?e.clipboardData.getData('text/plain'):'';
     if(!tx)return;
