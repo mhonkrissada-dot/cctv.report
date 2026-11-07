@@ -933,7 +933,6 @@ html.notedock #notep .nq{order:0;flex:1 1 auto;margin:0}
 .ntab td.np>div,.ntab td.nt>div{padding-right:4px}
 /* when the note is pinned, the project list on the left gets narrower */
 html.notedock .layout{grid-template-columns:200px minmax(0,1fr)}
-html.notedock .layout:has(.rail.dense2){grid-template-columns:250px minmax(0,1fr)}
 html.notedock .rail .fn{font-size:12.5px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
@@ -2017,7 +2016,8 @@ function render(){
 function fitRail(){
   var r=app.querySelector('.rail');if(!r||window.innerWidth<=900){if(r)r.classList.remove('dense','dense2');return}
   var y=r.scrollTop;r.classList.remove('dense','dense2');
-  if(r.scrollHeight>r.clientHeight+1){r.classList.add('dense');if(r.scrollHeight>r.clientHeight+1){r.classList.remove('dense');r.classList.add('dense2')}}
+  var one=document.documentElement.classList.contains('notedock'); /* note pinned: keep one vertical column */
+  if(r.scrollHeight>r.clientHeight+1){r.classList.add('dense');if(!one&&r.scrollHeight>r.clientHeight+1){r.classList.remove('dense');r.classList.add('dense2')}}
   r.scrollTop=y;
   Array.prototype.forEach.call(r.querySelectorAll('button.f'),function(b){var n=b.querySelector('.fn'),m=b.querySelector('.fm');if(n)b.title=n.textContent+(m?' · '+m.textContent:'')});
 }
