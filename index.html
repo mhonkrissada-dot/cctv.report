@@ -2362,14 +2362,16 @@ function bulkPhotos(files){
 (function(){
   var KEY='cctv-note2',OLD='cctv-note',btn=document.getElementById('notebtn'),pane=document.getElementById('notep'),body=document.getElementById('nbody'),st=document.getElementById('nst'),emp=document.getElementById('nempty'),t=null,rows=[];
   function load(){try{rows=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){rows=null}
-    if(!Array.isArray(rows)){rows=[];try{var o=localStorage.getItem(OLD);if(o&&o.trim())rows=parse(o)}catch(e){}}}
+    if(!Array.isArray(rows)){rows=[];try{var o=localStorage.getItem(OLD);if(o&&o.trim())rows=parse(o)}catch(e){}}
+    rows=rows.map(function(r){return [r[0]||'',r[1]||'',nodia(r[2])]})}
+  function nodia(x){return String(x||'').replace(/♦\uFE0F?\s*/g,'').trim()}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(rows));st.textContent='บันทึกแล้ว · '+rows.length+' แถว'}catch(e){st.textContent='บันทึกไม่ได้'}dot()}
   function later(){st.textContent='กำลังบันทึก…';clearTimeout(t);t=setTimeout(save,350)}
   function dot(){btn.querySelector('.ndot').hidden=!rows.length;emp.hidden=!!rows.length}
   function tm(x){var m=String(x||'').match(/(\d{1,2})\s*[.:]\s*(\d{2})/);return m&&+m[1]<24&&+m[2]<60?('0'+m[1]).slice(-2)+':'+m[2]:''}
   /* a line from the sheet: project, view, time, text — or project, time, text — or just the text */
   function parse(text){
-    return String(text).replace(/\r/g,'').split('\n').filter(function(l){return l.trim()}).map(function(l){
+    return String(text).replace(/♦\uFE0F?\s*/g,'').replace(/\r/g,'').split('\n').filter(function(l){return l.trim()}).map(function(l){
       var c=l.split('\t').map(function(x){return x.trim()});
       if(c.length>=4)return [c[0],tm(c[2])||c[2],c.slice(3).join(' ')];
       if(c.length===3)return tm(c[1])?[c[0],tm(c[1]),c[2]]:[c[0],tm(c[2]),c[1]+' '+c[2]];
