@@ -919,6 +919,22 @@ html.notedock #notep .nrs{display:block;position:absolute;left:0;top:0;bottom:0;
 html.notedock #notep .nrs:hover,html.notedock #notep .nrs.on{background:linear-gradient(90deg,var(--n-ac),transparent);opacity:.5}
 html.notedock #notep .nh{flex-wrap:wrap}
 html.notedock #notep .nq{order:9;flex:1 1 100%;margin:4px 0 0}
+
+/* note header: two balanced rows */
+#notep .nh{display:block;padding:9px 12px 8px 14px}
+#notep .nh1,#notep .nh2{display:flex;align-items:center;gap:6px}
+#notep .nh2{margin-top:7px}
+#notep .nh2 .nq{flex:1 1 auto;margin:0;order:0}
+html.notedock #notep .nh{flex-wrap:nowrap}
+html.notedock #notep .nq{order:0;flex:1 1 auto;margin:0}
+@media (max-width:600px){#notep .nq{order:0;flex:1 1 auto;margin:0}}
+/* narrower first columns, more room for the event text */
+.ntab col.c1{width:92px!important}.ntab col.c2{width:48px!important}.ntab col.c4{width:46px!important}
+.ntab td.np>div,.ntab td.nt>div{padding-right:4px}
+/* when the note is pinned, the project list on the left gets narrower */
+html.notedock .layout{grid-template-columns:200px minmax(0,1fr)}
+html.notedock .layout:has(.rail.dense2){grid-template-columns:250px minmax(0,1fr)}
+html.notedock .rail .fn{font-size:12.5px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -944,10 +960,10 @@ html.notedock #notep .nq{order:9;flex:1 1 100%;margin:4px 0 0}
     </div>
   </div></div>
   <div id="notep" role="dialog" aria-label="โน้ต" hidden><div class="nrs" id="nrs" title="ลากเพื่อปรับความกว้าง" aria-hidden="true"></div>
-    <div class="nh"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span>
-      <label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><span class="grow"></span>
-      <span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span>
-      <button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
+    <div class="nh">
+      <div class="nh1"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span><span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span><button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
+      <div class="nh2"><label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button></div>
+    </div>
     <div class="ntw" id="ntw"><table class="ntab"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
       <thead><tr><th>โครงการ</th><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody id="nbody"></tbody></table>
       <p class="nempty" id="nempty">วางจากชีตหรือ Excel ได้เลย (Ctrl+V) แอปจะแยกเป็น โครงการ / เวลา / เหตุการณ์ ให้เอง<br>หรือกด + แถว เพื่อพิมพ์เอง · เก็บไว้ในเครื่องนี้เท่านั้น</p></div>
