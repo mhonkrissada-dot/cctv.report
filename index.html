@@ -846,6 +846,27 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
 .qbox .qimg{display:inline-flex;align-items:center;gap:6px;flex:none;cursor:pointer}
 .qbox .qimg svg{width:16px;height:16px;color:currentColor}
 .qbox.over{box-shadow:0 0 0 2px var(--accent)}
+
+/* --- note pad, top right --- */
+.notebtn{display:inline-flex;align-items:center;gap:6px;position:relative;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:#FFF8E1;color:#7A5200;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .12s,box-shadow .12s}
+.notebtn svg{width:16px;height:16px}
+.notebtn:hover{background:#FFEFC2}
+.notebtn[aria-expanded=true]{background:#FFE7A3;box-shadow:inset 0 0 0 1px #E8B53A}
+.notebtn .ndot{position:absolute;top:6px;right:8px;width:7px;height:7px;border-radius:50%;background:#E8A33D}
+.brandwrap{display:flex;align-items:center;gap:10px}
+.brandwrap.hasnote{flex:1 1 100%}
+.notebtn.inrow{margin-left:auto}
+#notep{position:fixed;z-index:60;top:96px;right:max(14px,calc((100vw - 1600px)/2 + 14px));width:min(420px,calc(100vw - 28px));height:min(62vh,560px);min-height:220px;display:flex;flex-direction:column;background:#FFFCF2;border:1px solid #F0DFAE;border-radius:16px;box-shadow:0 18px 50px rgba(16,24,40,.18);resize:both;overflow:hidden;animation:npop .12s ease-out}
+#notep[hidden]{display:none}
+@keyframes npop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#notep .nh{display:flex;align-items:center;gap:8px;padding:10px 12px 8px 16px;border-bottom:1px solid #F3E6BF}
+#notep .nh b{font-size:14px;color:#5C3D00}
+#notep .nst{font-size:11.5px;color:#A08440}
+#notep .grow{flex:1}
+#notep .nb{font:inherit;font-size:12px;border:1px solid #EAD9A6;background:#fff;color:#6B4C00;border-radius:999px;padding:3px 11px;cursor:pointer}
+#notep .nb:hover{background:#FFF3CF}
+#notep .nx{padding:3px 9px}
+#notetxt{flex:1;width:100%;box-sizing:border-box;border:0;background:transparent;resize:none;padding:12px 16px;font:inherit;font-size:14px;line-height:1.7;color:#2B2410;outline:none}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -867,8 +888,14 @@ body.cvoff .proj,body.cvoff .sp,body.cvoff .fday,body.cvoff .fgroup{content-visi
         <button type="button" id="m-fold" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 1.5h7.5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>โฟลเดอร์</span></button>
         <button type="button" id="m-data" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>จัดการข้อมูล</span></button>
       </div>
+      <button type="button" class="notebtn" id="notebtn" aria-expanded="false" aria-controls="notep" title="โน้ต (จดไว้ดูเอง ไม่ส่งไปไหน)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7.5L16 6.5V17H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 3v4h4M7.5 10h6M7.5 13h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>โน้ต<i class="ndot" hidden></i></button>
     </div>
   </div></div>
+  <div id="notep" role="dialog" aria-label="โน้ต" hidden>
+    <div class="nh"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span>
+      <button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
+    <textarea id="notetxt" spellcheck="false" placeholder="จดอะไรก็ได้ เช่น เรื่องที่ต้องตามต่อ เบอร์โทร ข้อความที่ใช้บ่อย&#10;บันทึกให้อัตโนมัติในเครื่องนี้ ไม่ส่งไปชีตหรือ LINE"></textarea>
+  </div>
   <p class="totals" id="totals"></p>
   <div id="app"></div>
 </div>
@@ -2312,7 +2339,35 @@ function bulkPhotos(files){
     toast('ใส่รูป '+imgs.length+' รูป ให้ '+ids.length+' เหตุการณ์'+(byTime?' (ตามเวลา '+byTime+')':'')+(left?' · ยังไม่มีรูปอีก '+left+' เหตุการณ์':''));
   });
 }
+/* note pad: kept in this browser only */
+(function(){
+  var KEY='cctv-note',btn=document.getElementById('notebtn'),pane=document.getElementById('notep'),ta=document.getElementById('notetxt'),st=document.getElementById('nst'),t=null;
+  function get(){try{return localStorage.getItem(KEY)||''}catch(e){return ''}}
+  function dot(){btn.querySelector('.ndot').hidden=!ta.value.trim()}
+  function put(){try{localStorage.setItem(KEY,ta.value);st.textContent='บันทึกแล้ว'}catch(e){st.textContent='บันทึกไม่ได้'}dot()}
+  ta.value=get();dot();
+  /* keep the button in the top-right corner: in the first row when the bar wraps to two rows */
+  var bw=document.querySelector('.brandwrap'),tl=document.querySelector('.bar .tools');
+  function place(){
+    if(btn.parentNode!==tl){tl.appendChild(btn);bw.classList.remove('hasnote');btn.classList.remove('inrow')}
+    if(tl.offsetTop>bw.offsetTop+4){bw.appendChild(btn);bw.classList.add('hasnote');btn.classList.add('inrow')}
+  }
+  place();window.addEventListener('load',place);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(place);
+  window.addEventListener('resize',function(){clearTimeout(place.t);place.t=setTimeout(place,60)});
+  function open(on){pane.hidden=!on;btn.setAttribute('aria-expanded',on?'true':'false');if(on){ta.focus();try{ta.setSelectionRange(ta.value.length,ta.value.length)}catch(e){}}}
+  btn.addEventListener('click',function(){open(pane.hidden)});
+  document.getElementById('nclose').addEventListener('click',function(){open(false);btn.focus()});
+  document.getElementById('ncopy').addEventListener('click',function(){var v=ta.value;if(!v.trim()){toast('โน้ตว่างอยู่');return}(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(function(){toast('คัดลอกโน้ตแล้ว')},function(){ta.select();document.execCommand('copy');toast('คัดลอกโน้ตแล้ว')})});
+  var cb=document.getElementById('nclear'),ct=null;
+  cb.addEventListener('click',function(){if(!ta.value.trim())return;
+    if(cb.dataset.arm){clearTimeout(ct);delete cb.dataset.arm;cb.textContent='ล้าง';ta.value='';put();ta.focus();toast('ล้างโน้ตแล้ว');return}
+    cb.dataset.arm='1';cb.textContent='กดอีกครั้งเพื่อล้าง';ct=setTimeout(function(){delete cb.dataset.arm;cb.textContent='ล้าง'},3000)});
+  ta.addEventListener('input',function(){st.textContent='กำลังบันทึก…';clearTimeout(t);t=setTimeout(put,400)});
+  window.addEventListener('storage',function(e){if(e.key===KEY&&document.activeElement!==ta){ta.value=e.newValue||'';dot()}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!pane.hidden&&pane.contains(document.activeElement)){open(false);btn.focus()}});
+})();
 document.addEventListener('paste',function(e){
+  if(e.target&&e.target.closest&&e.target.closest('#notep'))return;
   if(mode!=='edit')return;
   if(e.target&&e.target.id==='qpaste'){
     var qi=clipImages(e.clipboardData),qt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
