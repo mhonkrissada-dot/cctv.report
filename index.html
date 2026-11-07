@@ -935,7 +935,7 @@ html.notedock #notep .nq{order:0;flex:1 1 auto;margin:0}
 html.notedock .layout{grid-template-columns:200px minmax(0,1fr)}
 html.notedock .rail .fn{font-size:12.5px}
 
-.ntab col.c4{width:70px!important}
+.ntab col.c4{width:46px!important}
 .ntab td.nd .nin{color:var(--n-ac)}
 .ntab td.nd .nin:hover{background:#fff}
 .ntab tr.done td{opacity:.55}
@@ -948,6 +948,13 @@ html.notedock .rail .fn{font-size:12.5px}
 #notep .nb{white-space:nowrap}
 #notep .nh3{display:flex;align-items:center;gap:6px;margin-top:7px;flex-wrap:wrap}
 #notep .nhint{margin-left:auto;font-size:11.5px;color:var(--n-mu)}
+
+/* project panel: full height, add-project button pinned at the bottom */
+@media (min-width:901px){
+  .side{height:calc(100vh - 108px)!important}
+  .side .rail{flex:1 1 auto;min-height:0}
+  .side>.addp{flex:none;margin-top:8px;width:100%}
+}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -976,7 +983,7 @@ html.notedock .rail .fn{font-size:12.5px}
     <div class="nh">
       <div class="nh1"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span><span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span><button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
       <div class="nh2"><label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button></div>
-      <div class="nh3"><button type="button" class="nb nchip" id="nonly" aria-pressed="true" hidden title="แสดงเฉพาะแถวของโครงการที่เปิดอยู่"><span></span></button><button type="button" class="nb nchip" id="nhide" aria-pressed="false" title="ซ่อนแถวที่ใส่ในบันทึกแล้ว">ซ่อนที่ใส่แล้ว</button><span class="nhint">กด ➜ ท้ายแถวเพื่อใส่ในบันทึก</span></div>
+      <div class="nh3"><button type="button" class="nb nchip" id="nonly" aria-pressed="true" hidden title="แสดงเฉพาะแถวของโครงการที่เปิดอยู่"><span></span></button></div>
     </div>
     <div class="ntw" id="ntw"><table class="ntab"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
       <thead><tr><th>โครงการ</th><th>เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody id="nbody"></tbody></table>
@@ -1661,7 +1668,7 @@ function railHTML(){
     h+='</div>';
   });
   if(pq&&!shown)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
-  return h+'<button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button>';
+  return h;
 }
 function caseHTML(c){
   var th=allPhotos(c).map(function(p){return '<div class="thumb"><img src="'+imgURL(p)+'" decoding="async" loading="lazy" alt="รูปเหตุการณ์ เวลา '+hhmm(c.time)+'" data-zoom><button type="button" class="cp" data-act="copyphoto" data-pid="'+p.id+'">คัดลอก</button><button type="button" class="x" data-act="delphoto" data-pid="'+p.id+'" aria-label="ลบรูป">×</button></div>'}).join('');
@@ -1704,7 +1711,7 @@ function renderEdit(){
   }else{
     body=ps.filter(function(p){return p.id===sel}).map(function(p){return heroHTML(p)+projHTML(p)}).join('');
   }
-  app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav></div><div id="main">'+quickHTML()+body+'</div></div>';
+  app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav><button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button></div><div id="main">'+quickHTML()+body+'</div></div>';
   fitAll();paintArrows();
 }
 /* ---------- executive report: message form ---------- */
@@ -2451,21 +2458,19 @@ var appSave=save;
   }
   function cell(v,i,k,cls){return '<td class="'+cls+'"><div contenteditable="plaintext-only" spellcheck="false" data-r="'+i+'" data-k="'+k+'">'+esc(v||'')+'</div></td>'}
   var nq=document.getElementById('nq'),qv='';
-  var onlyP=true,hideDone=false;try{onlyP=localStorage.getItem('cctv-note-only')!=='0';hideDone=localStorage.getItem('cctv-note-hide')==='1'}catch(e){}
+  var onlyP=true;try{onlyP=localStorage.getItem('cctv-note-only')!=='0'}catch(e){}
   function curProj(){return sel&&sel!=='all'?R().projects.filter(function(p){return p.id===sel})[0]:null}
   function projOf(name){var k=norm(name||'');if(!k)return null;var ps=R().projects.filter(function(p){return norm(p.name)===k});if(ps.length)return ps[0];var m=matchProj(name);return m.length===1?m[0]:null}
   function hit(r){
-    if(hideDone&&r[3])return false;
     var cp=onlyP&&mode==='edit'&&curProj();if(cp&&norm(r[0])!==norm(cp.name))return false;
     if(!qv)return true;var h=(r[0]+' '+r[1]+' '+r[2]).toLowerCase().replace(/\s+/g,'');return qv.split(/\s+/).every(function(w){return !w||h.indexOf(w)>=0})}
   function paint(){
     var shown=0;
     var cp=onlyP&&mode==='edit'&&curProj(),fb=document.getElementById('nonly');
     fb.hidden=!curProj()||mode!=='edit';fb.setAttribute('aria-pressed',cp?'true':'false');fb.querySelector('span').textContent=curProj()?'เฉพาะ '+curProj().name:'';
-    document.getElementById('nhide').setAttribute('aria-pressed',hideDone?'true':'false');
-    body.innerHTML=rows.map(function(r,i){if(!hit(r))return '';shown++;return '<tr'+(r[3]?' class="done"':'')+'>'+cell(r[0],i,0,'np')+cell(r[1],i,1,'nt')+cell(r[2],i,2,'ne')+'<td class="nd"><button type="button" class="nin" data-in="'+i+'" aria-label="ใส่ในบันทึก" title="'+(r[3]?'ใส่บันทึกแล้ว (กดอีกครั้งเพื่อใส่ซ้ำ)':'ใส่ในบันทึกเป็นเหตุการณ์')+'">'+(r[3]?'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h10M10.5 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>')+'</button><button type="button" class="ncp" data-cp="'+i+'" aria-label="คัดลอกเหตุการณ์" title="คัดลอกเหตุการณ์"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9.5" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 12.5V5a1.5 1.5 0 0 1 1.5-1.5H13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button type="button" class="ndl" data-del="'+i+'" aria-label="ลบแถว" title="ลบแถว"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></td></tr>'}).join('');
+    body.innerHTML=rows.map(function(r,i){if(!hit(r))return '';shown++;return '<tr>'+cell(r[0],i,0,'np')+cell(r[1],i,1,'nt')+cell(r[2],i,2,'ne')+'<td class="nd"><button type="button" class="ncp" data-cp="'+i+'" aria-label="คัดลอกเหตุการณ์" title="คัดลอกเหตุการณ์"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9.5" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 12.5V5a1.5 1.5 0 0 1 1.5-1.5H13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button type="button" class="ndl" data-del="'+i+'" aria-label="ลบแถว" title="ลบแถว"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></td></tr>'}).join('');
     var nd=rows.filter(function(r){return r[3]}).length;
-    dot();st.textContent=rows.length?((qv||cp||hideDone)&&shown!==rows.length?'แสดง '+shown+' จาก '+rows.length+' แถว':rows.length+' แถว')+(nd?' · ใส่แล้ว '+nd:''):'บันทึกอัตโนมัติ';
+    dot();st.textContent=rows.length?((qv||cp)&&shown!==rows.length?'แสดง '+shown+' จาก '+rows.length+' แถว':rows.length+' แถว'):'บันทึกอัตโนมัติ';
     if(!shown&&rows.length){body.innerHTML='<tr><td colspan="4" class="nnone">'+(qv?'ไม่พบ “'+esc(nq.value)+'”':cp?'ไม่มีแถวของ '+esc(cp.name)+' · กด “เฉพาะ '+esc(cp.name)+'” เพื่อดูทั้งหมด':'ไม่มีแถวที่ยังไม่ใส่')+'</td></tr>'}
   }
   nq.addEventListener('input',function(){qv=nq.value.trim().toLowerCase();clearTimeout(nq.t);nq.t=setTimeout(paint,120)});
@@ -2473,28 +2478,13 @@ var appSave=save;
   load();paint();
   window.notePaint=function(){if(!pane.hidden)paint()};
   document.getElementById('nonly').addEventListener('click',function(){onlyP=!onlyP;try{localStorage.setItem('cctv-note-only',onlyP?'1':'0')}catch(e){}paint()});
-  document.getElementById('nhide').addEventListener('click',function(){hideDone=!hideDone;try{localStorage.setItem('cctv-note-hide',hideDone?'1':'0')}catch(e){}paint()});
+
   body.addEventListener('input',function(e){var d=e.target.closest('[data-r]');if(!d)return;rows[+d.dataset.r][+d.dataset.k]=d.textContent;later()});
   body.addEventListener('keydown',function(e){var d=e.target.closest('[data-r]');if(!d)return;
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();var i=+d.dataset.r,k=+d.dataset.k;
       if(k<2){var n=body.querySelector('[data-r="'+i+'"][data-k="'+(k+1)+'"]');if(n)n.focus()}
       else{if(i===rows.length-1){rows.push(['','',''])};save();paint();var n2=body.querySelector('[data-r="'+(i+1)+'"][data-k="0"]');if(n2)n2.focus()}}});
-  function insertRow(i,pp){
-    var r=rows[i],p=pp||(r[0].trim()?projOf(r[0]):curProj());
-    if(!p){var all=sortedProjects().filter(function(q){return q.name});
-      pickProj(r[0].trim()||'',all,function(q){insertRow(i,q)},r[0].trim()?true:'ask');return}
-    var tx=nodia(r[2]);if(!tx){toast('แถวนี้ยังไม่มีข้อความ');return}
-    var full='♦️ '+tx,t=tm(r[1])||tm((tx.match(/เวลา\s*\d{1,2}\s*[.:]\s*\d{2}/)||[''])[0])||nowHM();
-    var dup=p.cases.filter(function(c){return String(c.text).replace(/\s+/g,'')===full.replace(/\s+/g,'')})[0];
-    var c=dup||{id:uid(),time:t,text:full};
-    if(!dup){p.cases.push(c);markP(p);appSave();pend=[{id:c.id,need:'photo'}]}
-    rows[i][3]=1;save();
-    if(sel!=='all'&&sel!==p.id)sel=p.id;render();pasteCase=c.id;
-    var n=app.querySelector('.case[data-c="'+c.id+'"]');if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-140,behavior:'instant'})}
-    paint();toast(dup?'มีเหตุการณ์นี้ใน '+p.name+' แล้ว':'ใส่ '+p.name+' '+hhmm(c.time)+' แล้ว · วางรูปต่อได้เลย');
-  }
   body.addEventListener('click',function(e){
-    var ib=e.target.closest('[data-in]');if(ib){insertRow(+ib.dataset.in);return}
     var c=e.target.closest('[data-cp]');
     if(c){var v=String(rows[+c.dataset.cp][2]||'').trim();if(!v){toast('แถวนี้ยังไม่มีข้อความ');return}
       var ok=function(){c.classList.add('ok');setTimeout(function(){c.classList.remove('ok')},900);toast('คัดลอกแล้ว')};
