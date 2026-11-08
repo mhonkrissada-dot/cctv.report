@@ -965,6 +965,15 @@ html.notedock .rail .fn{font-size:12.5px}
 #notep.nhp col.c1,#notep.nht col.c2{width:0!important}
 #notep.nhp th.hp,#notep.nht th.ht{padding:0;font-size:0;overflow:hidden}
 #notep.nhp td.np>div,#notep.nht td.nt>div{display:none}
+
+/* PC: use the full screen width */
+@media (min-width:1200px){
+  .wrap{max-width:none}
+  #notep{right:14px}
+}
+#notep{min-width:360px}
+html.notedock #notep{min-width:0}
+#notep .nst{white-space:nowrap}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -2519,7 +2528,7 @@ var appSave=save;
   },true);
   /* pinned: the note becomes a right-hand column and the page narrows, so nothing is covered */
   var PK='cctv-note-pin',WK='cctv-note-w',pin=false,root=document.documentElement,pb=document.getElementById('npin');
-  try{pin=localStorage.getItem(PK)==='1';var w0=+localStorage.getItem(WK);if(w0>=300)root.style.setProperty('--ndw',w0+'px')}catch(e){}
+  try{pin=localStorage.getItem(PK)!=='0';var w0=+localStorage.getItem(WK);if(w0>=300)root.style.setProperty('--ndw',w0+'px')}catch(e){}
   function dock(){var on=pin&&!pane.hidden&&window.innerWidth>=1000;
     if(root.classList.contains('notedock')!==on){root.classList.toggle('notedock',on);setTimeout(function(){window.dispatchEvent(new Event('resize'))},30)}
     pb.setAttribute('aria-pressed',pin?'true':'false');pb.querySelector('span').textContent=pin?'เลิกปัก':'ปักข้าง'}
