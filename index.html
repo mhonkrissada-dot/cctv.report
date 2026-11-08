@@ -968,8 +968,8 @@ html.notedock .rail .fn{font-size:12.5px}
 
 /* PC: use the full screen width */
 @media (min-width:1200px){
-  .wrap{max-width:none}
-  #notep{right:14px}
+  html[data-mode=edit] .wrap{max-width:none}
+  html[data-mode=edit] #notep{right:14px}
 }
 #notep{min-width:360px}
 html.notedock #notep{min-width:0}
@@ -2044,6 +2044,8 @@ function renderData(){
 }
 var RENDERING=false;
 function render(){
+  /* page name on <html>: only the record page uses the full PC width */
+  if(document.documentElement.dataset.mode!==mode){document.documentElement.dataset.mode=mode;setTimeout(function(){window.dispatchEvent(new Event('resize'))},0)}
   /* let a focused field commit (its change handler may re-render) before the page is rebuilt */
   if(RENDERING)return;
   var ae=document.activeElement;
