@@ -1933,7 +1933,10 @@ function flush(){
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
 var SY_PULL_GAP=60000;
-function softRender(){if(!isTyping(document.activeElement))render()}
+/* redraw now, or as soon as the person leaves the field they are typing in */
+var needRender=false;
+function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
+document.addEventListener('focusout',function(){setTimeout(function(){if(needRender&&!isTyping(document.activeElement)){needRender=false;render()}},50)});
 function syncPull(force){
   if(!syOn()||SY.pulling)return Promise.resolve();
   if(!force&&SY.pulledAt&&Date.now()-SY.pulledAt<SY_PULL_GAP)return Promise.resolve();
@@ -1984,7 +1987,8 @@ function syncPull(force){
   });
 }
 function fetchPhotos(list,force){
-  if(!list.length||SY.fetching)return Promise.resolve();
+  if(!list.length){SY.lastDl='ไม่มีรูปใหม่ในชีตให้ดึง';return Promise.resolve()}
+  if(SY.fetching)return Promise.resolve();
   SY.fetching=true;SY.dl={n:0,total:list.length,fail:0,err:''};paintSync();
   var chain=Promise.resolve();
   list.forEach(function(p){chain=chain.then(function(){
@@ -2002,6 +2006,7 @@ function fetchPhotos(list,force){
   return chain.then(function(){
     var d=SY.dl;SY.fetching=false;SY.dl=null;
     SY.dlErr=d.fail?'ดึงรูปไม่สำเร็จ '+d.fail+' จาก '+d.total+' รูป: '+d.err:'';
+    SY.lastDl=d.fail?SY.dlErr:'ดึงรูปมาแล้ว '+d.n+' รูป';
     if(d.n)softRender();paintSync();
     if(force||d.fail)toast(d.fail?SY.dlErr:'ดึงรูปจากเครื่องอื่นแล้ว '+d.n+' รูป');
   });
@@ -2631,7 +2636,7 @@ app.addEventListener('click',function(e){
   else if(act==='sy-all'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
     b.disabled=true;
-    syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;toast(SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))});
+    SY.lastDl='';syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;var up=unsyncedPhotos().length;toast((SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))+' · รูป: '+(SY.lastDl||'ดึงข้อมูลไม่สำเร็จ')+(up?' · รูปในเครื่องนี้ยังไม่ขึ้น Drive '+up+' รูป':''))});
   }
   else if(act==='sy-purge-photos'||act==='sy-purge-all'){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าการเชื่อมต่อ');return}
