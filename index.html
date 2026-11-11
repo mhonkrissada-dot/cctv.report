@@ -1127,6 +1127,7 @@ html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
 .btn:not(.ib){border-radius:10px!important;min-height:36px;padding:0 14px!important;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s,border-color .15s,color .15s!important}
 .btn[hidden]{display:none!important}
 .keyrow{display:flex;gap:6px;align-items:center}.keyrow input{flex:1;min-width:0}
+.appver{margin:4px 0 0;font-size:12px;color:var(--muted)}
 .btn svg{width:16px;height:16px;flex:none}
 .btn:active{transform:scale(.98)!important}
 .btn:focus-visible,.ib:focus-visible,.navb:focus-visible,.rail button.f:focus-visible,.rside .ri:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
@@ -1932,7 +1933,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000;
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 3';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -1979,7 +1980,7 @@ function syncPull(force){
     if(changed||Object.keys(touched).length)save();
     if(changed||Object.keys(touched).length)softRender();
     return want;
-  }).then(function(want){return fetchPhotos(want,force)}).then(function(){
+  }).then(function(want){fetchPhotos(want,force)}).then(function(){
     SY.pulling=false;SY.pulledAt=Date.now();
   },function(e){
     SY.pulling=false;
@@ -2040,7 +2041,7 @@ function syncHTML(){
   var s=store.sync;
   return '<article class="sheet"><header><p class="kick">สำรองข้อมูล</p><h2>Google Drive + Sheet</h2>'+
     '<p class="tot">ข้อความลงชีต รูปเก็บใน Drive แยกโฟลเดอร์ วันที่ → โครงการ ส่งเองทุกครั้งที่เพิ่มหรือแก้เหตุการณ์</p>'+
-    '<p class="pill" id="systat"></p></header>'+
+    '<p class="pill" id="systat"></p><p class="msg appver">เวอร์ชันหน้าเว็บ '+APPVER+'</p></header>'+
     '<div class="dsec"><h3>การเชื่อมต่อ</h3><div class="cfg">'+
       '<div class="fld"><label for="sy-url">ลิงก์ Web App (ลงท้าย /exec)</label><input id="sy-url" data-sy="url" value="'+esc(s.url||'')+'" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>'+
       '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><span class="keyrow"><input id="sy-key" type="password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off" spellcheck="false"><button type="button" class="btn" id="sy-show" aria-pressed="false" title="แสดง / ซ่อนรหัสที่พิมพ์">แสดง</button></span></div>'+
@@ -2636,7 +2637,7 @@ app.addEventListener('click',function(e){
   else if(act==='sy-all'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
     b.disabled=true;
-    SY.lastDl='';syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;var up=unsyncedPhotos().length;toast((SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))+' · รูป: '+(SY.lastDl||'ดึงข้อมูลไม่สำเร็จ')+(up?' · รูปในเครื่องนี้ยังไม่ขึ้น Drive '+up+' รูป':''))});
+    SY.lastDl='';toast('กำลังซิงก์… ดูความคืบหน้าที่ป้าย Drive มุมขวาบน');syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;var up=unsyncedPhotos().length;toast((SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))+' · รูป: '+(SY.dl?'กำลังดึง '+SY.dl.total+' รูปอยู่เบื้องหลัง':(SY.lastDl||'ดึงข้อมูลไม่สำเร็จ'))+(up?' · รูปในเครื่องนี้ยังไม่ขึ้น Drive '+up+' รูป':''))});
   }
   else if(act==='sy-purge-photos'||act==='sy-purge-all'){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าการเชื่อมต่อ');return}
