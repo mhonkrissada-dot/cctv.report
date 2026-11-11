@@ -2359,7 +2359,8 @@ function splitPaste(text){
 function pasteNewCase(text,imgs){
   text=String(text||'').replace(/\r/g,'').replace(/^\s+|\s+$/g,'');
   /* the other half of an earlier paste: a picture for the next case waiting for one, or text for a picture */
-  pend=pend.filter(function(x){return findCase(x.id)});
+  var inView=function(id){var f=findCase(id);return !!f&&(sel==='all'||f.p.id===sel)};
+  pend=pend.filter(function(x){return findCase(x.id)&&inView(x.id)});
   var nx=pend[0];
   if(nx&&((imgs.length&&!text&&nx.need==='photo')||(text&&!imgs.length&&nx.need==='text'&&splitPaste(text).length===1&&!splitPaste(text)[0].code))){
     pend.shift();var pc=findCase(nx.id),oc=pc.c,op=pc.p;
@@ -2538,8 +2539,11 @@ document.addEventListener('paste',function(e){
   }
   var imgs=clipImages(e.clipboardData);
   var k=e.target&&e.target.closest&&e.target.closest('.case[data-c]');
-  if(!k&&!isTyping(e.target)&&(!(pasteCase&&caseExists(pasteCase))||pend.length)){
-    var txt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
+  /* only the project on screen can take pictures: a picture pasted while another project is open must not land on an old case */
+  var txt=e.clipboardData?e.clipboardData.getData('text/plain'):'';
+  var inView=function(id){var f=findCase(id);return !!f&&(sel==='all'||f.p.id===sel)};
+  var live=!!pasteCase&&caseExists(pasteCase)&&inView(pasteCase);
+  if(!k&&!isTyping(e.target)&&(txt.trim()||!live||pend.some(function(x){return inView(x.id)}))){
     if(!imgs.length&&!txt.trim())return;
     e.preventDefault();pasteNewCase(txt,imgs);return;
   }
