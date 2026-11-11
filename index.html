@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ECECEC"><script>(function(){var t="dark";try{t=localStorage.getItem("cctv-theme2")||"dark"}catch(e){}document.documentElement.dataset.theme=t})()</script><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ECECEC"><script>(function(){var t="dark",f="1",F={"1": "Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700", "2": "Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700", "3": "Roboto:wght@400;500;700&family=Sarabun:wght@400;500;600;700", "4": "Plus+Jakarta+Sans:wght@400;500;600;700&family=Anuphan:wght@400;500;600;700", "5": "DM+Sans:wght@400;500;600;700&family=Prompt:wght@400;500;600;700", "6": "Poppins:wght@400;500;600;700&family=Kanit:wght@400;500;600"};try{t=localStorage.getItem("cctv-theme2")||"dark";f=localStorage.getItem("cctv-font")||"1"}catch(e){}if(!F[f])f="1";var d=document.documentElement;d.dataset.theme=t;d.dataset.font=f;window.__FONTS=F;var l=document.createElement("link");l.rel="stylesheet";l.id="fontcss";l.href="https://fonts.googleapis.com/css2?family="+F[f]+"&display=swap";document.head.appendChild(l)})()</script><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
 <title>cctv-report</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -549,7 +549,7 @@ img{image-rendering:auto}
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Anuphan:wght@400;500;600;700&display=swap">
+
 <style>
 /* ===== modern refresh: font + rounder corners + soft depth ===== */
 :root{
@@ -982,13 +982,13 @@ html.notedock #notep{min-width:0}
   --sh:0 1px 2px rgba(16,24,40,.05);--sh2:0 6px 20px rgba(16,24,40,.08);
 }
 html[data-theme=dark]{color-scheme:dark;
-  --bg:#232427;--surface:#2B2C30;--card:#333439;--fill:#38393E;--ink:#ECECEE;--muted:#A9ABB1;
-  --line:#45464C;--line2:#3C3D42;--fld:#515259;--fld-h:#6F7179;
-  --accent:#8AB4F8;--accent-2:#A3C4FA;--accent-soft:rgba(138,180,248,.14);
-  --pri:#8AB4F8;--pri-h:#A8C7FA;--pri-ink:#0E1626;
-  --ok:#7DD3A0;--ok-soft:rgba(125,211,160,.13);--danger:#F28B82;--danger-soft:rgba(242,139,130,.14);
-  --warn:#F5B971;--warn-soft:rgba(245,185,113,.12);
-  --sh:none;--sh2:0 8px 24px rgba(0,0,0,.35);
+  --bg:#000000;--surface:#000000;--card:#16181C;--fill:#202327;--ink:#E7E9EA;--muted:#8B9096;
+  --line:#2F3336;--line2:#2F3336;--fld:#3A3E42;--fld-h:#5B6168;
+  --accent:#1D9BF0;--accent-2:#4CB1F5;--accent-soft:rgba(29,155,240,.16);
+  --pri:#1D9BF0;--pri-h:#1A8CD8;--pri-ink:#FFFFFF;
+  --ok:#00BA7C;--ok-soft:rgba(0,186,124,.14);--danger:#F4212E;--danger-soft:rgba(244,33,46,.14);
+  --warn:#FFAD1F;--warn-soft:rgba(255,173,31,.13);
+  --sh:none;--sh2:none;
 }
 body{background:var(--bg)!important;color:var(--ink);font-size:14.5px;line-height:1.55}
 .topwrap{background:var(--bg)!important}
@@ -1199,6 +1199,25 @@ html[data-theme=dark] .thumb{box-shadow:none}
 .prog .left{color:var(--warn)!important}
 .bar .sub{color:var(--muted)!important}
 html[data-theme=dark] .bar .brand span,html[data-theme=dark] .bar .brand b{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important}
+
+/* fonts: Thai + English pairs */
+html[data-font="1"]{--f:'Inter','IBM Plex Sans Thai','Leelawadee UI',system-ui,sans-serif}
+html[data-font="2"]{--f:'Inter','Noto Sans Thai','Leelawadee UI',system-ui,sans-serif}
+html[data-font="3"]{--f:'Roboto','Sarabun','Leelawadee UI',system-ui,sans-serif}
+html[data-font="4"]{--f:'Plus Jakarta Sans','Anuphan','Leelawadee UI',system-ui,sans-serif}
+html[data-font="5"]{--f:'DM Sans','Prompt','Leelawadee UI',system-ui,sans-serif}
+html[data-font="6"]{--f:'Poppins','Kanit','Leelawadee UI',system-ui,sans-serif}
+.fontmenu .ff1 b{font-family:'Inter','IBM Plex Sans Thai'}.fontmenu .ff2 b{font-family:'Inter','Noto Sans Thai'}.fontmenu .ff3 b{font-family:'Roboto','Sarabun'}
+.fontmenu .ff4 b{font-family:'Plus Jakarta Sans','Anuphan'}.fontmenu .ff5 b{font-family:'DM Sans','Prompt'}.fontmenu .ff6 b{font-family:'Poppins','Kanit'}
+.fontmenu{min-width:300px}
+.fontmenu button{display:flex!important;flex-direction:column;align-items:flex-start;gap:1px;width:100%;padding:8px 12px!important}
+.fontmenu button b{font-size:16px;font-weight:600}
+.fontmenu button small{font-size:11.5px;color:var(--muted)}
+.fontmenu button[aria-checked=true]{background:var(--accent-soft)!important;box-shadow:inset 3px 0 0 var(--accent)}
+.fontbtn b{font-size:14px;font-weight:700;letter-spacing:-.02em}
+/* pure black: panels separated by thin borders, like X */
+html[data-theme=dark] .bar,html[data-theme=dark] .side,html[data-theme=dark] .proj,html[data-theme=dark] .sheet,html[data-theme=dark] .qbox,html[data-theme=dark] .rside,html[data-theme=dark] .fov,html[data-theme=dark] .quiet{border:1px solid var(--line)!important}
+html[data-theme=dark] .ctx,html[data-theme=dark] #msgdlg .mbox,html[data-theme=dark] #pickp .pkbox{background:#000!important;border:1px solid var(--line)!important;box-shadow:0 0 0 1px rgba(255,255,255,.04),0 8px 28px rgba(255,255,255,.06)!important}
 .fcard .mt{color:var(--muted)!important}
 
 /* ===== report page, layout B ===== */
@@ -1245,6 +1264,7 @@ html.notedock .replay.rb{grid-template-columns:260px minmax(0,1fr)!important}
         <button type="button" id="m-fold" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5a1 1 0 0 1 1-1h4l1.5 1.5h7.5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>โฟลเดอร์</span></button>
         <button type="button" id="m-data" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>จัดการข้อมูล</span></button>
       </div>
+      <button type="button" class="themebtn fontbtn" id="fontbtn" title="เลือกฟอนต์ ไทย / ENG" aria-label="เลือกฟอนต์" aria-haspopup="menu"><b>Aa</b></button>
       <button type="button" class="themebtn" id="themebtn" title="สลับโหมดสว่าง / มืด" aria-label="สลับโหมดสว่าง / มืด"><svg class="moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M16 12.3A6.5 6.5 0 0 1 7.7 4a6.5 6.5 0 1 0 8.3 8.3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><svg class="sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       <button type="button" class="notebtn" id="notebtn" aria-expanded="false" aria-controls="notep" title="โน้ต (จดไว้ดูเอง ไม่ส่งไปไหน)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7.5L16 6.5V17H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 3v4h4M7.5 10h6M7.5 13h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>โน้ต<i class="ndot" hidden></i></button>
     </div>
@@ -2666,6 +2686,21 @@ app.addEventListener('contextmenu',function(e){
 });
 document.addEventListener('mousedown',function(e){if(ctx&&!ctx.contains(e.target))closeCtx()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();closeMsg()}});
+(function(){var b=document.getElementById('fontbtn');if(!b)return;
+  var L=[['1','Inter + IBM Plex Sans Thai'],['2','Inter + Noto Sans Thai'],['3','Roboto + Sarabun'],['4','Plus Jakarta Sans + Anuphan'],['5','DM Sans + Prompt'],['6','Poppins + Kanit']],all=false;
+  var url=function(f){return 'https://fonts.googleapis.com/css2?family='+window.__FONTS[f]+'&display=swap'};
+  b.addEventListener('click',function(){
+    if(!all){all=true;Object.keys(window.__FONTS).forEach(function(k){var l=document.createElement('link');l.rel='stylesheet';l.href=url(k);document.head.appendChild(l)})}
+    closeCtx();ctx=document.createElement('div');ctx.className='ctx fontmenu';ctx.setAttribute('role','menu');
+    var cur=document.documentElement.dataset.font||'1';
+    ctx.innerHTML='<div class="ctxh">ฟอนต์ ไทย / ENG</div>'+L.map(function(o){return '<button type="button" role="menuitemradio" aria-checked="'+(cur===o[0])+'" data-font="'+o[0]+'" class="ff'+o[0]+'"><b>รายงานเหตุการณ์ 08:05 Report</b><small>'+o[0]+'. '+o[1]+'</small></button>'}).join('');
+    document.body.appendChild(ctx);var r=b.getBoundingClientRect();ctx.style.left=Math.max(8,Math.min(r.left,innerWidth-ctx.offsetWidth-8))+'px';ctx.style.top=(r.bottom+6)+'px';
+    ctx.addEventListener('click',function(ev){var x=ev.target.closest('[data-font]');if(!x)return;var f=x.dataset.font;
+      document.documentElement.dataset.font=f;try{localStorage.setItem('cctv-font',f)}catch(er){}
+      var fl=document.getElementById('fontcss');if(fl)fl.href=url(f);
+      closeCtx();toast('ฟอนต์: '+L[+f-1][1]);setTimeout(function(){window.dispatchEvent(new Event('resize'))},400)});
+  });
+})();
 (function(){var b=document.getElementById('themebtn');if(!b)return;b.addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cctv-theme2',t)}catch(e){}toast(t==='dark'?'โหมดมืด':'โหมดสว่าง')})})();
 window.addEventListener('scroll',closeCtx,{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
