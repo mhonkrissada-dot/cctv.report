@@ -1145,6 +1145,47 @@ html[data-theme=dark] .thumb{box-shadow:none}
 .nlock input:focus{border-color:var(--n-ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--n-ac) 25%,transparent)}
 .nlock.bad input{animation:nshake .3s;border-color:#D92D20}
 @keyframes nshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ===== record page, layout B: list on the left, one project on the right ===== */
+@media (min-width:901px){
+  .layout{grid-template-columns:300px minmax(0,1fr)!important;gap:20px!important}
+  html.notedock .layout{grid-template-columns:260px minmax(0,1fr)!important}
+}
+.rail button.f{display:flex!important;align-items:center;gap:8px;padding:8px 10px!important;border-radius:10px!important;width:100%;color:var(--ink)}
+.rail .fn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;line-height:1.35}
+.rail .rc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.rail .sd{width:8px;height:8px;border-radius:50%;flex:none}
+.rail .f.wait .sd{background:var(--warn)}
+.rail .f.sent .sd{background:var(--ok)}
+.rail .f.none .fn{color:var(--muted);font-weight:400}
+.rail .f.all .fn{font-weight:600}
+.rail button.f[aria-current=true]{background:var(--card)!important;box-shadow:inset 3px 0 0 var(--accent)!important}
+.rail button.f[aria-current=true] .fn{color:var(--ink)!important;font-weight:600}
+.rail .gh{font-size:12px;font-weight:600;padding:14px 10px 4px!important;color:var(--muted)!important}
+.rail .gh.rg-wait{color:var(--warn)!important}
+.rail .gh.rg-sent{color:var(--ok)!important}
+.rail .gh[data-rtoggle]{cursor:pointer;user-select:none;border-radius:8px}
+.rail .gh[data-rtoggle]:hover{color:var(--ink)!important;background:var(--fill)}
+.rail .rempty{padding:4px 10px;color:var(--muted);font-size:12.5px}
+.rail.dense button.f{padding:5px 10px!important}
+.rail.dense .gh{padding:10px 10px 2px!important}
+.proj.solo{border-radius:20px!important}
+.proj.solo:hover{box-shadow:var(--sh)!important}
+.proj.solo>header{padding:16px 20px!important}
+.proj.solo>header>.ficon{display:none}
+.proj.solo .pname{font-size:22px!important;font-weight:700;flex:1 1 240px;padding:2px 8px}
+.proj.solo>.case{margin-left:20px;margin-right:20px}
+.proj.solo>header+.case{margin-top:18px}
+.proj.solo>.empty{margin:18px 20px}
+.proj.solo>.addc{margin:14px 20px 20px!important}
+.proj.solo>.addc .btn{width:100%;justify-content:center;border-style:dashed!important;min-height:46px;color:var(--muted)!important}
+.proj.solo>.addc .btn:hover{color:var(--ink)!important}
+.pnav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.pnav .btn{max-width:48%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail .sd{order:1}.rail .fn{order:2}.rail .rc{order:3}
+.side .shift .msg{display:none}
+.side .shift{margin-bottom:4px}
+@media (max-width:900px){.rail button.f{width:auto!important;max-width:220px}.rail .rl{flex-direction:row!important;gap:6px}.rail .fn{overflow:visible}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1542,6 +1583,7 @@ function openCtx(x,y,p,fromMore){
   ctx.innerHTML='<div class="ctxh">'+esc(p.name||'โครงการ')+'</div>'+
     (fromMore?'':'<button type="button" role="menuitem" data-c="xlfull">คัดลอก EXCEL (13 แถว)</button><button type="button" role="menuitem" data-c="xlview">แก้ไขตาราง EXCEL</button>')+
     '<button type="button" role="menuitem" data-c="viewmsg">ดูข้อความรายงาน</button>'+
+    '<button type="button" role="menuitem" data-c="folder">เปิดโฟลเดอร์ย้อนหลัง</button>'+
     (fromMore?'':'<button type="button" role="menuitem" data-c="copymsg"'+(p.cases.length?'':' disabled')+'>คัดลอกข้อความรายงาน</button>')+
     (projPhotos(p).length?'<button type="button" role="menuitem" data-c="album">'+(IS_MOB?'ส่งรูปเป็นอัลบั้ม':'บันทึกรูปเป็นอัลบั้ม')+' ('+projPhotos(p).length+' รูป)</button><button type="button" role="menuitem" data-c="copyphotos">คัดลอกรูปรวม ('+projPhotos(p).length+' รูป)</button>':'')+
     '<button type="button" role="menuitem" data-c="sent">'+(isSent(p)?'ทำเครื่องหมายยังไม่ส่ง':'ทำเครื่องหมายส่งแล้ว ✓')+'</button>'+
@@ -1557,6 +1599,7 @@ function openCtx(x,y,p,fromMore){
     if(sw){store.fcolor=store.fcolor||{};var k=norm(p.name||'x');if(sw.dataset.sw==='auto')delete store.fcolor[k];else store.fcolor[k]=+sw.dataset.sw;save();closeCtx();render();toast('เปลี่ยนสีโฟลเดอร์ '+p.name+' แล้ว');return}
     var b=e.target.closest('button[data-c]');if(!b||b.disabled)return;var c=b.dataset.c;
     if(c==='open'){closeCtx();sel=p.id;render();window.scrollTo(0,0);return}
+    if(c==='folder'){closeCtx();fsel=norm(p.name||p.id);fgal=false;mode='folders';render();window.scrollTo(0,0);return}
     if(c==='xlfull'){closeCtx();xlCopyProject(p);return}
     if(c==='xlcopy'){closeCtx();xlStep(p,app.querySelector('.proj[data-p="'+p.id+'"] [data-act=xlcopy]'));return}
     if(c==='xlview'){closeCtx();openXL(p);return}
@@ -1914,22 +1957,23 @@ function renderTotals(){var n=counts();
 var pq='';
 function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))>=0||String(p.name||'').toLowerCase().indexOf(pq.toLowerCase())>=0}
 function searchHTML(id){return '<label class="psearch" for="'+id+'"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="'+id+'" type="search" data-search placeholder="ค้นหาโครงการ" autocomplete="off" value="'+esc(pq)+'"><button type="button" class="pqx" data-pqx aria-label="ล้างคำค้นหา"'+(pq?'':' hidden')+'>✕</button></label>'}
+/* project list grouped by status: waiting to send, sent, nothing yet */
+var railOpenNone=false,selAllChosen=false;
+function railGroup(p){return p.cases.length?(isSent(p)?'sent':'wait'):'none'}
+function railList(){return sortedProjects().filter(function(p){return pq?pqMatch(p):(inShift(p)||sel===p.id)})}
+function railOrder(){var l=railList(),o=[];['wait','sent','none'].forEach(function(k){l.forEach(function(p){if(railGroup(p)===k)o.push(p)})});return o}
 function railHTML(){
-  var all=sortedProjects(),n=counts();
-  var h='<button type="button" class="f" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'>'+folderIcon()+'<span class="fn">รวมทุกโครงการ</span><span class="fm">'+n.c+' เคส · '+n.ph+' รูป</span></button>';
-  /* one list in the PC folder order, whatever the shift */
-  var shown=0;
-  [''].forEach(function(){
-    var list=all.filter(function(p){return pq?pqMatch(p):(inShift(p)||sel===p.id)});
-    shown=list.length;if(!list.length)return;
-    h+='<div class="gh"><span>โครงการ</span><span>'+list.length+'</span></div><div class="rl">';
-    list.forEach(function(p){
-      var ph=0;p.cases.forEach(function(c){ph+=allPhotos(c).length});
-      h+='<button type="button" class="f'+(p.cases.length?'':' zero')+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'>'+folderIcon(p)+'<span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+(isSent(p)?' <span class="sentok">✓ ส่งแล้ว</span>':'')+'</span><span class="fm">'+(realN(p.cases)?realN(p.cases)+' เคส · '+ph+' รูป':p.cases.length?'ปกติ':'ยังไม่มีเหตุการณ์')+'</span></button>';
-    });
-    h+='</div>';
+  var n=counts(),list=railList(),g={wait:[],sent:[],none:[]};
+  list.forEach(function(p){g[railGroup(p)].push(p)});
+  var h='<button type="button" class="f all" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'><span class="fn">ภาพรวมทุกโครงการ</span><span class="rc">'+n.c+' เคส</span></button>';
+  function item(p,k){var c=realN(p.cases);return '<button type="button" class="f '+k+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'><span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span>'+(c?'<span class="rc">'+c+'</span>':p.cases.length?'<span class="rc">ปกติ</span>':'')+'<i class="sd" aria-hidden="true"></i></button>'}
+  [['wait','ยังไม่ส่ง'],['sent','ส่งแล้ว'],['none','ยังไม่มีเหตุการณ์']].forEach(function(x){
+    var k=x[0],l=g[k];if(!l.length&&k==='none')return;
+    var open=k!=='none'||railOpenNone||!!pq||l.some(function(p){return p.id===sel});
+    h+='<div class="gh rg-'+k+'"'+(k==='none'?' data-rtoggle role="button" tabindex="0"':'')+'><span>'+x[1]+'</span><span>'+l.length+(k==='none'?(open?' ▾':' ▸'):'')+'</span></div>';
+    if(open)h+='<div class="rl">'+(l.length?l.map(function(p){return item(p,k)}).join(''):'<div class="rempty">ไม่มี</div>')+'</div>';
   });
-  if(pq&&!shown)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
+  if(pq&&!list.length)h+='<div class="empty">ไม่พบโครงการที่ชื่อมี “'+esc(pq)+'”</div>';
   return h;
 }
 function caseHTML(c){
@@ -1953,9 +1997,9 @@ var IC={
   pen:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16v-2.6l8.6-8.6 2.6 2.6L6.6 16z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 6.4l2.6 2.6" stroke="currentColor" stroke-width="1.6"/></svg>',
   dots:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="15.5" cy="10" r="1.6" fill="currentColor"/></svg>'
 };
-function projHTML(p){
+function projHTML(p,solo){
   var opts=ORDER.map(function(m){return '<option value="'+m+'"'+((p.mode||'')===m?' selected':'')+'>'+(m?MODES[m]:'ไม่ระบุช่วงเวลา')+'</option>'}).join('');
-  return '<section class="proj'+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
+  return '<section class="proj'+(solo?' solo':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
     '<input class="pname" id="n-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'" placeholder="ชื่อโครงการ" aria-label="ชื่อโครงการ">'+
     '<select class="msel" id="s-'+p.id+'" data-f="mode" aria-label="ช่วงเวลาที่ดู CCTV">'+opts+'</select>'+
     '<span class="cnt">'+(realN(p.cases)||!p.cases.length?realN(p.cases)+' เคส':'ปกติ')+'</span>'+
@@ -1974,9 +2018,11 @@ function fitAll(){Array.prototype.forEach.call(app.querySelectorAll('textarea'),
 function renderEdit(){
   R().projects.forEach(function(p){if(tplsFor(p).length)ensureTpls(p,false)});
   var ps=sortedProjects(),body='';
+  /* open the first project still waiting to be sent, unless the overview was picked on purpose */
+  if(sel==='all'&&!selAllChosen){var fw=railOrder().filter(function(p){return railGroup(p)==='wait'})[0];if(fw)sel=fw.id}
   if(sel==='all'){
     var withC=ps.filter(function(p){return p.cases.length&&inShift(p)}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
-    body=foldersHTML()+(withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>');
+    body=(withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>');
     if(quiet.length){
       body+='<div class="quiet"><h3>ยังไม่มีเหตุการณ์วันนี้ ('+quiet.length+' โครงการ)</h3>';
       ORDER.forEach(function(m){
@@ -1986,7 +2032,9 @@ function renderEdit(){
       body+='</div>';
     }
   }else{
-    body=ps.filter(function(p){return p.id===sel}).map(function(p){return heroHTML(p)+projHTML(p)}).join('');
+    var cur=ps.filter(function(p){return p.id===sel})[0],ord=railOrder(),ix=ord.indexOf(cur),pv=ix>0?ord[ix-1]:null,nx=ord[ix+1]||null;
+    body=cur?projHTML(cur,true)+'<div class="pnav">'+(pv?'<button type="button" class="btn" data-sel="'+pv.id+'">← '+esc(pv.name||'(ยังไม่ตั้งชื่อ)')+'</button>':'<span></span>')+
+      (nx?'<button type="button" class="btn" data-sel="'+nx.id+'">ถัดไป: '+esc(nx.name||'(ยังไม่ตั้งชื่อ)')+' →</button>':'')+'</div>':'';
   }
   app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav><button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button></div><div id="main">'+quickHTML()+body+'</div></div>';
   fitAll();paintArrows();
@@ -2318,7 +2366,7 @@ function render(){
 function fitRail(){
   var r=app.querySelector('.rail');if(!r||window.innerWidth<=900){if(r)r.classList.remove('dense','dense2');return}
   var y=r.scrollTop;r.classList.remove('dense','dense2');
-  var one=document.documentElement.classList.contains('notedock'); /* note pinned: keep one vertical column */
+  var one=true; /* the list always stays one vertical column */
   if(r.scrollHeight>r.clientHeight+1){r.classList.add('dense');if(!one&&r.scrollHeight>r.clientHeight+1){r.classList.remove('dense');r.classList.add('dense2')}}
   r.scrollTop=y;
   Array.prototype.forEach.call(r.querySelectorAll('button.f'),function(b){var n=b.querySelector('.fn'),m=b.querySelector('.fm');if(n)b.title=n.textContent+(m?' · '+m.textContent:'')});
@@ -2413,8 +2461,9 @@ app.addEventListener('click',function(e){
   if(e.target.closest('[data-fgalx]')){fgal=false;render();window.scrollTo(0,0);return}
   var hb=e.target.closest('[data-hist]');
   if(hb){e.preventDefault();var hp=hb.dataset.hist.split('|');if(mode==='folders')mode='edit';store.date=hp[0];save();render();sel=hp[1];render();window.scrollTo(0,0);return}
+  if(e.target.closest('[data-rtoggle]')){railOpenNone=!railOpenNone;render();return}
   var s=e.target.closest('[data-sel]');
-  if(s){sel=s.dataset.sel;if(mode==='folders')mode='edit';render();window.scrollTo(0,0);return}
+  if(s){sel=s.dataset.sel;selAllChosen=sel==='all';if(mode==='folders')mode='edit';render();window.scrollTo(0,0);return}
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act,p=findP(b),c=p&&findC(b,p);
   if(act==='pmore'&&p){var rr=b.getBoundingClientRect();openCtx(rr.left,rr.bottom+6,p,true);return}
