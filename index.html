@@ -1127,6 +1127,7 @@ html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
 .btn:not(.ib){border-radius:10px!important;min-height:36px;padding:0 14px!important;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s,border-color .15s,color .15s!important}
 .btn[hidden]{display:none!important}
 .keyrow{display:flex;gap:6px;align-items:center}.keyrow input{flex:1;min-width:0}
+.pinmask{-webkit-text-security:disc;text-security:disc}
 .appver{margin:4px 0 0;font-size:12px;color:var(--muted)}
 /* the Drive status pill is shown on the data page only */
 html:not([data-mode=data]) #syncst{display:none!important}
@@ -1337,9 +1338,9 @@ html.notedock .replay.rb{grid-template-columns:260px minmax(0,1fr)!important}
   <div id="notep" role="dialog" aria-label="โน้ต" hidden><div class="nrs" id="nrs" title="ลากเพื่อปรับความกว้าง" aria-hidden="true"></div>
     <div class="nh">
       <div class="nh1"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span><span class="ncols" role="group" aria-label="แสดงคอลัมน์"><button type="button" class="nb ncol" data-col="p" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์โครงการ">โครงการ</button><button type="button" class="nb ncol" data-col="t" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์เวลา">เวลา</button></span><span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span><button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb" id="nlockb" title="ล็อกโน้ต ต้องใส่รหัสใหม่">ล็อก</button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
-      <div class="nh2"><label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button></div>
+      <div class="nh2"><label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" name="cctv-note-search" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off" data-lpignore="true" data-1p-ignore="true"></label><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button></div>
     </div>
-    <div class="nlock" id="nlock" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 9V6.5a3.2 3.2 0 0 1 6.4 0V9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>โน้ตถูกล็อก</b><input id="npin_in" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="รหัส" aria-label="ใส่รหัสโน้ต 4 หลัก"></div>
+    <div class="nlock" id="nlock" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 9V6.5a3.2 3.2 0 0 1 6.4 0V9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>โน้ตถูกล็อก</b><input id="npin_in" type="text" inputmode="numeric" maxlength="4" autocomplete="off" name="cctv-note-pin" data-lpignore="true" data-1p-ignore="true" class="pinmask" placeholder="รหัส" aria-label="ใส่รหัสโน้ต 4 หลัก"></div>
     <div class="ntw" id="ntw"><table class="ntab"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
       <thead><tr><th class="hp">โครงการ</th><th class="ht">เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody id="nbody"></tbody></table>
       <p class="nempty" id="nempty">วางจากชีตหรือ Excel ได้เลย (Ctrl+V) แอปจะแยกเป็น โครงการ / เวลา / เหตุการณ์ ให้เอง<br>หรือกด + แถว เพื่อพิมพ์เอง · เก็บไว้ในเครื่องนี้เท่านั้น</p></div>
@@ -2090,7 +2091,7 @@ function syncHTML(){
     '<p class="pill" id="systat"></p><p class="msg appver">เวอร์ชันหน้าเว็บ '+APPVER+'</p></header>'+
     '<div class="dsec"><h3>การเชื่อมต่อ</h3><div class="cfg">'+
       '<div class="fld"><label for="sy-url">ลิงก์ Web App (ลงท้าย /exec)</label><input id="sy-url" data-sy="url" value="'+esc(s.url||'')+'" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>'+
-      '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><span class="keyrow"><input id="sy-key" type="password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off" spellcheck="false"><button type="button" class="btn" id="sy-show" aria-pressed="false" title="แสดง / ซ่อนรหัสที่พิมพ์">แสดง</button></span></div>'+
+      '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><span class="keyrow"><input id="sy-key" type="password" name="cctv-sync-secret" autocomplete="new-password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off" spellcheck="false"><button type="button" class="btn" id="sy-show" aria-pressed="false" title="แสดง / ซ่อนรหัสที่พิมพ์">แสดง</button></span></div>'+
     '</div>'+
     '<div class="rowb"><label class="msg" style="display:flex;gap:6px;align-items:center;margin-right:6px"><input type="checkbox" data-sy="on"'+(s.on!==false?' checked':'')+'> ส่งอัตโนมัติ</label>'+
     '<button type="button" class="btn" data-act="sy-test">ทดสอบการเชื่อมต่อ</button><button type="button" class="btn pri" data-act="sy-all">ซิงก์ทั้งหมดตอนนี้</button></div>'+
@@ -2945,6 +2946,8 @@ var appSave=save;
   }
   function cell(v,i,k,cls){return '<td class="'+cls+'"><div contenteditable="plaintext-only" spellcheck="false" data-r="'+i+'" data-k="'+k+'">'+esc(v||'')+'</div></td>'}
   var nq=document.getElementById('nq'),qv='';
+  /* a browser may have filled the search box by itself (a saved link or login): start empty */
+  var clearAuto=function(){if(document.activeElement!==nq&&nq.value&&(!qv||/^https?:\/\//.test(nq.value))){nq.value='';qv='';paint()}};setTimeout(clearAuto,0);setTimeout(clearAuto,800);setTimeout(clearAuto,2500);
 
   function curProj(){return sel&&sel!=='all'?R().projects.filter(function(p){return p.id===sel})[0]:null}
   function projOf(name){var k=norm(name||'');if(!k)return null;var ps=R().projects.filter(function(p){return norm(p.name)===k});if(ps.length)return ps[0];var m=matchProj(name);return m.length===1?m[0]:null}
