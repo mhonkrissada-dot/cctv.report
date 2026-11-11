@@ -1949,7 +1949,7 @@ function flush(){
     return post({action:'deletePhotos',ids:ids}).then(function(){ids.forEach(function(i){delete s.pdels[i]});save()});
   }).then(function(){
     var idx=caseIndex(),list=[],stamp={},chain=Promise.resolve();
-    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&isRoutine(o.c)){delete s.dirty[i];return}if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
+    Object.keys(s.dirty).forEach(function(i){var o=idx[i];if(o&&(isRoutine(o.c)||(s.purgedBefore&&o.d<s.purgedBefore))){delete s.dirty[i];return}if(o&&bodyText(o.c)){list.push(caseRow(o));stamp[i]=s.dirty[i]}else delete s.dirty[i]});
     for(var k=0;k<list.length;k+=150)(function(part){chain=chain.then(function(){return post({action:'upsertCases',cases:part}).then(function(){part.forEach(function(r){if(s.dirty[r.id]===stamp[r.id])delete s.dirty[r.id]});save();paintSync()})})})(list.slice(k,k+150));
     return chain;
   }).then(function(){
@@ -1966,11 +1966,17 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 4';
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 5';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
 document.addEventListener('focusout',function(){setTimeout(function(){if(needRender&&!isTyping(document.activeElement)){needRender=false;render()}},50)});
+/* what this browser cleared on purpose is not pulled back from the sheet */
+function skipInfo(){var k=store.sync.skip=store.sync.skip||{};k.days=k.days||{};return k}
+function skipCase(d){var k=skipInfo();return !!((k.before&&d<k.before)||k.days[d]==='all')}
+function skipPhoto(d){var k=skipInfo();return skipCase(d)||!!((k.photosBefore&&d<k.photosBefore)||k.days[d]==='photos')}
+function hasSkip(){var k=skipInfo();return !!(k.before||k.photosBefore||Object.keys(k.days).length)}
+function maxDate(a,b){return !a?b:!b?a:(a>b?a:b)}
 function syncPull(force,day){
   if(!syOn()||SY.pulling)return Promise.resolve();
   if(!force&&!day&&SY.pulledAt&&Date.now()-SY.pulledAt<SY_PULL_GAP)return Promise.resolve();
@@ -1990,7 +1996,8 @@ function syncPull(force,day){
     Object.keys(photoMap).forEach(function(k){photoMap[k]=photoMap[k].filter(function(x){
       if(gone[x.id]&&x.fileId){tx('readwrite',function(st){return st.delete(x.id)});changed++;return false}return true})});
     /* cases: the sheet is the truth, except for a case this device changed and has not sent yet */
-    (j.cases||[]).filter(function(r){return !day||r.date===day}).forEach(function(r){
+    if(j.purgedBefore)s.purgedBefore=maxDate(s.purgedBefore,j.purgedBefore);
+    (j.cases||[]).filter(function(r){return (!day||r.date===day)&&!skipCase(r.date)}).forEach(function(r){
       var cur=idx[r.id];
       if(cur&&(s.dirty[r.id]||isRoutine(cur.c)))return;
       if(s.dels[r.id]||gone[r.id])return;
@@ -2009,7 +2016,7 @@ function syncPull(force,day){
     /* photos: download the ones this device does not have yet */
     var idx2=caseIndex(),have={};
     Object.keys(photoMap).forEach(function(k){photoMap[k].forEach(function(x){have[x.id]=1})});
-    var want=(j.photos||[]).filter(function(p){return !have[p.id]&&!s.pdels[p.id]&&!gone[p.id]&&idx2[p.caseId]&&(!day||idx2[p.caseId].d===day)});
+    var want=(j.photos||[]).filter(function(p){return !have[p.id]&&!s.pdels[p.id]&&!gone[p.id]&&idx2[p.caseId]&&(!day||idx2[p.caseId].d===day)&&!skipPhoto(idx2[p.caseId].d)});
     if(changed||Object.keys(touched).length)save();
     if(changed||Object.keys(touched).length)softRender();
     return want;
@@ -2104,7 +2111,7 @@ function syncHTML(){
 /* ---------- render ---------- */
 var app=document.getElementById('app');
 function renderTotals(){var n=counts();
-  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="syncnow" class="syncbtn" title="ซิงก์วันที่เปิดอยู่"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span></button>';paintSync()}
+  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ ทั้งในเครื่องนี้ บน Drive และในเครื่องอื่นที่ซิงก์ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="syncnow" class="syncbtn" title="ซิงก์วันที่เปิดอยู่"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span></button>';paintSync()}
 /* project search: filters the project list (and the folder overview) by name */
 var pq='';
 function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))>=0||String(p.name||'').toLowerCase().indexOf(pq.toLowerCase())>=0}
@@ -2517,7 +2524,8 @@ function renderData(){
     '<p class="tot">'+days.length+' วัน · '+tot.c+' เคส · '+tot.ph+' รูป · ประมาณ '+fmtB(tot.by)+'</p><p class="msg" id="est"></p></header>'+
     '<div class="dsec"><h3>ลบข้อมูลเก่าในเบราว์เซอร์</h3><p>ลบเฉพาะในเบราว์เซอร์นี้เพื่อคืนพื้นที่เครื่อง ข้อมูลที่ขึ้น Drive แล้วยังอยู่ครบ ลบแล้วกู้คืนในเบราว์เซอร์ไม่ได้</p><div class="rowb">'+
       '<label for="oldn" class="msg">เก่ากว่า</label><select id="oldn" class="msel"><option value="7">7 วัน</option><option value="30" selected>30 วัน</option><option value="90">90 วัน</option><option value="180">180 วัน</option></select>'+
-      '<button type="button" class="btn" data-act="old-photos">ลบเฉพาะรูป (เก็บข้อความ)</button><button type="button" class="btn danger" data-act="old-all">ลบทั้งรูปและข้อความ</button></div></div>'+
+      '<button type="button" class="btn" data-act="old-photos">ลบเฉพาะรูป (เก็บข้อความ)</button><button type="button" class="btn danger" data-act="old-all">ลบทั้งรูปและข้อความ</button></div>'+
+      (hasSkip()?'<p class="msg" style="margin-top:8px">วันที่ลบในเครื่องนี้จะไม่ถูกดึงกลับจากชีต</p><div class="rowb"><button type="button" class="btn" data-act="unskip">ดึงข้อมูลที่ลบในเครื่องนี้กลับมาจากชีต</button></div>':'')+'</div>'+
     '<div class="dsec"><h3>ทำความสะอาดอัตโนมัติ</h3><p>วันที่ไม่มีเหตุการณ์ถูกลบออกจากรายการให้แล้ว</p><div class="rowb">'+
       '<button type="button" class="btn" data-act="orphans"'+(orph.length?'':' disabled')+'>ลบรูปที่ไม่มีเหตุการณ์อ้างถึง ('+orph.length+' รูป, '+fmtB(ob)+')</button>'+
       '<button type="button" class="btn" data-act="prune"'+(ex?'':' disabled')+'>ลบโครงการที่เพิ่มเองและว่างเปล่า ('+ex+')</button></div></div>'+
@@ -2665,18 +2673,20 @@ app.addEventListener('click',function(e){
     save();render();
   }
   else if(act==='delphoto'&&c){delPhoto(c.id,b.dataset.pid,true);render()}
-  else if(act==='dd-photos'){var tr=b.closest('[data-date]'),d1=tr&&tr.dataset.date;if(!d1||guardUnsynced([d1])||!arm(b,'ยืนยันลบรูป'))return;dropDayPhotos(d1);toast('ลบรูปของวันนั้นแล้ว');render()}
-  else if(act==='dd-day'){var tr2=b.closest('[data-date]'),d2=tr2&&tr2.dataset.date;if(!d2||guardUnsynced([d2])||!arm(b,'ยืนยันลบทั้งวัน'))return;dropDayPhotos(d2);delete store.reports[d2];save();toast('ลบข้อมูลวันนั้นแล้ว');render()}
+  else if(act==='dd-photos'){var tr=b.closest('[data-date]'),d1=tr&&tr.dataset.date;if(!d1||guardUnsynced([d1])||!arm(b,'ยืนยันลบรูป'))return;dropDayPhotos(d1);var k1=skipInfo();if(k1.days[d1]!=='all')k1.days[d1]='photos';save();toast('ลบรูปของวันนั้นในเครื่องนี้แล้ว');render()}
+  else if(act==='dd-day'){var tr2=b.closest('[data-date]'),d2=tr2&&tr2.dataset.date;if(!d2||guardUnsynced([d2])||!arm(b,'ยืนยันลบทั้งวัน'))return;dropDayPhotos(d2);delete store.reports[d2];skipInfo().days[d2]='all';save();toast('ลบข้อมูลวันนั้นในเครื่องนี้แล้ว');render()}
   else if(act==='old-photos'||act==='old-all'){
     var n=+document.getElementById('oldn').value,cut=cutoffDate(n),ds=Object.keys(store.reports).filter(function(d){return d<cut});
     if(!ds.length){toast('ไม่มีข้อมูลที่เก่ากว่า '+n+' วัน');return}
     if(guardUnsynced(ds)||!arm(b,'ยืนยัน ('+ds.length+' วัน)'))return;
     ds.forEach(function(d){dropDayPhotos(d);if(act==='old-all')delete store.reports[d]});
+    var k2=skipInfo();if(act==='old-all')k2.before=maxDate(k2.before,cut);else k2.photosBefore=maxDate(k2.photosBefore,cut);
     save();toast('ลบข้อมูลเก่าแล้ว '+ds.length+' วัน');render();
   }
+  else if(act==='unskip'){if(!arm(b,'ยืนยันดึงกลับมา'))return;store.sync.skip={days:{}};save();toast('จะดึงข้อมูลทุกวันจากชีตกลับมา');render();syncPull(true)}
   else if(act==='orphans'){var o=orphanPhotos();if(!o.length){toast('ไม่มีรูปที่ตกค้าง');return}if(!arm(b,'ยืนยันลบ '+o.length+' รูป'))return;o.forEach(function(x){delPhoto(x.caseId,x.id)});toast('ลบรูปที่ตกค้างแล้ว');render()}
   else if(act==='prune'){if(!arm(b,'ยืนยันลบโครงการว่าง'))return;Object.keys(store.reports).forEach(function(d){store.reports[d].projects=store.reports[d].projects.filter(function(q){return q.cases.length||inReg(q)})});save();toast('ลบโครงการว่างแล้ว');render()}
-  else if(act==='wipe'){if(guardUnsynced(null)||!arm(b,'ยืนยันล้างทุกอย่าง'))return;tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};save();toast('ล้างข้อมูลทั้งหมดแล้ว');render()}
+  else if(act==='wipe'){if(guardUnsynced(null)||!arm(b,'ยืนยันล้างทุกอย่าง'))return;tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};var k3=skipInfo();k3.before=maxDate(k3.before,cutoffDate(0));save();toast('ล้างข้อมูลทั้งหมดในเครื่องนี้แล้ว วันก่อนหน้านี้จะไม่ถูกดึงกลับมา');render()}
   else if(act==='sy-test'){
     if(!store.sync.url||!store.sync.key){toast('ใส่ลิงก์ Web App และรหัสลับก่อน');return}
     b.disabled=true;post({action:'ping'}).then(function(j){b.disabled=false;SY.err='';paintSync();toast('เชื่อมต่อสำเร็จ'+(j.permanent?'':' (ยังไม่ได้เปิด Drive API รูปที่ลบจะอยู่ในถังขยะ 30 วัน)'))},function(er){b.disabled=false;toast('เชื่อมต่อไม่สำเร็จ: '+er.message)});
@@ -2684,7 +2694,7 @@ app.addEventListener('click',function(e){
   else if(act==='sy-all'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
     b.disabled=true;
-    SY.lastDl='';toast('กำลังซิงก์… ดูความคืบหน้าที่ป้าย Drive มุมขวาบน');syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;var up=unsyncedPhotos().length;toast((SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))+' · รูป: '+(SY.dl?'กำลังดึง '+SY.dl.total+' รูปอยู่เบื้องหลัง':(SY.lastDl||'ดึงข้อมูลไม่สำเร็จ'))+(up?' · รูปในเครื่องนี้ยังไม่ขึ้น Drive '+up+' รูป':''))});
+    SY.lastDl='';toast('กำลังซิงก์… ดูความคืบหน้าที่ป้าย Drive มุมขวาบน');syncPull(true).then(function(){allCases(function(k,pp,dd){if(!(store.sync.purgedBefore&&dd<store.sync.purgedBefore))store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;var up=unsyncedPhotos().length;toast((SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))+' · รูป: '+(SY.dl?'กำลังดึง '+SY.dl.total+' รูปอยู่เบื้องหลัง':(SY.lastDl||'ดึงข้อมูลไม่สำเร็จ'))+(up?' · รูปในเครื่องนี้ยังไม่ขึ้น Drive '+up+' รูป':''))});
   }
   else if(act==='sy-purge-photos'||act==='sy-purge-all'){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าการเชื่อมต่อ');return}
@@ -2692,7 +2702,7 @@ app.addEventListener('click',function(e){
     if(!arm(b,'ยืนยันลบบน Drive'))return;
     b.disabled=true;var tot={f:0,kb:0,r:0},perm=true;
     var loop=function(){return post({action:'purge',before:cut2,what:what}).then(function(j){tot.f+=j.files;tot.kb+=j.kb;tot.r+=j.rows||0;if(!j.permanent)perm=false;if(j.more)return loop()})};
-    loop().then(function(){b.disabled=false;toast('ลบบน Drive แล้ว '+tot.f+' รูป ('+fmtB(tot.kb*1024)+')'+(what==='all'?' และ '+tot.r+' แถว':'')+(perm?' คืนพื้นที่แล้ว':' ไฟล์อยู่ในถังขยะ จะหายถาวรใน 30 วัน'))},function(er){b.disabled=false;toast('ลบไม่สำเร็จ: '+er.message)});
+    loop().then(function(){if(what==='all'){store.sync.purgedBefore=maxDate(store.sync.purgedBefore,cut2);save()}b.disabled=false;toast('ลบบน Drive แล้ว '+tot.f+' รูป ('+fmtB(tot.kb*1024)+')'+(what==='all'?' และ '+tot.r+' แถว':'')+(perm?' คืนพื้นที่แล้ว':' ไฟล์อยู่ในถังขยะ จะหายถาวรใน 30 วัน'))},function(er){b.disabled=false;toast('ลบไม่สำเร็จ: '+er.message)});
   }
   else if(act==='copycase'&&c){copyText(caseText(c))}
   else if(act==='viewmsg'&&p){openMsg(p)}
@@ -3123,7 +3133,7 @@ document.getElementById('totals').addEventListener('click',function(e){
       toast(SY.err?'ซิงก์ไม่สำเร็จ: '+SY.err:'ซิงก์วันที่ '+thaiShort(day)+' แล้ว'+(SY.dl?' · กำลังโหลดรูป '+SY.dl.total+' รูป':''))});
     return}
   var cb=e.target.closest('#clrday');if(!cb)return;
-  if(!arm(cb,'ยืนยันล้างข้อมูลวันที่ '+thaiShort(store.date)))return;
+  if(!arm(cb,'ยืนยันล้างวันที่ '+thaiShort(store.date)+' (ทุกเครื่อง)'))return;
   /* clear test entries: every case and photo of this day (also removed from Drive), project list stays */
   var n=0;R().projects.forEach(function(p){p.cases.forEach(function(k){markDel(k);delCasePhotos(k);n++});p.cases=[]});
   R().projects=R().projects.filter(function(p){return inReg(p)});
