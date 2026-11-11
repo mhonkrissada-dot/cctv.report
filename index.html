@@ -1966,7 +1966,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 6';
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 7';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2602,9 +2602,9 @@ app.addEventListener('change',function(e){
   var t=e.target;
   if(t.dataset&&t.dataset.actChange==='addnormal'){
     var np=findP(t),w=t.value;t.value='';if(!np||!w)return;
-    var tx=w==='night'?LINE_NIGHT:LINE_DAY,tm=w==='night'?'19:00':'07:00';
-    if(np.cases.some(function(k){return (k.text||'').trim()===tx})){toast('มีบรรทัดนี้ในโครงการแล้ว');return}
-    var nc={id:uid(),time:tm,text:tx};np.cases.push(nc);np.cases.sort(byTime);markP(np);save();render();return;
+    var ntx=w==='night'?LINE_NIGHT:LINE_DAY,tm=w==='night'?'19:00':'07:00';
+    if(np.cases.some(function(k){return (k.text||'').trim()===ntx})){toast('มีบรรทัดนี้ในโครงการแล้ว');return}
+    var nc={id:uid(),time:tm,text:ntx};np.cases.push(nc);np.cases.sort(byTime);markP(np);save();render();return;
   }
   if(t.id==='rep-from'||t.id==='rep-to'){var fr=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;if(fr&&to){if(fr===to){toast('เวลาเริ่มกับเวลาสิ้นสุดต้องไม่เท่ากัน');return}R().repFrom=fr;R().repTo=to;save();render()}return}
   if(t.dataset&&t.dataset.f==='text'&&t.readOnly)return;
@@ -2623,7 +2623,7 @@ app.addEventListener('click',function(e){
     store.shift=sh.dataset.shift;
     /* กลางคืน / กลางวัน: put that shift's normal line on every project shown for this shift */
     if(store.shift==='night'||store.shift==='day'){
-      var tx=store.shift==='night'?LINE_NIGHT:LINE_DAY,tm=store.shift==='night'?'19:00':'07:00',other=store.shift==='night'?LINE_DAY:LINE_NIGHT,n=0;
+      var ntx=store.shift==='night'?LINE_NIGHT:LINE_DAY,tm=store.shift==='night'?'19:00':'07:00',other=store.shift==='night'?LINE_DAY:LINE_NIGHT,n=0;
       /* drop the other shift's normal line (when it has no photos) so only the chosen shift remains */
       R().projects.forEach(function(p){
         var keep=p.cases.filter(function(k){var gone=(k.text||'').trim()===other&&!allPhotos(k).length;if(gone)markDel(k);return !gone});
@@ -2631,11 +2631,11 @@ app.addEventListener('click',function(e){
       });
       R().projects.forEach(function(p){
         if(!inShift(p)||!(p.name||'').trim())return;
-        if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;
-        p.cases.push({id:uid(),time:tm,text:tx});p.cases.sort(byTime);markP(p);n++;
+        if(p.cases.some(function(k){return (k.text||'').trim()===ntx}))return;
+        p.cases.push({id:uid(),time:tm,text:ntx});p.cases.sort(byTime);markP(p);n++;
       });
       R().projects.forEach(function(p){if(inShift(p)&&tplsFor(p).some(function(d){return d.shift===store.shift}))ensureTpls(p,true)});
-      if(n)toast('ใส่ "'+tx.replace('♦️ ','')+'" ให้ '+n+' โครงการแล้ว');
+      if(n)toast('ใส่ "'+ntx.replace('♦️ ','')+'" ให้ '+n+' โครงการแล้ว');
     }
     save();render();return;
   }
@@ -2695,7 +2695,7 @@ app.addEventListener('click',function(e){
   else if(act==='unskip'){if(!arm(b,'ยืนยันดึงกลับมา'))return;store.sync.skip={days:{}};save();toast('จะดึงข้อมูลทุกวันจากชีตกลับมา');render();syncPull(true)}
   else if(act==='orphans'){var o=orphanPhotos();if(!o.length){toast('ไม่มีรูปที่ตกค้าง');return}if(!arm(b,'ยืนยันลบ '+o.length+' รูป'))return;o.forEach(function(x){delPhoto(x.caseId,x.id)});toast('ลบรูปที่ตกค้างแล้ว');render()}
   else if(act==='prune'){if(!arm(b,'ยืนยันลบโครงการว่าง'))return;Object.keys(store.reports).forEach(function(d){store.reports[d].projects=store.reports[d].projects.filter(function(q){return q.cases.length||inReg(q)})});save();toast('ลบโครงการว่างแล้ว');render()}
-  else if(act==='wipe'){if(guardUnsynced(null)||!arm(b,'ยืนยันล้างทุกอย่าง'))return;tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};var k3=skipInfo();k3.before=maxDate(k3.before,cutoffDate(0));save();toast('ล้างข้อมูลทั้งหมดในเครื่องนี้แล้ว วันก่อนหน้านี้จะไม่ถูกดึงกลับมา');render()}
+  else if(act==='wipe'){if(guardUnsynced(null)||!arm(b,'ยืนยันล้างทุกอย่าง'))return;tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};var k3=skipInfo(),keep=store.date<cutoffDate(0)?store.date:cutoffDate(0);k3.before=maxDate(k3.before,keep);save();toast('ล้างข้อมูลทั้งหมดในเครื่องนี้แล้ว ข้อมูลในชีตยังอยู่ครบ · วันที่ '+thaiShort(keep)+' เป็นต้นไปยังซิงก์ต่อ');render();syncPull(true,keep)}
   else if(act==='sy-test'){
     if(!store.sync.url||!store.sync.key){toast('ใส่ลิงก์ Web App และรหัสลับก่อน');return}
     b.disabled=true;post({action:'ping'}).then(function(j){b.disabled=false;SY.err='';paintSync();toast('เชื่อมต่อสำเร็จ'+(j.permanent?'':' (ยังไม่ได้เปิด Drive API รูปที่ลบจะอยู่ในถังขยะ 30 วัน)'))},function(er){b.disabled=false;toast('เชื่อมต่อไม่สำเร็จ: '+er.message)});
