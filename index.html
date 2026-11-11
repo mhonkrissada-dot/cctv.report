@@ -1120,6 +1120,37 @@ html[data-theme=dark] .thumb{box-shadow:none}
 /* v2 fixes: brand, report and folder pages */
 .bar .brand span{color:var(--ink)!important}
 .bar .brand b{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important;background:none!important}
+
+/* ===== modern buttons ===== */
+:root{--pri:#0F1419;--pri-h:#272C30}
+html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
+.btn:not(.ib){border-radius:10px!important;min-height:36px;padding:0 14px!important;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s,border-color .15s,color .15s!important}
+.btn[hidden]{display:none!important}
+.btn svg{width:16px;height:16px;flex:none}
+.btn:active{transform:scale(.98)!important}
+.btn:focus-visible,.ib:focus-visible,.navb:focus-visible,.rail button.f:focus-visible,.rside .ri:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
+.btn.pri,.btn.navy{box-shadow:inset 0 1px 0 rgba(255,255,255,.12)!important}
+.btn.back{padding-left:10px!important;color:var(--ink)!important}
+.btn.back svg{color:var(--muted)}
+.btn.back:hover svg{color:var(--ink)}
+.pacts .btn.ib,.ib{border-radius:10px!important}
+.chip{border-radius:8px!important}
+/* previous / next */
+.pnav{display:grid!important;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.navb{display:flex;align-items:center;gap:12px;min-width:0;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:background-color .15s,border-color .15s}
+.navb:hover{background:var(--fill);border-color:var(--fld-h)}
+.navb:active{transform:scale(.99)}
+.navb.next{grid-column:2;justify-content:flex-end;text-align:right}
+.navb span{display:flex;flex-direction:column;min-width:0}
+.navb small{font-size:12px;color:var(--muted);line-height:1.3}
+.navb b{font-size:15px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.navb svg{width:18px;height:18px;flex:none;color:var(--muted)}
+.navb:hover svg{color:var(--ink)}
+@media (max-width:600px){.pnav{grid-template-columns:1fr}.navb.next{grid-column:1}}
+/* list: selected row is a soft fill, no side bar */
+.rail button.f,.rside .ri{border-radius:8px!important;transition:background-color .12s}
+html .rail button.f[aria-current=true],html .rside .ri[aria-current=true]{background:var(--fill)!important;box-shadow:none!important}
+html .rail button.f[aria-current=true] .fn,html .rside .ri[aria-current=true] .fn{font-weight:700!important}
 .rshide{background:transparent!important;border:1px solid var(--fld)!important;color:var(--muted)!important}
 .pct{background:var(--ok-soft)!important;color:var(--ok)!important}
 .bar2{background:var(--fill)!important}
@@ -1780,7 +1811,7 @@ function renderFolderDetail(){
   var days=folderDays(fsel),cur=sortedProjects().filter(function(p){return norm(p.name||p.id)===fsel})[0]||(days[0]&&days[0].p);
   var name=cur?cur.name:fsel,nc=0,nph=0;
   days.forEach(function(x){x.p.cases.forEach(function(c){if(!isRoutine(c))nc++;nph+=allPhotos(c).length})});
-  var h='<div class="fov"><div class="fdtop"><button type="button" class="btn navy" data-fback>← ภาพรวมโฟลเดอร์</button>'+
+  var h='<div class="fov"><div class="fdtop"><button type="button" class="btn back" data-fback><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>ภาพรวมโฟลเดอร์</button>'+
     '<div class="fdhero">'+folderArt(cur||{name:name},nc?nc+' เคส':'')+'<div><h2>'+esc(name)+'</h2><p class="sub">'+(cur&&cur.mode?MODES[cur.mode]+' · ':'')+esc(rangeLabel())+' · '+days.length+' วัน · '+nc+' เคส · '+nph+' รูป</p></div></div>'+
     '<div class="fdtools">'+rangeHTML()+'<label class="msg fdchk"><input type="checkbox" data-fph'+(fonlyPh?' checked':'')+'> เฉพาะเคสที่มีรูป</label>'+(nph?'<button type="button" class="btn" data-fgal>ดูรูปทั้งหมด ('+nph+')</button>':'')+'</div></div>';
   if(!days.length)return app.innerHTML=h+'<div class="empty">'+(fFrom||fTo?'ไม่มีเคสในช่วง '+esc(rangeLabel())+' ลองเปลี่ยนช่วงวันที่':'ยังไม่มีเคสของโครงการนี้ในเบราว์เซอร์นี้')+'</div></div>';
@@ -2017,6 +2048,14 @@ function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))
 function searchHTML(id){return '<label class="psearch" for="'+id+'"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="'+id+'" type="search" data-search placeholder="ค้นหาโครงการ" autocomplete="off" value="'+esc(pq)+'"><button type="button" class="pqx" data-pqx aria-label="ล้างคำค้นหา"'+(pq?'':' hidden')+'>✕</button></label>'}
 /* project list grouped by status: waiting to send, sent, nothing yet */
 var railOpenNone=false,selAllChosen=false;
+/* previous / next project: two wide buttons under the project */
+function navHTML(attr,pv,nx){
+  var L='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      Rt='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5L13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return '<nav class="pnav" aria-label="ไปโครงการอื่น">'+
+    (pv?'<button type="button" class="navb prev" '+attr+'="'+pv.id+'">'+L+'<span><small>ก่อนหน้า</small><b>'+esc(pv.name||'(ยังไม่ตั้งชื่อ)')+'</b></span></button>':'')+
+    (nx?'<button type="button" class="navb next" '+attr+'="'+nx.id+'"><span><small>ถัดไป</small><b>'+esc(nx.name||'(ยังไม่ตั้งชื่อ)')+'</b></span>'+Rt+'</button>':'')+'</nav>';
+}
 function railGroup(p){return p.cases.length?(isSent(p)?'sent':'wait'):'none'}
 function railList(){return sortedProjects().filter(function(p){return pq?pqMatch(p):(inShift(p)||sel===p.id)})}
 function railOrder(){var l=railList(),o=[];['wait','sent','none'].forEach(function(k){l.forEach(function(p){if(railGroup(p)===k)o.push(p)})});return o}
@@ -2092,8 +2131,7 @@ function renderEdit(){
   }else{
     var cur=ps.filter(function(p){return p.id===sel})[0],ord=railOrder(),ix=ord.indexOf(cur),pv=ix>0?ord[ix-1]:null,nx=ord[ix+1]||null;
     if(cur&&railGroup(cur)==='sent'){var nw=ord.filter(function(p){return railGroup(p)==='wait'})[0];if(nw)nx=nw}
-    body=cur?projHTML(cur,true)+'<div class="pnav">'+(pv?'<button type="button" class="btn" data-sel="'+pv.id+'">← '+esc(pv.name||'(ยังไม่ตั้งชื่อ)')+'</button>':'<span></span>')+
-      (nx?'<button type="button" class="btn" data-sel="'+nx.id+'">ถัดไป: '+esc(nx.name||'(ยังไม่ตั้งชื่อ)')+' →</button>':'')+'</div>':'';
+    body=cur?projHTML(cur,true)+navHTML('data-sel',pv,nx):'';
   }
   app.innerHTML='<div class="layout"><div class="side">'+searchHTML('psearch')+'<div id="shiftbox">'+shiftHTML()+'</div><nav class="rail" aria-label="โครงการ">'+railHTML()+'</nav><button type="button" class="btn addp" data-act="addproj">+ เพิ่มโครงการ</button></div><div id="main">'+quickHTML()+body+'</div></div>';
   fitAll();paintArrows();
@@ -2378,7 +2416,7 @@ function renderReport(){
     var cp=ord.filter(function(p){return p.id===rsel})[0],ix=ord.indexOf(cp),pv=ix>0?ord[ix-1]:null,nx=ord[ix+1]||null;
     if(isSent(cp)&&unsent.length)nx=unsent[0]; /* just sent: next is the next one still waiting */
     if(!unsent.length&&ps.length)h+='<div class="alldone">ส่งครบทุกโครงการแล้ว ✓</div>';
-    h+=card(cp,none.indexOf(cp)>=0)+'<div class="pnav">'+(pv?'<button type="button" class="btn" data-rsel="'+pv.id+'">← '+esc(pv.name||'')+'</button>':'<span></span>')+(nx?'<button type="button" class="btn" data-rsel="'+nx.id+'">ถัดไป: '+esc(nx.name||'')+' →</button>':'')+'</div>';
+    h+=card(cp,none.indexOf(cp)>=0)+navHTML('data-rsel',pv,nx);
     app.innerHTML='<div class="replay rb"><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
     fitAll();paintProg();return;
   }
