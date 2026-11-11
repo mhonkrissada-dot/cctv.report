@@ -1568,7 +1568,7 @@ var ctx=null;
 /* popup with the full report message */
 /* ---------- Excel: hourly table, one row per hour of the shift ---------- */
 function xlKey(p){return norm(p.name||p.id)}
-function xlBlank(p){var b=store.xlblank&&store.xlblank[xlKey(p)];return b!=null&&b!==''?b:'เหตุการณ์ปกติ'}
+function xlBlank(p){var b=store.xlblank&&store.xlblank[xlKey(p)];return b!=null&&b!==''&&b!=='เหตุการณ์ปกติ'?b:'เหตุการณ์ภายในชุมชนปกติ'}
 function xlShift(p){var s=curShift();if(s==='night'||s==='day')return s;return (p.mode||'')==='night'?'night':'day'}
 function xlHours(sh){var h=[],i;if(sh==='night'){for(i=19;i<24;i++)h.push(i);for(i=0;i<=7;i++)h.push(i)}else for(i=7;i<=19;i++)h.push(i);return h}
 function xlKey(p){return p.id+'@'+xlShift(p)}
