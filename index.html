@@ -1145,6 +1145,21 @@ html[data-mode=data] #syncnow{margin-left:6px}
 .syncbtn.bad{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
 @keyframes syspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.syncbtn.spin svg{animation:none}}
+/* Sync: a little bigger, presses in, pulses while working, pops when done */
+.syncbtn{height:38px!important;padding:0 17px 0 13px!important;font-size:14.5px!important;gap:7px!important;position:relative;overflow:hidden;
+  transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .15s,border-color .15s,box-shadow .2s!important}
+.syncbtn svg{width:18px!important;height:18px!important;transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.syncbtn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.syncbtn:hover svg{transform:rotate(-40deg)}
+.syncbtn:active{transform:scale(.92)!important;box-shadow:none}
+.syncbtn.spin{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft);animation:sypulse 1.1s ease-in-out infinite}
+.syncbtn.done{animation:sypop .55s cubic-bezier(.3,1.6,.5,1);border-color:var(--ok)!important;box-shadow:0 0 0 3px var(--ok-soft)}
+.syncbtn.done svg{color:var(--ok)!important}
+.syncbtn .rip{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);animation:syrip .55s ease-out forwards;pointer-events:none}
+@keyframes sypulse{50%{box-shadow:0 0 0 6px var(--accent-soft)}}
+@keyframes sypop{0%{transform:scale(.92)}55%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes syrip{to{transform:scale(2.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.syncbtn,.syncbtn svg{transition:none!important}.syncbtn.spin,.syncbtn.done,.syncbtn .rip{animation:none!important}}
 .btn svg{width:16px;height:16px;flex:none}
 .btn:active{transform:scale(.98)!important}
 .btn:focus-visible,.ib:focus-visible,.navb:focus-visible,.rail button.f:focus-visible,.rside .ri:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
@@ -3093,12 +3108,15 @@ document.getElementById('m-fold').addEventListener('click',function(){mode='fold
 document.getElementById('m-rep').addEventListener('click',function(){mode='report';render();window.scrollTo(0,0)});
 document.getElementById('totals').addEventListener('click',function(e){
   if(e.target.closest('#syncst')){mode='data';render();window.scrollTo(0,0);return}
-  if(e.target.closest('#syncnow')){
+  var snb=e.target.closest('#syncnow');
+  if(snb){var rr=snb.getBoundingClientRect(),d=Math.max(rr.width,rr.height),rp=document.createElement('span');rp.className='rip';rp.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-rr.left-d/2)+'px;top:'+(e.clientY-rr.top-d/2)+'px';snb.appendChild(rp);setTimeout(function(){rp.remove()},600)}
+  if(snb){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าซิงก์ ใส่ลิงก์และรหัสลับในหน้าจัดการข้อมูลก่อน');mode='data';render();window.scrollTo(0,0);return}
     if(SY.busy||SY.pulling){toast('กำลังซิงก์อยู่');return}
     var day=store.date;SY.lastDl='';SY.manual=true;paintSync();
     /* only the day on screen: quick, the rest keeps syncing on its own */
     syncPull(true,day).then(function(){return flush()}).then(function(){SY.manual=false;paintSync();
+      var bb=document.getElementById('syncnow');if(bb&&!SY.err){bb.classList.remove('done');void bb.offsetWidth;bb.classList.add('done');setTimeout(function(){bb.classList.remove('done')},900)}
       toast(SY.err?'ซิงก์ไม่สำเร็จ: '+SY.err:'ซิงก์วันที่ '+thaiShort(day)+' แล้ว'+(SY.dl?' · กำลังโหลดรูป '+SY.dl.total+' รูป':''))});
     return}
   var cb=e.target.closest('#clrday');if(!cb)return;
