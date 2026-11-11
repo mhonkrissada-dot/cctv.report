@@ -1877,7 +1877,7 @@ function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).fo
 function pending(){var s=store.sync;return dirtyIn(null)+Object.keys(s.dels).length+Object.keys(s.pdels).length+unsyncedPhotos().length}
 function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c)}}
 function post(body){
-  body.key=store.sync.key;
+  body.key=String(store.sync.key||'').trim(); /* a space copied with the code would make it wrong */
   var url=String(store.sync.url||'').trim();
   if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[^/]+\/exec$/.test(url))return Promise.reject(new Error('ลิงก์ต้องเป็นลิงก์ Web App ที่ลงท้ายด้วย /exec (ไม่ใช่ลิงก์ /dev หรือลิงก์หน้าแก้โค้ด)'));
   return fetch(url,{method:'POST',body:JSON.stringify(body)})
