@@ -1132,12 +1132,16 @@ html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
 html:not([data-mode=data]) #syncst{display:none!important}
 #syncnow{margin-left:auto}
 html[data-mode=data] #syncnow{margin-left:6px}
-.syncbtn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0;flex:none;transition:background-color .15s,color .15s}
+.syncbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0;flex:none;transition:background-color .15s,color .15s}
 .syncbtn:hover{background:var(--fill);color:var(--ink)}
 .syncbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.syncbtn svg{width:18px;height:18px}
-.syncbtn.spin{color:var(--accent)}
-.syncbtn.spin svg{animation:syspin 1s linear infinite}
+.syncbtn svg{width:16px;height:16px}
+.syncbtn{color:var(--ink)}
+.syncbtn svg{color:var(--muted)}
+.syncbtn.spin svg{color:var(--accent)}
+#syncnow{color:var(--ink)!important}
+#syncnow.bad{color:var(--danger)!important}
+.syncbtn.spin svg{animation:syspin .7s linear infinite}
 .syncbtn.bad{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
 @keyframes syspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.syncbtn.spin svg{animation:none}}
@@ -1951,11 +1955,11 @@ var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 4';
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
 document.addEventListener('focusout',function(){setTimeout(function(){if(needRender&&!isTyping(document.activeElement)){needRender=false;render()}},50)});
-function syncPull(force){
+function syncPull(force,day){
   if(!syOn()||SY.pulling)return Promise.resolve();
-  if(!force&&SY.pulledAt&&Date.now()-SY.pulledAt<SY_PULL_GAP)return Promise.resolve();
+  if(!force&&!day&&SY.pulledAt&&Date.now()-SY.pulledAt<SY_PULL_GAP)return Promise.resolve();
   SY.pulling=true;
-  return post({action:'pullAll'}).then(function(j){
+  return post(day?{action:'pullAll',date:day}:{action:'pullAll'}).then(function(j){
     if(!j||!j.ok)throw new Error((j&&j.error)||'ดึงข้อมูลไม่ได้');
     var s=store.sync,idx=caseIndex(),touched={},changed=0,gone={};
     /* deleted on another device: remove here too, unless this device has an edit still waiting to go up */
@@ -1970,7 +1974,7 @@ function syncPull(force){
     Object.keys(photoMap).forEach(function(k){photoMap[k]=photoMap[k].filter(function(x){
       if(gone[x.id]&&x.fileId){tx('readwrite',function(st){return st.delete(x.id)});changed++;return false}return true})});
     /* cases: the sheet is the truth, except for a case this device changed and has not sent yet */
-    (j.cases||[]).forEach(function(r){
+    (j.cases||[]).filter(function(r){return !day||r.date===day}).forEach(function(r){
       var cur=idx[r.id];
       if(cur&&(s.dirty[r.id]||isRoutine(cur.c)))return;
       if(s.dels[r.id]||gone[r.id])return;
@@ -1989,7 +1993,7 @@ function syncPull(force){
     /* photos: download the ones this device does not have yet */
     var idx2=caseIndex(),have={};
     Object.keys(photoMap).forEach(function(k){photoMap[k].forEach(function(x){have[x.id]=1})});
-    var want=(j.photos||[]).filter(function(p){return !have[p.id]&&!s.pdels[p.id]&&!gone[p.id]&&idx2[p.caseId]});
+    var want=(j.photos||[]).filter(function(p){return !have[p.id]&&!s.pdels[p.id]&&!gone[p.id]&&idx2[p.caseId]&&(!day||idx2[p.caseId].d===day)});
     if(changed||Object.keys(touched).length)save();
     if(changed||Object.keys(touched).length)softRender();
     return want;
@@ -2056,7 +2060,7 @@ function syncState(){var s=store.sync;if(!s.url||!s.key)return 'off';if(s.on===f
 function paintSync(){
   var l=syncLabel()||'ยังไม่ได้ตั้งค่าสำรอง Drive',st=syncState();
   ['syncst','systat'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.className='pill '+st;el.innerHTML='<i aria-hidden="true"></i>'+esc(l)});
-  var sb=document.getElementById('syncnow');if(sb){sb.classList.toggle('spin',!!(SY.busy||SY.pulling||SY.fetching||SY.manual));sb.classList.toggle('bad',st==='err');sb.title='ซิงก์ตอนนี้ · '+l}
+  var sb=document.getElementById('syncnow');if(sb){sb.classList.toggle('spin',!!SY.manual);sb.classList.toggle('bad',st==='err');sb.title='ซิงก์วันที่เปิดอยู่ · '+l}
 }
 function guardUnsynced(dates){
   if(!syOn())return false;
@@ -2084,7 +2088,7 @@ function syncHTML(){
 /* ---------- render ---------- */
 var app=document.getElementById('app');
 function renderTotals(){var n=counts();
-  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="syncnow" class="syncbtn" aria-label="ซิงก์ตอนนี้" title="ซิงก์ตอนนี้"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';paintSync()}
+  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="syncnow" class="syncbtn" title="ซิงก์วันที่เปิดอยู่"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span></button>';paintSync()}
 /* project search: filters the project list (and the folder overview) by name */
 var pq='';
 function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))>=0||String(p.name||'').toLowerCase().indexOf(pq.toLowerCase())>=0}
@@ -3092,9 +3096,10 @@ document.getElementById('totals').addEventListener('click',function(e){
   if(e.target.closest('#syncnow')){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าซิงก์ ใส่ลิงก์และรหัสลับในหน้าจัดการข้อมูลก่อน');mode='data';render();window.scrollTo(0,0);return}
     if(SY.busy||SY.pulling){toast('กำลังซิงก์อยู่');return}
-    SY.lastDl='';SY.manual=true;paintSync();
-    syncPull(true).then(function(){return flush()}).then(function(){SY.manual=false;paintSync();
-      toast(SY.err?'ซิงก์ไม่สำเร็จ: '+SY.err:'ซิงก์แล้ว'+(SY.dl?' · กำลังดึงรูป '+SY.dl.total+' รูปอยู่เบื้องหลัง':SY.lastDl&&SY.lastDl!=='ไม่มีรูปใหม่ในชีตให้ดึง'?' · '+SY.lastDl:''))});
+    var day=store.date;SY.lastDl='';SY.manual=true;paintSync();
+    /* only the day on screen: quick, the rest keeps syncing on its own */
+    syncPull(true,day).then(function(){return flush()}).then(function(){SY.manual=false;paintSync();
+      toast(SY.err?'ซิงก์ไม่สำเร็จ: '+SY.err:'ซิงก์วันที่ '+thaiShort(day)+' แล้ว'+(SY.dl?' · กำลังโหลดรูป '+SY.dl.total+' รูป':''))});
     return}
   var cb=e.target.closest('#clrday');if(!cb)return;
   if(!arm(cb,'ยืนยันล้างข้อมูลวันที่ '+thaiShort(store.date)))return;
