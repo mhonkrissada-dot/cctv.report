@@ -1976,28 +1976,35 @@ function syncPull(force){
     if(changed||Object.keys(touched).length)save();
     if(changed||Object.keys(touched).length)softRender();
     return want;
-  }).then(function(want){return fetchPhotos(want)}).then(function(){
+  }).then(function(want){return fetchPhotos(want,force)}).then(function(){
     SY.pulling=false;SY.pulledAt=Date.now();
   },function(e){
     SY.pulling=false;
     if(force)toast('ดึงข้อมูลจาก Drive ไม่สำเร็จ: '+((e&&e.message)||e));
   });
 }
-function fetchPhotos(list){
+function fetchPhotos(list,force){
   if(!list.length||SY.fetching)return Promise.resolve();
-  SY.fetching=true;var n=0,chain=Promise.resolve();
+  SY.fetching=true;SY.dl={n:0,total:list.length,fail:0,err:''};paintSync();
+  var chain=Promise.resolve();
   list.forEach(function(p){chain=chain.then(function(){
     if(!syOn())return;
     return post({action:'getPhoto',id:p.id}).then(function(j){
-      if(!j||!j.ok||!j.data||!findCase(p.caseId))return;
+      if(!j||!j.ok||!j.data)throw new Error((j&&j.error)||'ไม่ได้ข้อมูลรูป');
+      if(!findCase(p.caseId))return;
       var rec={id:p.id,caseId:p.caseId,data:j.data,t:p.t,fileId:p.fileId,url:p.url};
       (photoMap[p.caseId]=photoMap[p.caseId]||[]).push(rec);
       photoMap[p.caseId].sort(function(a,b){return a.t-b.t});
       tx('readwrite',function(st){return st.put(rec)});
-      if(++n%5===0)softRender();
-    },function(){});
+      if(++SY.dl.n%5===0)softRender();
+    }).catch(function(e){SY.dl.fail++;SY.dl.err=(e&&e.message)||String(e)}).then(paintSync);
   })});
-  return chain.then(function(){SY.fetching=false;if(n)softRender()},function(){SY.fetching=false});
+  return chain.then(function(){
+    var d=SY.dl;SY.fetching=false;SY.dl=null;
+    SY.dlErr=d.fail?'ดึงรูปไม่สำเร็จ '+d.fail+' จาก '+d.total+' รูป: '+d.err:'';
+    if(d.n)softRender();paintSync();
+    if(force||d.fail)toast(d.fail?SY.dlErr:'ดึงรูปจากเครื่องอื่นแล้ว '+d.n+' รูป');
+  });
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden)syncPull()});
 setInterval(function(){if(!document.hidden)syncPull()},5*60000);
@@ -2005,13 +2012,15 @@ function syncLabel(){
   var s=store.sync;
   if(!s.url||!s.key)return '';
   if(s.on===false)return 'Drive: ปิดการส่งอัตโนมัติ';
+  if(SY.dl&&SY.dl.total)return 'Drive: กำลังดึงรูปจากเครื่องอื่น '+(SY.dl.n+SY.dl.fail)+'/'+SY.dl.total;
+  if(SY.dlErr)return 'Drive: '+SY.dlErr;
   if(SY.err)return 'Drive: ส่งไม่สำเร็จ จะลองใหม่ ('+SY.err+')';
   var n=pending();
   if(SY.busy)return 'Drive: กำลังส่ง… เหลือ '+n+' รายการ';
   if(n)return 'Drive: รอส่ง '+n+' รายการ';
   return 'Drive: สำรองครบแล้ว'+(s.last?' '+new Date(s.last).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.':'');
 }
-function syncState(){var s=store.sync;if(!s.url||!s.key)return 'off';if(s.on===false)return 'off';if(SY.err)return 'err';if(SY.busy)return 'busy';return pending()?'wait':'ok'}
+function syncState(){var s=store.sync;if(!s.url||!s.key)return 'off';if(s.on===false)return 'off';if(SY.err||SY.dlErr)return 'err';if(SY.busy||SY.dl)return 'busy';return pending()?'wait':'ok'}
 function paintSync(){
   var l=syncLabel()||'ยังไม่ได้ตั้งค่าสำรอง Drive',st=syncState();
   ['syncst','systat'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.className='pill '+st;el.innerHTML='<i aria-hidden="true"></i>'+esc(l)});
