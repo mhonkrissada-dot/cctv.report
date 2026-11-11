@@ -1622,6 +1622,77 @@ function flush(){
   }).then(function(){s.last=Date.now();save()},function(e){SY.err=(e&&e.message)||'ส่งไม่สำเร็จ';SY.timer=setTimeout(flush,30000)})
   .then(function(){SY.busy=false;paintSync();if(SY.again){SY.again=false;schedule()}});
 }
+/* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
+var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
+var SY_PULL_GAP=60000;
+function softRender(){if(!isTyping(document.activeElement))render()}
+function syncPull(force){
+  if(!syOn()||SY.pulling)return Promise.resolve();
+  if(!force&&SY.pulledAt&&Date.now()-SY.pulledAt<SY_PULL_GAP)return Promise.resolve();
+  SY.pulling=true;
+  return post({action:'pullAll'}).then(function(j){
+    if(!j||!j.ok)throw new Error((j&&j.error)||'ดึงข้อมูลไม่ได้');
+    var s=store.sync,idx=caseIndex(),touched={},changed=0,gone={};
+    /* deleted on another device: remove here too, unless this device has an edit still waiting to go up */
+    (j.tombs||[]).forEach(function(i){gone[i]=1});
+    Object.keys(gone).forEach(function(i){
+      var o=idx[i];
+      if(o&&!s.dirty[i]&&!isRoutine(o.c)){
+        o.p.cases=o.p.cases.filter(function(c){return c!==o.c});changed++;
+        (photoMap[i]||[]).forEach(function(x){tx('readwrite',function(st){return st.delete(x.id)})});delete photoMap[i];
+      }
+    });
+    Object.keys(photoMap).forEach(function(k){photoMap[k]=photoMap[k].filter(function(x){
+      if(gone[x.id]&&x.fileId){tx('readwrite',function(st){return st.delete(x.id)});changed++;return false}return true})});
+    /* cases: the sheet is the truth, except for a case this device changed and has not sent yet */
+    (j.cases||[]).forEach(function(r){
+      var cur=idx[r.id];
+      if(cur&&(s.dirty[r.id]||isRoutine(cur.c)))return;
+      if(s.dels[r.id]||gone[r.id])return;
+      var body='♦️ '+bodyText({text:r.text});
+      var rep=store.reports[r.date]||(store.reports[r.date]={projects:[]});
+      var pr=rep.projects.filter(function(p){return p.name===r.project})[0];
+      if(!pr){pr={id:uid(),name:r.project,mode:MODE_REV[r.mode]||'',cases:[]};rep.projects.push(pr)}
+      if(cur){
+        if(cur.c.text===body&&cur.c.time===r.time&&cur.p===pr)return;
+        if(cur.p!==pr){cur.p.cases=cur.p.cases.filter(function(c){return c!==cur.c});pr.cases.push(cur.c)}
+        cur.c.text=body;cur.c.time=r.time;
+      }else pr.cases.push({id:r.id,time:r.time,text:body});
+      touched[pr.id]=pr;changed++;
+    });
+    Object.keys(touched).forEach(function(k){touched[k].cases.sort(byTime)});
+    /* photos: download the ones this device does not have yet */
+    var idx2=caseIndex(),have={};
+    Object.keys(photoMap).forEach(function(k){photoMap[k].forEach(function(x){have[x.id]=1})});
+    var want=(j.photos||[]).filter(function(p){return !have[p.id]&&!s.pdels[p.id]&&!gone[p.id]&&idx2[p.caseId]});
+    if(changed||Object.keys(touched).length)save();
+    if(changed||Object.keys(touched).length)softRender();
+    return want;
+  }).then(function(want){return fetchPhotos(want)}).then(function(){
+    SY.pulling=false;SY.pulledAt=Date.now();
+  },function(e){
+    SY.pulling=false;
+    if(force)toast('ดึงข้อมูลจาก Drive ไม่สำเร็จ: '+((e&&e.message)||e));
+  });
+}
+function fetchPhotos(list){
+  if(!list.length||SY.fetching)return Promise.resolve();
+  SY.fetching=true;var n=0,chain=Promise.resolve();
+  list.forEach(function(p){chain=chain.then(function(){
+    if(!syOn())return;
+    return post({action:'getPhoto',id:p.id}).then(function(j){
+      if(!j||!j.ok||!j.data||!findCase(p.caseId))return;
+      var rec={id:p.id,caseId:p.caseId,data:j.data,t:p.t,fileId:p.fileId,url:p.url};
+      (photoMap[p.caseId]=photoMap[p.caseId]||[]).push(rec);
+      photoMap[p.caseId].sort(function(a,b){return a.t-b.t});
+      tx('readwrite',function(st){return st.put(rec)});
+      if(++n%5===0)softRender();
+    },function(){});
+  })});
+  return chain.then(function(){SY.fetching=false;if(n)softRender()},function(){SY.fetching=false});
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)syncPull()});
+setInterval(function(){if(!document.hidden)syncPull()},5*60000);
 function syncLabel(){
   var s=store.sync;
   if(!s.url||!s.key)return '';
@@ -2192,8 +2263,8 @@ app.addEventListener('click',function(e){
   }
   else if(act==='sy-all'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
-    allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';b.disabled=true;
-    flush().then(function(){b.disabled=false;toast(SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))});
+    b.disabled=true;
+    syncPull(true).then(function(){allCases(function(k){store.sync.dirty[k.id]=++store.sync.n});save();SY.err='';return flush()}).then(function(){b.disabled=false;toast(SY.err?'ยังส่งไม่ครบ: '+SY.err:(SY.busy?'กำลังส่งอยู่':'ซิงก์ครบแล้ว'))});
   }
   else if(act==='sy-purge-photos'||act==='sy-purge-all'){
     if(!syOn()){toast('ยังไม่ได้ตั้งค่าการเชื่อมต่อ');return}
@@ -2601,7 +2672,7 @@ document.getElementById('totals').addEventListener('click',function(e){
 
 fixTimes();
 render();
-loadPhotos().then(function(){render();schedule()});
+loadPhotos().then(function(){render();schedule();syncPull()});
 /* re-measure text boxes once the web font arrives and whenever the window width changes */
 try{document.fonts.ready.then(fitAll)}catch(e){}
 var rzT;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fitAll,120)});
