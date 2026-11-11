@@ -1185,6 +1185,17 @@ html[data-theme=dark] .thumb{box-shadow:none}
 .rail .sd{order:1}.rail .fn{order:2}.rail .rc{order:3}
 .side .shift .msg{display:none}
 .side .shift{margin-bottom:4px}
+/* dark-mode audit fixes */
+.seg.tabs button{color:var(--muted)!important}
+.seg.tabs button[aria-pressed=true]{color:var(--accent-2)!important}
+.ctx .sw.auto{background:var(--fill)!important;color:var(--ink)!important}
+.pgrp:not(.wait){background:var(--ok-soft)!important;border-color:transparent!important}
+.pgrp .pgh,.pgrp .pgx{color:inherit}
+.pgrp:not(.wait) .pgh{color:var(--ok)!important}
+.pgrp.wait .pgh{color:var(--warn)!important}
+.pgrp .chip.sent{background:transparent!important;color:var(--ink)!important}
+.mhead .waitc{color:var(--warn)!important}
+.mhead .okc{color:var(--accent-2)!important}
 @media (max-width:900px){.rail button.f{width:auto!important;max-width:220px}.rail .rl{flex-direction:row!important;gap:6px}.rail .fn{overflow:visible}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
