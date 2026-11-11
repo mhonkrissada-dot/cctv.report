@@ -1128,6 +1128,8 @@ html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
 .btn[hidden]{display:none!important}
 .keyrow{display:flex;gap:6px;align-items:center}.keyrow input{flex:1;min-width:0}
 .appver{margin:4px 0 0;font-size:12px;color:var(--muted)}
+/* the Drive status pill is shown on the data page only */
+html:not([data-mode=data]) #syncst{display:none!important}
 .btn svg{width:16px;height:16px;flex:none}
 .btn:active{transform:scale(.98)!important}
 .btn:focus-visible,.ib:focus-visible,.navb:focus-visible,.rail button.f:focus-visible,.rside .ri:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
