@@ -1126,6 +1126,7 @@ html[data-theme=dark] .thumb{box-shadow:none}
 html[data-theme=dark]{--pri:#1D9BF0;--pri-h:#1A8CD8}
 .btn:not(.ib){border-radius:10px!important;min-height:36px;padding:0 14px!important;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background-color .15s,border-color .15s,color .15s!important}
 .btn[hidden]{display:none!important}
+.keyrow{display:flex;gap:6px;align-items:center}.keyrow input{flex:1;min-width:0}
 .btn svg{width:16px;height:16px;flex:none}
 .btn:active{transform:scale(.98)!important}
 .btn:focus-visible,.ib:focus-visible,.navb:focus-visible,.rail button.f:focus-visible,.rside .ri:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
@@ -2028,7 +2029,7 @@ function syncHTML(){
     '<p class="pill" id="systat"></p></header>'+
     '<div class="dsec"><h3>การเชื่อมต่อ</h3><div class="cfg">'+
       '<div class="fld"><label for="sy-url">ลิงก์ Web App (ลงท้าย /exec)</label><input id="sy-url" data-sy="url" value="'+esc(s.url||'')+'" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>'+
-      '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><input id="sy-key" type="password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off"></div>'+
+      '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><span class="keyrow"><input id="sy-key" type="password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off" spellcheck="false"><button type="button" class="btn" id="sy-show" aria-pressed="false" title="แสดง / ซ่อนรหัสที่พิมพ์">แสดง</button></span></div>'+
     '</div>'+
     '<div class="rowb"><label class="msg" style="display:flex;gap:6px;align-items:center;margin-right:6px"><input type="checkbox" data-sy="on"'+(s.on!==false?' checked':'')+'> ส่งอัตโนมัติ</label>'+
     '<button type="button" class="btn" data-act="sy-test">ทดสอบการเชื่อมต่อ</button><button type="button" class="btn pri" data-act="sy-all">ซิงก์ทั้งหมดตอนนี้</button></div>'+
@@ -2739,6 +2740,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();
       closeCtx();toast('ฟอนต์: '+L[+f-1][1]);setTimeout(function(){window.dispatchEvent(new Event('resize'))},400)});
   });
 })();
+document.addEventListener('click',function(e){var b=e.target.closest('#sy-show');if(!b)return;var i=document.getElementById('sy-key');if(!i)return;var on=i.type==='password';i.type=on?'text':'password';b.textContent=on?'ซ่อน':'แสดง';b.setAttribute('aria-pressed',on)});
 (function(){var b=document.getElementById('themebtn');if(!b)return;b.addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cctv-theme2',t)}catch(e){}toast(t==='dark'?'โหมดมืด':'โหมดสว่าง')})})();
 window.addEventListener('scroll',closeCtx,{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
