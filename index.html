@@ -1966,7 +1966,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 7';
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 8';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2504,7 +2504,7 @@ function renderReport(){
 /* ---------- data cleanup ---------- */
 function allCases(fn){Object.keys(store.reports).forEach(function(d){store.reports[d].projects.forEach(function(p){p.cases.forEach(function(c){fn(c,p,d)})})})}
 function dayStats(d){var c=0,ph=0,by=0,pr=0;store.reports[d].projects.forEach(function(p){if(p.cases.length)pr++;c+=p.cases.length;p.cases.forEach(function(k){allPhotos(k).forEach(function(x){ph++;by+=x.data.length*0.75})})});return{pr:pr,c:c,ph:ph,by:by}}
-function fmtB(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'}
+function fmtB(b){return !(b>0)?'0 KB':b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'}
 function dropDayPhotos(d){store.reports[d].projects.forEach(function(p){p.cases.forEach(delCasePhotos)})}
 function orphanPhotos(){var ids={};allCases(function(c){ids[c.id]=1});var out=[];Object.keys(photoMap).forEach(function(k){if(!ids[k])photoMap[k].forEach(function(x){out.push(x)})});return out}
 function emptyExtras(){var n=0;Object.keys(store.reports).forEach(function(d){store.reports[d].projects.forEach(function(p){if(!p.cases.length&&!inReg(p))n++})});return n}
@@ -2522,16 +2522,16 @@ function renderData(){
   var ex=emptyExtras();
   app.innerHTML=syncHTML()+'<article class="sheet"><header><p class="kick">ข้อมูลในเบราว์เซอร์นี้</p><h2>ล้างและลบข้อมูล</h2>'+
     '<p class="tot">'+days.length+' วัน · '+tot.c+' เคส · '+tot.ph+' รูป · ประมาณ '+fmtB(tot.by)+'</p><p class="msg" id="est"></p></header>'+
-    '<div class="dsec"><h3>ลบข้อมูลเก่าในเบราว์เซอร์</h3><p>ลบเฉพาะในเบราว์เซอร์นี้เพื่อคืนพื้นที่เครื่อง ข้อมูลที่ขึ้น Drive แล้วยังอยู่ครบ ลบแล้วกู้คืนในเบราว์เซอร์ไม่ได้</p><div class="rowb">'+
-      '<label for="oldn" class="msg">เก่ากว่า</label><select id="oldn" class="msel"><option value="7">7 วัน</option><option value="30" selected>30 วัน</option><option value="90">90 วัน</option><option value="180">180 วัน</option></select>'+
+    '<div class="dsec"><h3>ลบข้อมูลในเครื่องนี้</h3><p>คืนพื้นที่เครื่อง ข้อมูลในชีตและบน Drive ยังอยู่ครบ และเครื่องอื่นไม่ถูกลบ ต้องการคืน กด ดึงข้อมูลกลับจากชีต</p><div class="rowb">'+
+      '<label for="oldn" class="msg">เก่ากว่า</label><select id="oldn" class="msel"><option value="7">7 วัน</option><option value="30" selected>30 วัน</option><option value="90">90 วัน</option><option value="180">180 วัน</option><option value="all">ทั้งหมด (ทุกวัน)</option></select>'+
       '<button type="button" class="btn" data-act="old-photos">ลบเฉพาะรูป (เก็บข้อความ)</button><button type="button" class="btn danger" data-act="old-all">ลบทั้งรูปและข้อความ</button></div>'+
-      (hasSkip()?'<p class="msg" style="margin-top:8px">วันที่ลบในเครื่องนี้จะไม่ถูกดึงกลับจากชีต</p><div class="rowb"><button type="button" class="btn" data-act="unskip">ดึงข้อมูลที่ลบในเครื่องนี้กลับมาจากชีต</button></div>':'')+'</div>'+
+      (hasSkip()?'<p class="msg" style="margin-top:8px">วันที่ลบในเครื่องนี้จะไม่ถูกดึงกลับเอง ถ้าต้องการ กด ดึงข้อมูลกลับจากชีต ด้านบน</p>':'')+'</div>'+
     '<div class="dsec"><h3>ทำความสะอาดอัตโนมัติ</h3><p>วันที่ไม่มีเหตุการณ์ถูกลบออกจากรายการให้แล้ว</p><div class="rowb">'+
       '<button type="button" class="btn" data-act="orphans"'+(orph.length?'':' disabled')+'>ลบรูปที่ไม่มีเหตุการณ์อ้างถึง ('+orph.length+' รูป, '+fmtB(ob)+')</button>'+
       '<button type="button" class="btn" data-act="prune"'+(ex?'':' disabled')+'>ลบโครงการที่เพิ่มเองและว่างเปล่า ('+ex+')</button></div></div>'+
     '<div class="dsec"><h3>รายวัน</h3>'+(days.length?'<div class="scroll"><table class="tbl"><thead><tr><th>วันที่</th><th class="num">โครงการ</th><th class="num">เคส</th><th class="num">รูป</th><th class="num">ขนาด</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<p>ยังไม่มีข้อมูล</p>')+'</div>'+
     (removedKeys().length?'<div class="dsec"><h3>โครงการที่ลบออก</h3><p>โครงการเหล่านี้จะไม่แสดงในรายการ กด นำกลับ เพื่อให้แสดงอีกครั้ง</p><div class="rowb">'+removedKeys().map(function(k){var nm=(REG.filter(function(r){return norm(r[0])===k})[0]||[k])[0];return '<button type="button" class="chip" data-act="restoreproj" data-k="'+esc(k)+'">'+esc(nm)+' · นำกลับ</button>'}).join('')+'</div></div>':'')+
-    '<div class="dsec"><h3>ล้างทั้งหมด</h3><p>ลบทุกวัน ทุกเหตุการณ์ และทุกรูปในเบราว์เซอร์นี้ รายชื่อโครงการตามช่วงเวลาที่ดูจะกลับมาเป็นรายการว่าง</p><div class="rowb"><button type="button" class="btn danger" data-act="wipe">ล้างข้อมูลทั้งหมด</button></div></div></article>';
+    '</article>';
   try{if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(function(e){var el=document.getElementById('est');if(el&&e.quota)el.textContent='เบราว์เซอร์ใช้พื้นที่ของหน้านี้ '+fmtB(e.usage||0)+' จากที่อนุญาตประมาณ '+fmtB(e.quota)})}catch(er){}
 }
 var RENDERING=false;
@@ -2676,12 +2676,19 @@ app.addEventListener('click',function(e){
   else if(act==='dd-photos'){var tr=b.closest('[data-date]'),d1=tr&&tr.dataset.date;if(!d1||guardUnsynced([d1])||!arm(b,'ยืนยันลบรูป'))return;dropDayPhotos(d1);var k1=skipInfo();if(k1.days[d1]!=='all')k1.days[d1]='photos';save();toast('ลบรูปของวันนั้นในเครื่องนี้แล้ว');render()}
   else if(act==='dd-day'){var tr2=b.closest('[data-date]'),d2=tr2&&tr2.dataset.date;if(!d2||guardUnsynced([d2])||!arm(b,'ยืนยันลบทั้งวัน'))return;dropDayPhotos(d2);delete store.reports[d2];skipInfo().days[d2]='all';save();toast('ลบข้อมูลวันนั้นในเครื่องนี้แล้ว');render()}
   else if(act==='old-photos'||act==='old-all'){
-    var n=+document.getElementById('oldn').value,cut=cutoffDate(n),ds=Object.keys(store.reports).filter(function(d){return d<cut});
-    if(!ds.length){toast('ไม่มีข้อมูลที่เก่ากว่า '+n+' วัน');return}
+    var nv=document.getElementById('oldn').value,all=nv==='all',cut=all?'9999-12-31':cutoffDate(+nv);
+    var ds=Object.keys(store.reports).filter(function(d){return d<cut&&dayStats(d).c+dayStats(d).ph>0});
+    if(!ds.length){toast(all?'ไม่มีข้อมูลในเครื่องนี้':'ไม่มีข้อมูลที่เก่ากว่า '+nv+' วัน');return}
     if(guardUnsynced(ds)||!arm(b,'ยืนยัน ('+ds.length+' วัน)'))return;
+    var k2=skipInfo(),keep=store.date<cutoffDate(0)?store.date:cutoffDate(0);
+    if(all&&act==='old-all'){
+      tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};k2.before=maxDate(k2.before,keep);save();
+      toast('ลบข้อมูลทั้งหมดในเครื่องนี้แล้ว · ในชีตยังอยู่ครบ · วันที่ '+thaiShort(keep)+' เป็นต้นไปยังซิงก์ต่อ');render();syncPull(true,keep);return;
+    }
     ds.forEach(function(d){dropDayPhotos(d);if(act==='old-all')delete store.reports[d]});
-    var k2=skipInfo();if(act==='old-all')k2.before=maxDate(k2.before,cut);else k2.photosBefore=maxDate(k2.photosBefore,cut);
-    save();toast('ลบข้อมูลเก่าแล้ว '+ds.length+' วัน');render();
+    if(act==='old-all')k2.before=maxDate(k2.before,cut);else k2.photosBefore=maxDate(k2.photosBefore,all?keep:cut);
+    save();toast((act==='old-all'?'ลบข้อมูล ':'ลบรูป ')+ds.length+' วันในเครื่องนี้แล้ว · ในชีตยังอยู่ครบ');render();
+    if(all&&act==='old-photos')syncPull(true,keep);
   }
   else if(act==='sy-pullall'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
@@ -2692,10 +2699,8 @@ app.addEventListener('click',function(e){
       var n=0;allCases(function(){n++});
       toast('ดึงข้อมูลกลับแล้ว · ในเครื่องนี้มี '+n+' เคส'+(SY.dl?' · กำลังโหลดรูป '+SY.dl.total+' รูป':SY.lastDl&&SY.lastDl!=='ไม่มีรูปใหม่ในชีตให้ดึง'?' · '+SY.lastDl:''))});
   }
-  else if(act==='unskip'){if(!arm(b,'ยืนยันดึงกลับมา'))return;store.sync.skip={days:{}};save();toast('จะดึงข้อมูลทุกวันจากชีตกลับมา');render();syncPull(true)}
   else if(act==='orphans'){var o=orphanPhotos();if(!o.length){toast('ไม่มีรูปที่ตกค้าง');return}if(!arm(b,'ยืนยันลบ '+o.length+' รูป'))return;o.forEach(function(x){delPhoto(x.caseId,x.id)});toast('ลบรูปที่ตกค้างแล้ว');render()}
   else if(act==='prune'){if(!arm(b,'ยืนยันลบโครงการว่าง'))return;Object.keys(store.reports).forEach(function(d){store.reports[d].projects=store.reports[d].projects.filter(function(q){return q.cases.length||inReg(q)})});save();toast('ลบโครงการว่างแล้ว');render()}
-  else if(act==='wipe'){if(guardUnsynced(null)||!arm(b,'ยืนยันล้างทุกอย่าง'))return;tx('readwrite',function(st){return st.clear()});photoMap={};store.reports={};var k3=skipInfo(),keep=store.date<cutoffDate(0)?store.date:cutoffDate(0);k3.before=maxDate(k3.before,keep);save();toast('ล้างข้อมูลทั้งหมดในเครื่องนี้แล้ว ข้อมูลในชีตยังอยู่ครบ · วันที่ '+thaiShort(keep)+' เป็นต้นไปยังซิงก์ต่อ');render();syncPull(true,keep)}
   else if(act==='sy-test'){
     if(!store.sync.url||!store.sync.key){toast('ใส่ลิงก์ Web App และรหัสลับก่อน');return}
     b.disabled=true;post({action:'ping'}).then(function(j){b.disabled=false;SY.err='';paintSync();toast('เชื่อมต่อสำเร็จ'+(j.permanent?'':' (ยังไม่ได้เปิด Drive API รูปที่ลบจะอยู่ในถังขยะ 30 วัน)'))},function(er){b.disabled=false;toast('เชื่อมต่อไม่สำเร็จ: '+er.message)});
