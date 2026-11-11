@@ -1966,7 +1966,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 5';
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 6';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2101,7 +2101,7 @@ function syncHTML(){
       '<div class="fld"><label for="sy-key">รหัสลับ (ตรงกับ SECRET ในสคริปต์)</label><span class="keyrow"><input id="sy-key" type="password" name="cctv-sync-secret" autocomplete="new-password" data-sy="key" value="'+esc(s.key||'')+'" autocomplete="off" spellcheck="false"><button type="button" class="btn" id="sy-show" aria-pressed="false" title="แสดง / ซ่อนรหัสที่พิมพ์">แสดง</button></span></div>'+
     '</div>'+
     '<div class="rowb"><label class="msg" style="display:flex;gap:6px;align-items:center;margin-right:6px"><input type="checkbox" data-sy="on"'+(s.on!==false?' checked':'')+'> ส่งอัตโนมัติ</label>'+
-    '<button type="button" class="btn" data-act="sy-test">ทดสอบการเชื่อมต่อ</button><button type="button" class="btn pri" data-act="sy-all">ซิงก์ทั้งหมดตอนนี้</button></div>'+
+    '<button type="button" class="btn" data-act="sy-test">ทดสอบการเชื่อมต่อ</button><button type="button" class="btn pri" data-act="sy-all">ซิงก์ทั้งหมดตอนนี้</button><button type="button" class="btn" data-act="sy-pullall" title="ดึงเคสและรูปทุกวันจากชีตลงเครื่องนี้ รวมวันที่เคยลบในเครื่องนี้ไว้">ดึงข้อมูลกลับจากชีต</button></div>'+
     '<p>ลบเคสหรือรูปในหน้าบันทึก จะลบบน Drive ด้วย ส่วนการลบด้านล่างในส่วน ข้อมูลในเบราว์เซอร์นี้ ไม่แตะ Drive</p></div>'+
     '<div class="dsec"><h3>ลบข้อมูลบน Drive เพื่อคืนพื้นที่</h3><p>ลบไฟล์รูปบน Drive และแถวในชีต ของวันที่เก่ากว่าที่เลือก ลบแล้วกู้คืนไม่ได้</p>'+
     '<div class="rowb"><label for="sy-n" class="msg">เก่ากว่า</label><select id="sy-n" class="msel"><option value="30">30 วัน</option><option value="90" selected>90 วัน</option><option value="180">180 วัน</option><option value="365">1 ปี</option></select>'+
@@ -2682,6 +2682,15 @@ app.addEventListener('click',function(e){
     ds.forEach(function(d){dropDayPhotos(d);if(act==='old-all')delete store.reports[d]});
     var k2=skipInfo();if(act==='old-all')k2.before=maxDate(k2.before,cut);else k2.photosBefore=maxDate(k2.photosBefore,cut);
     save();toast('ลบข้อมูลเก่าแล้ว '+ds.length+' วัน');render();
+  }
+  else if(act==='sy-pullall'){
+    if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
+    if(hasSkip()&&!arm(b,'ยืนยันดึงทุกวันกลับมา'))return;
+    store.sync.skip={days:{}};save();b.disabled=true;SY.lastDl='';
+    toast('กำลังดึงข้อมูลทุกวันจากชีต…');
+    syncPull(true).then(function(){b.disabled=false;render();
+      var n=0;allCases(function(){n++});
+      toast('ดึงข้อมูลกลับแล้ว · ในเครื่องนี้มี '+n+' เคส'+(SY.dl?' · กำลังโหลดรูป '+SY.dl.total+' รูป':SY.lastDl&&SY.lastDl!=='ไม่มีรูปใหม่ในชีตให้ดึง'?' · '+SY.lastDl:''))});
   }
   else if(act==='unskip'){if(!arm(b,'ยืนยันดึงกลับมา'))return;store.sync.skip={days:{}};save();toast('จะดึงข้อมูลทุกวันจากชีตกลับมา');render();syncPull(true)}
   else if(act==='orphans'){var o=orphanPhotos();if(!o.length){toast('ไม่มีรูปที่ตกค้าง');return}if(!arm(b,'ยืนยันลบ '+o.length+' รูป'))return;o.forEach(function(x){delPhoto(x.caseId,x.id)});toast('ลบรูปที่ตกค้างแล้ว');render()}
