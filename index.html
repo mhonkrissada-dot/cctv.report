@@ -1135,6 +1135,16 @@ html[data-theme=dark] .thumb{box-shadow:none}
 .fcard .fst.wait{background:var(--warn-soft)!important;color:var(--warn)!important}
 .proj>.case{grid-template-columns:132px minmax(0,1fr) auto!important}
 .rail{line-height:1.5}
+
+/* note lock */
+#notep.locked .nh2,#notep.locked .ntw,#notep.locked .ncols,#notep.locked #nsw,#notep.locked #nlockb,#notep.locked #nst{display:none!important}
+.nlock{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--n-ink);padding:24px}
+.nlock[hidden]{display:none}
+.nlock svg{width:30px;height:30px;color:var(--n-mu)}
+.nlock input{width:150px;text-align:center;font:inherit;font-size:20px;letter-spacing:.5em;padding:8px 10px 8px 18px;border:1px solid var(--n-bd);border-radius:12px;background:#fff;color:var(--n-tx);outline:none}
+.nlock input:focus{border-color:var(--n-ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--n-ac) 25%,transparent)}
+.nlock.bad input{animation:nshake .3s;border-color:#D92D20}
+@keyframes nshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
 <datalist id="folders"></datalist>
@@ -1162,9 +1172,10 @@ html[data-theme=dark] .thumb{box-shadow:none}
   </div></div>
   <div id="notep" role="dialog" aria-label="โน้ต" hidden><div class="nrs" id="nrs" title="ลากเพื่อปรับความกว้าง" aria-hidden="true"></div>
     <div class="nh">
-      <div class="nh1"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span><span class="ncols" role="group" aria-label="แสดงคอลัมน์"><button type="button" class="nb ncol" data-col="p" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์โครงการ">โครงการ</button><button type="button" class="nb ncol" data-col="t" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์เวลา">เวลา</button></span><span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span><button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
+      <div class="nh1"><b>โน้ต</b><span class="nst" id="nst">บันทึกอัตโนมัติ</span><span class="grow"></span><span class="ncols" role="group" aria-label="แสดงคอลัมน์"><button type="button" class="nb ncol" data-col="p" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์โครงการ">โครงการ</button><button type="button" class="nb ncol" data-col="t" aria-pressed="true" title="ซ่อน/แสดงคอลัมน์เวลา">เวลา</button></span><span class="nsw" id="nsw" role="group" aria-label="สีโน้ต"><button type="button" data-nc="yellow" style="background:#FFE7A3" title="เหลือง"></button><button type="button" data-nc="blue" style="background:#CFE0FF" title="ฟ้า"></button><button type="button" data-nc="green" style="background:#CDEFD8" title="เขียว"></button><button type="button" data-nc="pink" style="background:#FFD3DE" title="ชมพู"></button><button type="button" data-nc="gray" style="background:#E3E6EB" title="เทา"></button></span><button type="button" class="nb npin" id="npin" aria-pressed="false" title="ปักโน้ตไว้ด้านขวา หน้าบันทึกจะหดให้ ไม่โดนบัง"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 2.5l5 5-2.2.8-3.3 3.3.4 3.4-1.4 1.4-3.2-3.2L4 17l-1-1 3.8-3.8-3.2-3.2L5 7.6l3.4.4 3.3-3.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>ปักข้าง</span></button><button type="button" class="nb" id="nlockb" title="ล็อกโน้ต ต้องใส่รหัสใหม่">ล็อก</button><button type="button" class="nb nx" id="nclose" aria-label="ปิดโน้ต">✕</button></div>
       <div class="nh2"><label class="nq"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="nq" placeholder="ค้นหาในโน้ต" aria-label="ค้นหาในโน้ต" autocomplete="off"></label><button type="button" class="nb" id="nadd">+ แถว</button><button type="button" class="nb" id="ncopy">คัดลอก</button><button type="button" class="nb" id="nclear">ล้าง</button></div>
     </div>
+    <div class="nlock" id="nlock" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 9V6.5a3.2 3.2 0 0 1 6.4 0V9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><b>โน้ตถูกล็อก</b><input id="npin_in" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="รหัส" aria-label="ใส่รหัสโน้ต 4 หลัก"></div>
     <div class="ntw" id="ntw"><table class="ntab"><colgroup><col class="c1"><col class="c2"><col><col class="c4"></colgroup>
       <thead><tr><th class="hp">โครงการ</th><th class="ht">เวลา</th><th>เหตุการณ์</th><th></th></tr></thead><tbody id="nbody"></tbody></table>
       <p class="nempty" id="nempty">วางจากชีตหรือ Excel ได้เลย (Ctrl+V) แอปจะแยกเป็น โครงการ / เวลา / เหตุการณ์ ให้เอง<br>หรือกด + แถว เพื่อพิมพ์เอง · เก็บไว้ในเครื่องนี้เท่านั้น</p></div>
@@ -2732,6 +2743,7 @@ var appSave=save;
   var c0='yellow';try{c0=localStorage.getItem(CK)||'yellow'}catch(e){}setColor(c0);
   document.getElementById('nsw').addEventListener('click',function(e){var b=e.target.closest('[data-nc]');if(b)setColor(b.dataset.nc)});
   pane.addEventListener('paste',function(e){
+    if(pane.classList.contains('locked'))return;
     var tx=e.clipboardData?e.clipboardData.getData('text/plain'):'';
     if(!tx)return;
     if(tx.indexOf('\t')<0&&tx.indexOf('\n')<0&&e.target.closest('[data-r]'))return; /* one value into one cell */
@@ -2754,8 +2766,18 @@ var appSave=save;
     function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);rs.classList.remove('on');
       try{localStorage.setItem(WK,parseInt(getComputedStyle(root).getPropertyValue('--ndw'))||460)}catch(e){}window.dispatchEvent(new Event('resize'))}
     document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)});
-  function open(on){pane.hidden=!on;if(on)paint();btn.setAttribute('aria-expanded',on?'true':'false');dock();try{localStorage.setItem('cctv-note-open',on?'1':'0')}catch(e){}if(on){var f=body.querySelector('[data-k="2"]');(f||pane).focus&&(f||document.getElementById('nadd')).focus()}}
+  function open(on){pane.hidden=!on;if(on)paint();btn.setAttribute('aria-expanded',on?'true':'false');dock();try{localStorage.setItem('cctv-note-open',on?'1':'0')}catch(e){}if(on){if(pane.classList.contains('locked')){var q=document.getElementById('npin_in');if(q)q.focus()}else{var f=body.querySelector('[data-k="2"]');(f||pane).focus&&(f||document.getElementById('nadd')).focus()}}}
   btn.addEventListener('click',function(){open(pane.hidden)});
+  /* lock: the note stays hidden until the PIN is entered, once per browser tab */
+  var LH='888da84',lk=document.getElementById('nlock'),li=document.getElementById('npin_in');
+  function hpin(v){var x=2166136261,t='cctv-note:'+v;for(var i=0;i<t.length;i++){x^=t.charCodeAt(i);x=Math.imul(x,16777619)>>>0}return x.toString(16)}
+  function unlocked(){try{return sessionStorage.getItem('cctv-note-unlock')==='1'}catch(e){return false}}
+  function setLock(on){pane.classList.toggle('locked',on);lk.hidden=!on;li.value='';if(on&&!pane.hidden)setTimeout(function(){li.focus()},30)}
+  setLock(!unlocked());
+  li.addEventListener('input',function(){var v=li.value.replace(/\D/g,'');li.value=v;if(v.length<4)return;
+    if(hpin(v)===LH){try{sessionStorage.setItem('cctv-note-unlock','1')}catch(e){}setLock(false);paint();var f=document.getElementById('nadd');if(f)f.focus()}
+    else{lk.classList.add('bad');li.value='';setTimeout(function(){lk.classList.remove('bad')},400)}});
+  document.getElementById('nlockb').addEventListener('click',function(){try{sessionStorage.removeItem('cctv-note-unlock')}catch(e){}setLock(true);toast('ล็อกโน้ตแล้ว')});
   try{if(pin&&localStorage.getItem('cctv-note-open')==='1'&&window.innerWidth>=1000){pane.hidden=false;btn.setAttribute('aria-expanded','true');dock()}}catch(e){}
   document.getElementById('nclose').addEventListener('click',function(){open(false);btn.focus()});
   document.getElementById('nadd').addEventListener('click',function(){rows.push(['','','']);save();paint();var n=body.querySelector('[data-r="'+(rows.length-1)+'"][data-k="0"]');if(n){n.focus();n.scrollIntoView({block:'nearest'})}});
