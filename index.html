@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ECECEC"><script>(function(){var t="dark";try{t=localStorage.getItem("cctv-theme")||"dark"}catch(e){}document.documentElement.dataset.theme=t})()</script><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ECECEC"><script>(function(){var t="dark";try{t=localStorage.getItem("cctv-theme2")||"dark"}catch(e){}document.documentElement.dataset.theme=t})()</script><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
 <title>cctv-report</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -1196,6 +1196,29 @@ html[data-theme=dark] .thumb{box-shadow:none}
 .pgrp .chip.sent{background:transparent!important;color:var(--ink)!important}
 .mhead .waitc{color:var(--warn)!important}
 .mhead .okc{color:var(--accent-2)!important}
+
+/* ===== report page, layout B ===== */
+.replay.rb{grid-template-columns:300px minmax(0,1fr)!important;gap:20px!important}
+html.notedock .replay.rb{grid-template-columns:260px minmax(0,1fr)!important}
+.replay.rb .rside{display:flex!important;padding:10px!important;gap:1px;background:var(--surface)!important;border-color:var(--line2)!important;border-radius:20px!important}
+.replay.rb .ptabs,.replay.rb .pgrp{display:none!important}
+.rside .ri{display:flex!important;align-items:center;gap:8px;width:100%;padding:8px 10px!important;border-radius:10px!important;font-size:14px!important;color:var(--ink)!important;background:transparent!important}
+.rside .ri:hover{background:var(--fill)!important;color:var(--ink)!important}
+.rside .ri .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.rside .ri .rc{font-size:12px;color:var(--muted);flex:none}
+.rside .ri .sd{width:8px;height:8px;border-radius:50%;flex:none}
+.rside .ri.wait .sd{background:var(--warn)}.rside .ri.sent .sd{background:var(--ok)}.rside .ri.none .sd{background:var(--fld)}
+.rside .ri.sent .fn,.rside .ri.none .fn{color:var(--muted);font-weight:400}
+.rside .ri.all .fn{font-weight:600}
+.rside .ri[aria-current=true]{background:var(--card)!important;box-shadow:inset 3px 0 0 var(--accent)}
+.rside .ri[aria-current=true] .fn{color:var(--ink)!important;font-weight:600}
+.rside .rgh{display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding:14px 10px 4px;color:var(--muted)}
+.rside .rgh.wait{color:var(--warn)}.rside .rgh.ok{color:var(--ok)}
+.rside .rgh[data-rtoggle2]{cursor:pointer;border-radius:8px;user-select:none}
+.rside .rgh[data-rtoggle2]:hover{background:var(--fill);color:var(--ink)}
+.rside .rse{margin:2px 10px;font-size:12.5px;color:var(--muted)}
+.replay.rb .sp{border-top:0}
+@media (max-width:900px){.replay.rb{grid-template-columns:minmax(0,1fr)!important}.replay.rb .rside{position:static;height:auto;max-height:260px}}
 @media (max-width:900px){.rail button.f{width:auto!important;max-width:220px}.rail .rl{flex-direction:row!important;gap:6px}.rail .fn{overflow:visible}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fold" viewBox="0 0 20 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></symbol></svg>
@@ -2044,6 +2067,7 @@ function renderEdit(){
     }
   }else{
     var cur=ps.filter(function(p){return p.id===sel})[0],ord=railOrder(),ix=ord.indexOf(cur),pv=ix>0?ord[ix-1]:null,nx=ord[ix+1]||null;
+    if(cur&&railGroup(cur)==='sent'){var nw=ord.filter(function(p){return railGroup(p)==='wait'})[0];if(nw)nx=nw}
     body=cur?projHTML(cur,true)+'<div class="pnav">'+(pv?'<button type="button" class="btn" data-sel="'+pv.id+'">← '+esc(pv.name||'(ยังไม่ตั้งชื่อ)')+'</button>':'<span></span>')+
       (nx?'<button type="button" class="btn" data-sel="'+nx.id+'">ถัดไป: '+esc(nx.name||'(ยังไม่ตั้งชื่อ)')+' →</button>':'')+'</div>':'';
   }
@@ -2186,9 +2210,16 @@ function paintProg(){
     +(un.length?'<div class="pgrp wait"><div class="pgh">ยังไม่ส่ง <em>'+un.length+'</em><span class="pgx">กดชื่อเพื่อไปที่โครงการ</span></div><div class="chips">'+un.map(chip).join('')+'</div></div>':'')
     +(dn.length?'<div class="pgrp ok"><div class="pgh">ส่งแล้ว <em>'+dn.length+'</em><span class="pgx">กดชื่อเพื่อดูข้อความ</span></div><div class="chips">'+dn.map(chip).join('')+'</div></div>':''):'';
   var rs=document.getElementById('rside');
-  if(rs){var it=function(p){return '<button type="button" class="ri'+(isSent(p)?' sent':'')+'" data-act="jump" data-to="'+p.id+'">'+(isSent(p)?'✓ ':'')+esc(p.name)+'</button>'};
+  if(rs){
+    var none=reportProjects().none,cur=rselAll?'all':rsel;
+    var it=function(p,k){var c=realN(casesIn(p));return '<button type="button" class="ri '+k+'" data-rsel="'+p.id+'"'+(cur===p.id?' aria-current="true"':'')+'><i class="sd" aria-hidden="true"></i><span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span><span class="rc">'+(c||'ปกติ')+'</span></button>'};
+    var openN=rsOpenNone||none.some(function(p){return p.id===cur});
+    rs.innerHTML='<button type="button" class="ri all" data-rsel="all"'+(cur==='all'?' aria-current="true"':'')+'><span class="fn">ภาพรวมทุกโครงการ</span><span class="rc">'+ps.length+'</span></button>'+
+      '<div class="rgh wait"><span>ยังไม่ส่ง</span><span>'+un.length+'</span></div>'+(un.length?un.map(function(p){return it(p,'wait')}).join(''):'<p class="rse">ส่งครบแล้ว ✓</p>')+
+      '<div class="rgh ok"><span>ส่งแล้ว</span><span>'+dn.length+'</span></div>'+(dn.length?dn.map(function(p){return it(p,'sent')}).join(''):'<p class="rse">ยังไม่มี</p>')+
+      (none.length?'<div class="rgh none" data-rtoggle2 role="button" tabindex="0"><span>ไม่พบเหตุการณ์</span><span>'+none.length+(openN?' ▾':' ▸')+'</span></div>'+(openN?none.map(function(p){return it(p,'none')}).join(''):''):'');
     var tn=document.getElementById('rstabn');if(tn)tn.textContent=un.length;
-    rs.innerHTML='<div class="rstop"><span>รายชื่อโครงการ</span><span class="rsb"><button type="button" class="rspin" data-act="rspin" title="ปักแถบไว้ด้านซ้าย">ปักไว้</button><button type="button" class="rshide" data-act="rshide" title="ซ่อนแถบนี้" aria-label="ซ่อน">‹ ซ่อน</button></span></div>'+(ps.length?'<div class="rsh wait">ยังไม่ส่ง <em>'+un.length+'</em></div>'+(un.length?un.map(it).join(''):'<p class="rse">ส่งครบแล้ว</p>')+(dn.length?'<div class="rsh ok">ส่งแล้ว <em>'+dn.length+'</em></div>'+dn.map(it).join(''):''):'<p class="rse">ยังไม่มีโครงการ</p>')}
+  }
 }
 /* popup list of projects: "ยังไม่ส่ง" or "ส่งแล้ว" */
 function openPList(kind,focusId){
@@ -2290,6 +2321,7 @@ function msgSettingsHTML(){
     '</div><div class="rowb"><button type="button" class="btn" data-act="copy">คัดลอกข้อความรายงานทุกโครงการ</button></div></article>';
 }
 function fld(id,label,key,val){return '<div class="fld"><label for="'+id+'">'+label+'</label><input id="'+id+'" data-st="'+key+'" value="'+esc(val)+'"></div>'}
+var rsel='',rselAll=false,rsOpenNone=false;
 function renderReport(){
   var S=settings(),rp=reportProjects(),ps=rp.ps,none=rp.none,n={c:0,ph:0},g=repRange(),pk=repPreset();ps.forEach(function(p){casesIn(p).forEach(function(c){n.c++;n.ph+=allPhotos(c).length})});
   var rd=R().repDate||store.date;
@@ -2316,7 +2348,16 @@ function renderReport(){
   }
   if(!ps.length)h+='<div class="empty">วันนี้ยังไม่มีเหตุการณ์</div>';
   /* sent projects move into their own folder at the bottom, so the list only shows what is left to send */
-  var unsent=ps.filter(function(p){return !isSent(p)}),sentL=ps.filter(isSent);
+  var unsent=ps.filter(function(p){return !isSent(p)}),sentL=ps.filter(isSent),ord=unsent.concat(sentL,none);
+  if(!rselAll&&!ord.some(function(p){return p.id===rsel})){var f0=unsent[0]||sentL[0]||none[0];rsel=f0?f0.id:''}
+  if(!rselAll&&rsel){
+    var cp=ord.filter(function(p){return p.id===rsel})[0],ix=ord.indexOf(cp),pv=ix>0?ord[ix-1]:null,nx=ord[ix+1]||null;
+    if(isSent(cp)&&unsent.length)nx=unsent[0]; /* just sent: next is the next one still waiting */
+    if(!unsent.length&&ps.length)h+='<div class="alldone">ส่งครบทุกโครงการแล้ว ✓</div>';
+    h+=card(cp,none.indexOf(cp)>=0)+'<div class="pnav">'+(pv?'<button type="button" class="btn" data-rsel="'+pv.id+'">← '+esc(pv.name||'')+'</button>':'<span></span>')+(nx?'<button type="button" class="btn" data-rsel="'+nx.id+'">ถัดไป: '+esc(nx.name||'')+' →</button>':'')+'</div>';
+    app.innerHTML='<div class="replay rb"><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
+    fitAll();paintProg();return;
+  }
   unsent.forEach(function(p){h+=card(p,false)});
   if(!unsent.length&&ps.length)h+='<div class="alldone">ส่งครบทุกโครงการแล้ว ✓</div>';
   if(false&&sentL.length)h+='<details class="sentbox"'+(R().sentOpen?' open':'')+'><summary><svg class="sbico" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l2 2h8.5A1.5 1.5 0 0 1 19 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 1 13.5z"/></svg><b>ส่งแล้ว</b><span class="sbn">'+sentL.length+' โครงการ</span><span class="sbh">กดเพื่อเปิด/ปิด</span></summary><div class="sbody">'+sentL.map(function(p){return card(p,false)}).join('')+'</div></details>';
@@ -2324,7 +2365,7 @@ function renderReport(){
     h+='<section class="sp"><h3>ไม่พบเหตุการณ์<small>'+none.length+' โครงการ · ข้อความเหตุการณ์ปกติตามช่วงเวลาที่ดู</small></h3></section>';
     none.forEach(function(p){h+=card(p,true)});
   }
-  app.innerHTML='<div class="replay'+(rsHid?' hid':'')+'"><button type="button" class="rstab" data-act="rsopen" title="แสดงรายชื่อโครงการ"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>โครงการ<b id="rstabn"></b></button><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
+  app.innerHTML='<div class="replay rb"><aside class="rside" id="rside" aria-label="รายการโครงการ"></aside>'+h+'</article></div>';
   fitAll();paintProg();
 }
 
@@ -2473,6 +2514,9 @@ app.addEventListener('click',function(e){
   var hb=e.target.closest('[data-hist]');
   if(hb){e.preventDefault();var hp=hb.dataset.hist.split('|');if(mode==='folders')mode='edit';store.date=hp[0];save();render();sel=hp[1];render();window.scrollTo(0,0);return}
   if(e.target.closest('[data-rtoggle]')){railOpenNone=!railOpenNone;render();return}
+  if(e.target.closest('[data-rtoggle2]')){rsOpenNone=!rsOpenNone;paintProg();return}
+  var rq=e.target.closest('[data-rsel]');
+  if(rq){rsel=rq.dataset.rsel;rselAll=rsel==='all';render();window.scrollTo(0,0);return}
   var s=e.target.closest('[data-sel]');
   if(s){sel=s.dataset.sel;selAllChosen=sel==='all';if(mode==='folders')mode='edit';render();window.scrollTo(0,0);return}
   var b=e.target.closest('[data-act]');if(!b)return;
@@ -2571,7 +2615,7 @@ app.addEventListener('click',function(e){
   else if(act==='sent'&&p){setSent(p,!isSent(p))}
   else if(act==='rshide'||act==='rspin'||act==='rsopen'){rsSet(act==='rshide'?1:0,false);var rr=app.querySelector('.replay');if(rr&&act!=='rshide'){rr.classList.remove('slidein');void rr.offsetWidth;rr.classList.add('slidein')}return}
   else if(act==='qadd'){var q=document.getElementById('qpaste');if(q&&q.value.trim()){var v=q.value;q.value='';pasteCase=null;pasteNewCase(v,[])}else{toast('พิมพ์หรือวางข้อความในช่องก่อน');if(q)q.focus()}return}
-  else if(act==='jump'){rsPop(false);var jp=R().projects.filter(function(q){return q.id===b.dataset.to})[0];if(jp&&isSent(jp))openPList('ok',jp.id);else goToCard('.sp[data-p="'+b.dataset.to+'"]')}
+  else if(act==='jump'){rsel=b.dataset.to;rselAll=false;render();window.scrollTo(0,0)}
   else if(act==='album'&&p){albumGo(p)}
   else if(act==='xlcopy'&&p){xlStep(p,b)}
   else if(act==='xlfull'&&p){xlCopyProject(p)}
@@ -2618,7 +2662,7 @@ app.addEventListener('contextmenu',function(e){
 });
 document.addEventListener('mousedown',function(e){if(ctx&&!ctx.contains(e.target))closeCtx()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCtx();closeMsg()}});
-(function(){var b=document.getElementById('themebtn');if(!b)return;b.addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cctv-theme',t)}catch(e){}toast(t==='dark'?'โหมดมืด':'โหมดสว่าง')})})();
+(function(){var b=document.getElementById('themebtn');if(!b)return;b.addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cctv-theme2',t)}catch(e){}toast(t==='dark'?'โหมดมืด':'โหมดสว่าง')})})();
 window.addEventListener('scroll',closeCtx,{passive:true});
 app.addEventListener('focusin',function(e){setPasteCase(e.target)});
 document.addEventListener('mousedown',function(e){
