@@ -1933,7 +1933,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 3';
+var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 4';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -1987,24 +1987,37 @@ function syncPull(force){
     if(force)toast('ดึงข้อมูลจาก Drive ไม่สำเร็จ: '+((e&&e.message)||e));
   });
 }
+/* photos from other devices: the open day first, then newest days; 8 per call, 3 calls at a time */
 function fetchPhotos(list,force){
   if(!list.length){SY.lastDl='ไม่มีรูปใหม่ในชีตให้ดึง';return Promise.resolve()}
   if(SY.fetching)return Promise.resolve();
   SY.fetching=true;SY.dl={n:0,total:list.length,fail:0,err:''};paintSync();
-  var chain=Promise.resolve();
-  list.forEach(function(p){chain=chain.then(function(){
-    if(!syOn())return;
-    return post({action:'getPhoto',id:p.id}).then(function(j){
-      if(!j||!j.ok||!j.data)throw new Error((j&&j.error)||'ไม่ได้ข้อมูลรูป');
-      if(!findCase(p.caseId))return;
-      var rec={id:p.id,caseId:p.caseId,data:j.data,t:p.t,fileId:p.fileId,url:p.url};
-      (photoMap[p.caseId]=photoMap[p.caseId]||[]).push(rec);
-      photoMap[p.caseId].sort(function(a,b){return a.t-b.t});
-      tx('readwrite',function(st){return st.put(rec)});
-      if(++SY.dl.n%5===0)softRender();
-    }).catch(function(e){SY.dl.fail++;SY.dl.err=(e&&e.message)||String(e)}).then(paintSync);
-  })});
-  return chain.then(function(){
+  var day=store.date;
+  list=list.slice().sort(function(a,b){var x=a.date===day?1:0,y=b.date===day?1:0;if(x!==y)return y-x;return String(b.date||'')<String(a.date||'')?-1:String(b.date||'')>String(a.date||'')?1:0});
+  var put=function(p,data){
+    if(!findCase(p.caseId))return;
+    var rec={id:p.id,caseId:p.caseId,data:data,t:p.t,fileId:p.fileId,url:p.url};
+    var l=photoMap[p.caseId]=photoMap[p.caseId]||[];if(l.some(function(x){return x.id===p.id}))return;
+    l.push(rec);l.sort(function(a,b){return a.t-b.t});
+    tx('readwrite',function(st){return st.put(rec)});SY.dl.n++;
+  };
+  var fail=function(k,msg){SY.dl.fail+=k;SY.dl.err=msg};
+  var single=false,queue=[];for(var i=0;i<list.length;i+=8)queue.push(list.slice(i,i+8));
+  var lastPaint=0,tick=function(){paintSync();if(Date.now()-lastPaint>2500){lastPaint=Date.now();softRender()}};
+  function one(p){return post({action:'getPhoto',id:p.id}).then(function(j){if(!j||!j.ok||!j.data)throw new Error((j&&j.error)||'ไม่ได้ข้อมูลรูป');put(p,j.data)}).catch(function(e){fail(1,(e&&e.message)||String(e))})}
+  function worker(){
+    var batch=queue.shift();if(!batch||!syOn())return Promise.resolve();
+    var go=single?batch.reduce(function(c,p){return c.then(function(){return one(p)})},Promise.resolve()):
+      post({action:'getPhotos',ids:batch.map(function(p){return p.id})}).then(function(j){
+        var by={};(j.photos||[]).forEach(function(x){by[x.id]=x});
+        var left=[];batch.forEach(function(p){var x=by[p.id];if(x&&x.data)put(p,x.data);else if(x&&x.error)fail(1,x.error);else left.push(p)});
+        if(left.length){if(j.more)queue.push(left);else fail(left.length,'ไม่พบรูปในชีต')} /* more = the call stopped early because it was big */
+      },function(e){var m=(e&&e.message)||String(e);
+        if(/ไม่รู้จักคำสั่ง/.test(m)){single=true;queue.unshift(batch);return}
+        fail(batch.length,m)});
+    return go.then(tick).then(worker);
+  }
+  return Promise.all([worker(),worker(),worker()]).then(function(){
     var d=SY.dl;SY.fetching=false;SY.dl=null;
     SY.dlErr=d.fail?'ดึงรูปไม่สำเร็จ '+d.fail+' จาก '+d.total+' รูป: '+d.err:'';
     SY.lastDl=d.fail?SY.dlErr:'ดึงรูปมาแล้ว '+d.n+' รูป';
