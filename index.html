@@ -1028,6 +1028,10 @@ a{color:var(--accent-2)}
 .ib.del:hover{color:var(--danger)!important;background:var(--danger-soft)!important}
 .ib.armed{width:auto;padding:0 10px!important;background:var(--danger)!important;color:#fff!important;font-size:12.5px;font-weight:600}
 .ib input[type=file]{display:none}
+.ib.wide{width:auto!important;padding:0 10px!important;gap:5px;font-size:12.5px;font-weight:500;color:var(--muted)!important}
+.ib.wide:hover{color:var(--accent-2)!important;background:var(--accent-soft)!important}
+.ib.wide svg{width:16px;height:16px}
+@media (max-width:600px){.ib.wide{width:34px!important;padding:0!important}.ib.wide span{display:none}}
 
 /* project header: one action group */
 .pacts{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
@@ -2149,8 +2153,8 @@ function caseHTML(c){
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
     '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':c.tpl?' readonly class="locked tplk" title="ข้อความประจำล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
     (c.tpl?'<label class="tplret">กลับมาประจำจุดเวลา<input type="time" data-f="ret" value="'+esc(c.ret||'')+'" aria-label="เวลากลับมาประจำจุด"></label>':'')+
-    '<div class="ca"><label class="ib addph cab" title="เพิ่มรูป (หรือคลิกที่เคสแล้วกด Ctrl+V / ลากรูปมาวาง)" aria-label="เพิ่มรูป">'+IC.cam+'<input type="file" accept="image/*" multiple data-act="file"></label>'+
-    '<button type="button" class="ib cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้" aria-label="วางรูป">'+IC.paste+'</button>'+
+    '<div class="ca"><label class="ib wide addph cab" title="เลือกรูปจากเครื่อง (หรือลากรูปมาวางที่เคส)">'+IC.cam+'<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label>'+
+    '<button type="button" class="ib wide cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)">'+IC.paste+'<span>วางรูป</span></button>'+
     '<button type="button" class="ib del" data-act="delcase" title="ลบเหตุการณ์" aria-label="ลบเหตุการณ์">'+IC.trash+'</button></div>'+
     (th?'<div class="photos">'+th+'</div>':'')+'</div>';
 }
