@@ -1062,6 +1062,10 @@ table.cnt .no{color:var(--muted)}
 table.cnt .sm{font-weight:700}
 table.cnt .td{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
 table.cnt tr.tot td{font-weight:700;background:var(--fill)}
+
+.cnt .dcol{border:0;background:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer;padding:2px 4px;border-radius:6px;min-width:22px}
+.cnt .dcol:hover{background:var(--accent-soft);color:var(--accent-2)}
+.cnt .dcol.copied{background:var(--ok-soft);color:var(--ok)}
 @media (max-width:600px){.ib.wide{width:34px!important;padding:0!important}.ib.wide span{display:none}}
 
 /* project header: one action group */
@@ -2001,7 +2005,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 2';
+var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 3';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2731,6 +2735,10 @@ app.addEventListener('click',function(e){
     save();toast((act==='old-all'?'ลบข้อมูล ':'ลบรูป ')+ds.length+' วันในเครื่องนี้แล้ว · ในชีตยังอยู่ครบ');render();
     if(all&&act==='old-photos')syncPull(true,keep);
   }
+  else if(act==='cnt-day'){var dd=+b.dataset.d;if(!dd)return;var mc2=monthCounts(cntMonth);
+    var colv=mc2.rows.slice(0,COUNT_ORDER.length).map(function(r){var v=r.cells[dd-1];return v===''?'-':v});
+    copyText(colv.join('\n'),'คัดลอกวันที่ '+dd+' แล้ว ('+colv.length+' แถว) วางในช่องวันที่ '+dd+' แถวแรกของ Excel ได้เลย'+(mc2.extra?' · มีโครงการนอกไฟล์ '+mc2.extra+' โครงการไม่ได้คัดลอก':''));
+    var hb=document.querySelectorAll('.cnt [data-d="'+dd+'"]');hb.forEach(function(x){x.classList.add('copied');setTimeout(function(){x.classList.remove('copied')},900)})}
   else if(act==='cnt-copy'){copyText(monthTSV(),'คัดลอกตารางจำนวนเคสแล้ว วางใน Excel ได้เลย')}
   else if(act==='sy-pullall'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
@@ -3039,28 +3047,35 @@ function openSummary(){
 }
 /* cases per project per day for one month, like the monthly sheet */
 var cntMonth='';
+/* row order and names of the monthly EOC sheet; app names that differ are matched by the alias */
+var COUNT_ORDER=['ทาวน์โฮม ระยอง','คลังสินค้า ระยอง','จรรยวรรธ กม.16','คลังสินค้า กม.16','LV-SW RM2','ELDN','AN-ID-ASK','AN-ID-LSL','LPARK-RM9','LPARK-VC','LP-RM3 RR','LSL-C65','LV-SK109','IDRS','LC-EC48','LPARK-PH32','LP-RM3 RV','LP-RM4 RD','LUM-T','LV-CC','LV-SK101/1','SPC-RM3','TIJ','TPS','LT-LPN','U-CENTER','LP-SH','TRR71','VL 168 WG'];
+var COUNT_ALIAS={LSLCS65:'LSLC65',TRR:'TRR71',LPNT:'LTLPN'};
+function countKey(name){var k=norm(name||'');return COUNT_ALIAS[k]||k}
 function monthCounts(ym){
-  var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),names={},have=[];
-  for(var d=1;d<=nd;d++){var k=ym+'-'+('0'+d).slice(-2),r=store.reports[k];have.push(!!r);if(r)r.projects.forEach(function(p){if(p.name)names[p.name]=1})}
-  var list=Object.keys(names).sort(function(a,b){return folderIdx({name:a})-folderIdx({name:b})||a.localeCompare(b,'th')});
-  var rows=list.map(function(nm){var cells=[],sum=0;for(var d=1;d<=nd;d++){var r=store.reports[ym+'-'+('0'+d).slice(-2)];
-      if(!r){cells.push('');continue}var p=r.projects.filter(function(q){return q.name===nm})[0],n=p?realN(p.cases):0;sum+=n;cells.push(n||'-')}
-    return {name:nm,cells:cells,sum:sum}});
+  var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),have=[],rows=[],byKey={};
+  COUNT_ORDER.forEach(function(nm){var r={name:nm,cells:[],sum:0};rows.push(r);byKey[countKey(nm)]=r});
+  var extra=[];
+  for(var d=1;d<=nd;d++){var rp=store.reports[ym+'-'+('0'+d).slice(-2)];have.push(!!rp);if(!rp)continue;
+    rp.projects.forEach(function(p){if(!p.name)return;var k=countKey(p.name);if(!byKey[k]){byKey[k]={name:p.name,cells:[],sum:0};extra.push(byKey[k])}})}
+  extra.sort(function(a,b){return a.name.localeCompare(b.name,'th')});rows=rows.concat(extra);
+  rows.forEach(function(r){for(var d=1;d<=nd;d++){var rp=store.reports[ym+'-'+('0'+d).slice(-2)];
+    if(!rp){r.cells.push('');continue}
+    var n=0;rp.projects.forEach(function(p){if(p.name&&byKey[countKey(p.name)]===r)n+=realN(p.cases)});r.sum+=n;r.cells.push(n||'-')}});
   var col=[];for(var d=0;d<nd;d++){var t=0;rows.forEach(function(r){if(typeof r.cells[d]==='number')t+=r.cells[d]});col.push(have[d]?t:'')}
-  return {nd:nd,rows:rows,col:col,total:rows.reduce(function(a,r){return a+r.sum},0)};
+  return {nd:nd,rows:rows,col:col,total:rows.reduce(function(a,r){return a+r.sum},0),extra:extra.length};
 }
 function monthHTML(){
   var months={};Object.keys(store.reports).forEach(function(d){months[d.slice(0,7)]=1});months[store.date.slice(0,7)]=1;
   var ml=Object.keys(months).sort().reverse();if(!cntMonth||!months[cntMonth])cntMonth=store.date.slice(0,7);
   var mc=monthCounts(cntMonth),today=store.date.slice(0,7)===cntMonth?+store.date.slice(8,10):0;
   var mname=function(ym){return new Date(ym+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'})};
-  var th='<th class="no">ลำดับ</th><th class="nm">ชื่อโครงการ</th>';for(var d=1;d<=mc.nd;d++)th+='<th'+(d===today?' class="td"':'')+'>'+d+'</th>';th+='<th class="sm">รวม</th>';
+  var th='<th class="no">ลำดับ</th><th class="nm">ชื่อโครงการ</th>';for(var d=1;d<=mc.nd;d++)th+='<th'+(d===today?' class="td"':'')+'><button type="button" class="dcol" data-act="cnt-day" data-d="'+d+'" title="คัดลอกตัวเลขของวันที่ '+d+' ทั้งคอลัมน์">'+d+'</button></th>';th+='<th class="sm">รวม</th>';
   var body=mc.rows.map(function(r,i){return '<tr><td class="no">'+(i+1)+'</td><td class="nm">'+esc(r.name)+'</td>'+r.cells.map(function(c,j){return '<td'+(j+1===today?' class="td"':'')+'>'+c+'</td>'}).join('')+'<td class="sm">'+r.sum+'</td></tr>'}).join('');
   var foot='<tr class="tot"><td></td><td class="nm">รวมทั้งหมด</td>'+mc.col.map(function(c,j){return '<td'+(j+1===today?' class="td"':'')+'>'+c+'</td>'}).join('')+'<td class="sm">'+mc.total+'</td></tr>';
   return '<article class="sheet cnt-sheet"><header><p class="kick">นับเคสรายวัน</p><h2>จำนวนเคส '+mname(cntMonth)+'</h2>'+
-    '<p class="sub">นับเฉพาะเหตุการณ์ ไม่นับบรรทัดเหตุการณ์ปกติ · ช่องว่าง = ยังไม่มีข้อมูลวันนั้นในเครื่องนี้ · ขีด = ไม่มีเคส</p>'+
+    '<p class="sub">เรียงตามไฟล์ EOC · นับเฉพาะเหตุการณ์ ไม่นับบรรทัดเหตุการณ์ปกติ · ขีด = ไม่มีเคส · ช่องว่าง = ยังไม่มีข้อมูลวันนั้นในเครื่องนี้ · <b>กดเลขวันที่ เพื่อคัดลอกทั้งคอลัมน์</b></p>'+
     '<div class="rowb"><select id="cntm" class="msel" aria-label="เลือกเดือน">'+ml.map(function(m){return '<option value="'+m+'"'+(m===cntMonth?' selected':'')+'>'+mname(m)+'</option>'}).join('')+'</select>'+
-    '<button type="button" class="btn" data-act="cnt-copy">คัดลอกไป Excel</button><span class="msg">รวม '+mc.total+' เคส</span></div></header>'+
+    '<button type="button" class="btn pri" data-act="cnt-day" data-d="'+(today||'')+'"'+(today?'':' disabled')+'>คัดลอกคอลัมน์วันนี้</button><button type="button" class="btn" data-act="cnt-copy">คัดลอกทั้งตาราง</button><span class="msg">รวม '+mc.total+' เคส</span></div></header>'+
     (mc.rows.length?'<div class="cntwrap"><table class="cnt"><thead><tr>'+th+'</tr></thead><tbody>'+body+foot+'</tbody></table></div>':'<p class="empty">ยังไม่มีข้อมูลในเดือนนี้</p>')+'</article>';
 }
 function monthTSV(){
