@@ -1072,6 +1072,13 @@ table.cnt tr.tot td{font-weight:700;background:var(--fill)}
 .case button.who.empty{background:transparent;border:1px dashed var(--fld);opacity:0;pointer-events:none}
 .case:hover button.who.empty,.case:focus-within button.who.empty{opacity:1;pointer-events:auto}
 .whomenu{min-width:200px}
+
+.datalock{display:flex;flex-direction:column;align-items:center;gap:8px;padding:60px 20px!important;text-align:center}
+.datalock svg{width:34px;height:34px;color:var(--muted)}
+.datalock h2{margin:4px 0 0}
+.datalock input{width:160px;text-align:center;font:inherit;font-size:22px;letter-spacing:.5em;padding:8px 10px 8px 20px;border:1px solid var(--fld);border-radius:12px;background:transparent;color:var(--ink);outline:none}
+.datalock input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.datalock.bad input{animation:nshake .3s;border-color:var(--danger)}
 .whomenu [aria-checked=true]{font-weight:700;color:var(--accent-2)!important;background:var(--accent-soft)!important}
 .whomenu [aria-checked=true]::after{content:' ✓'}
 .whoin{display:flex;gap:6px;padding:6px 8px}
@@ -2016,7 +2023,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 4';
+var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 5';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2564,7 +2571,19 @@ function dropDayPhotos(d){store.reports[d].projects.forEach(function(p){p.cases.
 function orphanPhotos(){var ids={};allCases(function(c){ids[c.id]=1});var out=[];Object.keys(photoMap).forEach(function(k){if(!ids[k])photoMap[k].forEach(function(x){out.push(x)})});return out}
 function emptyExtras(){var n=0;Object.keys(store.reports).forEach(function(d){store.reports[d].projects.forEach(function(p){if(!p.cases.length&&!inReg(p))n++})});return n}
 function cutoffDate(n){var d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+/* the data page is locked with the same 4-digit code as the note, once per browser tab */
+function pinOk(v){var x=2166136261,t='cctv-note:'+v;for(var i=0;i<t.length;i++){x^=t.charCodeAt(i);x=Math.imul(x,16777619)>>>0}return x.toString(16)==='888da84'}
+function dataUnlocked(){try{return sessionStorage.getItem('cctv-data-unlock')==='1'}catch(e){return false}}
 function renderData(){
+  if(!dataUnlocked()){
+    app.innerHTML='<article class="sheet datalock"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 9V6.5a3.2 3.2 0 0 1 6.4 0V9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>'+
+      '<h2>หน้าจัดการข้อมูลถูกล็อก</h2><p class="sub">ใส่รหัส 4 หลักเพื่อเปิด</p><input id="datapin" class="pinmask" type="text" inputmode="numeric" maxlength="4" autocomplete="off" name="cctv-data-pin" data-lpignore="true" aria-label="รหัสหน้าจัดการข้อมูล"></article>';
+    var di=document.getElementById('datapin');setTimeout(function(){di.focus()},30);
+    di.addEventListener('input',function(){var v=di.value.replace(/\D/g,'');di.value=v;if(v.length<4)return;
+      if(pinOk(v)){try{sessionStorage.setItem('cctv-data-unlock','1')}catch(e){}render()}
+      else{di.parentNode.classList.add('bad');di.value='';setTimeout(function(){di.parentNode.classList.remove('bad')},400)}});
+    return;
+  }
   Object.keys(store.reports).forEach(function(d){if(d!==store.date&&!store.reports[d].projects.some(function(p){return p.cases.length}))delete store.reports[d]});
   save();
   var days=Object.keys(store.reports).sort().reverse(),tot={c:0,ph:0,by:0},rows='';
