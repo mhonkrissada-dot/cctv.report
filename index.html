@@ -1066,6 +1066,17 @@ table.cnt tr.tot td{font-weight:700;background:var(--fill)}
 .cnt .dcol{border:0;background:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer;padding:2px 4px;border-radius:6px;min-width:22px}
 .cnt .dcol:hover{background:var(--accent-soft);color:var(--accent-2)}
 .cnt .dcol.copied{background:var(--ok-soft);color:var(--ok)}
+
+.case button.who{border:0;font:inherit;font-size:11.5px;cursor:pointer;transition:background-color .15s,color .15s}
+.case button.who:hover{background:var(--accent-soft);color:var(--accent-2)}
+.case button.who.empty{background:transparent;border:1px dashed var(--fld);opacity:0;pointer-events:none}
+.case:hover button.who.empty,.case:focus-within button.who.empty{opacity:1;pointer-events:auto}
+.whomenu{min-width:200px}
+.whomenu [aria-checked=true]{font-weight:700;color:var(--accent-2)!important;background:var(--accent-soft)!important}
+.whomenu [aria-checked=true]::after{content:' ✓'}
+.whoin{display:flex;gap:6px;padding:6px 8px}
+.whoin input{flex:1;min-width:0;border:1px solid var(--fld);border-radius:8px;padding:5px 8px;background:transparent;color:var(--ink);font:inherit;font-size:13px}
+.whoin .btn{min-height:30px!important;padding:0 10px!important}
 @media (max-width:600px){.ib.wide{width:34px!important;padding:0!important}.ib.wide span{display:none}}
 
 /* project header: one action group */
@@ -2005,7 +2016,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 3';
+var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 4';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2192,7 +2203,7 @@ function caseHTML(c){
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
     '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':c.tpl?' readonly class="locked tplk" title="ข้อความประจำล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
     (c.tpl?'<label class="tplret">กลับมาประจำจุดเวลา<input type="time" data-f="ret" value="'+esc(c.ret||'')+'" aria-label="เวลากลับมาประจำจุด"></label>':'')+
-    '<div class="ca">'+(DUPS[c.id]?'<span class="dupb" title="คล้ายกับเคส '+hhmm(DUPS[c.id].time)+' ในโครงการนี้">อาจซ้ำ</span>':'')+(c.by?'<span class="who" title="กรอกโดย '+esc(c.by)+'">'+esc(c.by)+'</span>':'')+'<label class="ib wide addph cab" title="เลือกรูปจากเครื่อง (หรือลากรูปมาวางที่เคส)">'+IC.cam+'<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label>'+
+    '<div class="ca">'+(DUPS[c.id]?'<span class="dupb" title="คล้ายกับเคส '+hhmm(DUPS[c.id].time)+' ในโครงการนี้">อาจซ้ำ</span>':'')+(isRoutine(c)?'':'<button type="button" class="who'+(c.by?'':' empty')+'" data-act="who" title="'+(c.by?'กรอกโดย '+esc(c.by)+' · กดเพื่อเปลี่ยน':'ใส่ชื่อผู้กรอก')+'">'+(c.by?esc(c.by):'+ ผู้กรอก')+'</button>')+'<label class="ib wide addph cab" title="เลือกรูปจากเครื่อง (หรือลากรูปมาวางที่เคส)">'+IC.cam+'<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label>'+
     '<button type="button" class="ib wide cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)">'+IC.paste+'<span>วางรูป</span></button>'+
     '<button type="button" class="ib del" data-act="delcase" title="ลบเหตุการณ์" aria-label="ลบเหตุการณ์">'+IC.trash+'</button></div>'+
     (th?'<div class="photos">'+th+'</div>':'')+'</div>';
@@ -2834,6 +2845,7 @@ app.addEventListener('click',function(e){
     else v=v.replace(/\s+$/,'')+'\n'+line;
     ta.value=v;edits()[sk(p)]=v;save();fit(ta);var se=b.closest('.sp');if(se)se.classList.add('edited');
   }
+  else if(act==='who'&&c){openWho(b,c,p);return}
   else if(act==='pastephoto'&&c){pasteFromClipboard(c.id)}
   else if(act==='copyphoto'&&c){var rec=allPhotos(c).filter(function(r){return r.id===b.dataset.pid})[0];if(rec)copyImage(rec.data)}
   else if(act==='copy'){copyText(plainText())}
@@ -3009,6 +3021,18 @@ function minGap(a,b){var x=hmMin(a),y=hmMin(b);if(x==null||y==null)return 999;va
 /* same project, within 15 minutes, wording mostly the same */
 function dupsIn(p,time,text,except){return p.cases.filter(function(c){return c.id!==except&&!isRoutine(c)&&bodyText(c)&&minGap(c.time,time)<=15&&simTxt(c.text,text)>=0.72})}
 var DUPS={};
+/* change who entered a case: pick a name, or type another */
+function openWho(btn,c,p){
+  closeCtx();ctx=document.createElement('div');ctx.className='ctx whomenu';ctx.setAttribute('role','menu');
+  ctx.innerHTML='<div class="ctxh">ผู้กรอกเคสนี้</div>'+NAMES.map(function(n){return '<button type="button" role="menuitemradio" aria-checked="'+(c.by===n)+'" data-who="'+esc(n)+'">'+esc(n)+'</button>'}).join('')+
+    '<div class="whoin"><input type="text" id="whoother" placeholder="ชื่ออื่น" aria-label="พิมพ์ชื่ออื่น" value="'+(c.by&&NAMES.indexOf(c.by)<0?esc(c.by):'')+'"><button type="button" class="btn" data-who="__typed">ใช้</button></div>'+
+    (c.by?'<div class="ctxsep"></div><button type="button" class="dz" data-who="">ไม่ระบุชื่อ</button>':'');
+  document.body.appendChild(ctx);var r=btn.getBoundingClientRect();
+  ctx.style.left=Math.max(8,Math.min(r.left,innerWidth-ctx.offsetWidth-8))+'px';ctx.style.top=Math.min(r.bottom+6,innerHeight-ctx.offsetHeight-8)+'px';
+  var set=function(v){v=String(v||'').trim();c.by=v;if(!v)delete c.by;markP(p);save();closeCtx();render();toast(v?'ผู้กรอก: '+v:'ไม่ระบุชื่อผู้กรอก')};
+  ctx.addEventListener('click',function(e){var x=e.target.closest('[data-who]');if(!x)return;set(x.dataset.who==='__typed'?document.getElementById('whoother').value:x.dataset.who)});
+  ctx.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='whoother'){e.preventDefault();set(e.target.value)}});
+}
 function openDlg(title,body,foot,onClick){
   closeMsg();
   var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',title);
