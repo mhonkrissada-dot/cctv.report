@@ -1970,7 +1970,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='12 พ.ย. 69 · 8';
+var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 1';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2005,14 +2005,18 @@ function syncPull(force,day){
       var cur=idx[r.id];
       if(cur&&(s.dirty[r.id]||isRoutine(cur.c)))return;
       if(s.dels[r.id]||gone[r.id])return;
-      var body='♦️ '+bodyText({text:r.text});
+      /* keep the text as written, "เวลา ..น." included; only replace it when the words really changed */
+      var body=String(r.text||'').trim();if(body&&!/^(♦️|♦|◆)/.test(body))body='♦️ '+body;
+      var hasT=function(t){return /^\s*(♦️|♦|◆)?\s*เวลา\s*\d/.test(t||'')};
       var rep=store.reports[r.date]||(store.reports[r.date]={projects:[]});
       var pr=rep.projects.filter(function(p){return p.name===r.project})[0];
       if(!pr){pr={id:uid(),name:r.project,mode:MODE_REV[r.mode]||'',cases:[]};rep.projects.push(pr)}
       if(cur){
-        if(cur.c.text===body&&cur.c.time===r.time&&cur.p===pr)return;
+        var same=bodyText(cur.c)===bodyText({text:body});
+        var fixT=same&&!hasT(cur.c.text)&&hasT(body); /* put back a time that an older version stripped */
+        if((same&&!fixT)&&cur.c.time===r.time&&cur.p===pr)return;
         if(cur.p!==pr){cur.p.cases=cur.p.cases.filter(function(c){return c!==cur.c});pr.cases.push(cur.c)}
-        cur.c.text=body;cur.c.time=r.time;
+        if(!same||fixT)cur.c.text=body;cur.c.time=r.time;
       }else pr.cases.push({id:r.id,time:r.time,text:body});
       touched[pr.id]=pr;changed++;
     });
