@@ -1031,6 +1031,37 @@ a{color:var(--accent-2)}
 .ib.wide{width:auto!important;padding:0 10px!important;gap:5px;font-size:12.5px;font-weight:500;color:var(--muted)!important}
 .ib.wide:hover{color:var(--accent-2)!important;background:var(--accent-soft)!important}
 .ib.wide svg{width:16px;height:16px}
+
+/* who entered, possible duplicate, summary, monthly counts */
+.case .who{font-size:11.5px;color:var(--muted);background:var(--fill);border-radius:999px;padding:2px 8px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+.case .dupb{font-size:11.5px;font-weight:600;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.sumbtn svg{color:var(--muted)}
+#sumbtn{margin-left:auto;color:var(--ink)!important}
+#syncnow{margin-left:6px!important}
+.dbody{padding:4px 18px 8px;overflow:auto;max-height:65vh;display:flex;flex-direction:column;gap:6px}
+.dbody h4{margin:12px 0 2px;font-size:13px;color:var(--muted)}
+.dupx{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px}
+.dupx small{color:var(--muted);font-size:12px}.dupx p{margin:2px 0 0;font-size:14px}
+.sumst{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.sumst div{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column}
+.sumst b{font-size:22px;font-variant-numeric:tabular-nums}.sumst span{font-size:12px;color:var(--muted)}
+.sumst .w b{color:var(--warn)}
+.sumi{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);font:inherit;padding:7px 10px;border-radius:8px;cursor:pointer}
+.sumi:hover{background:var(--fill)}.sumi b{flex:none}.sumi span{color:var(--muted);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:600px){.sumst{grid-template-columns:1fr 1fr}.dupx{grid-template-columns:1fr}}
+.cnt-sheet .rowb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.cntwrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}
+table.cnt{border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;width:100%}
+table.cnt th,table.cnt td{border:1px solid var(--line);padding:4px 5px;text-align:center;min-width:24px}
+table.cnt th{background:var(--fill);font-weight:600}
+table.cnt td{background:var(--surface)}
+.cnt-sheet{position:relative;z-index:0}
+table.cnt .nm{text-align:left;white-space:nowrap;min-width:130px;position:sticky;left:0;background:var(--surface)}
+table.cnt th.nm{background:var(--fill)}
+table.cnt .no{color:var(--muted)}
+table.cnt .sm{font-weight:700}
+table.cnt .td{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+table.cnt tr.tot td{font-weight:700;background:var(--fill)}
 @media (max-width:600px){.ib.wide{width:34px!important;padding:0!important}.ib.wide span{display:none}}
 
 /* project header: one action group */
@@ -1914,7 +1945,7 @@ function caseIndex(){var m={};allCases(function(c,p,d){m[c.id]={c:c,p:p,d:d}});r
 function unsyncedPhotos(dates){var idx=caseIndex(),out=[];Object.keys(photoMap).forEach(function(k){var o=idx[k];if(!o||(dates&&dates.indexOf(o.d)<0))return;photoMap[k].forEach(function(x){if(!x.fileId)out.push({x:x,o:o})})});return out}
 function dirtyIn(dates){var idx=caseIndex(),n=0;Object.keys(store.sync.dirty).forEach(function(i){var o=idx[i];if(o&&bodyText(o.c)&&!isRoutine(o.c)&&(!dates||dates.indexOf(o.d)>=0))n++});return n}
 function pending(){var s=store.sync;return dirtyIn(null)+Object.keys(s.dels).length+Object.keys(s.pdels).length+unsyncedPhotos().length}
-function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c)}}
+function caseRow(o){return{id:o.c.id,date:o.d,project:o.p.name||'ไม่ระบุโครงการ',mode:MODES[o.p.mode||'']||'',time:o.c.time,text:caseText(o.c),by:o.c.by||''}}
 function post(body){
   body.key=String(store.sync.key||'').trim(); /* a space copied with the code would make it wrong */
   var url=String(store.sync.url||'').trim();
@@ -1970,7 +2001,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 1';
+var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 2';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2014,10 +2045,10 @@ function syncPull(force,day){
       if(cur){
         var same=bodyText(cur.c)===bodyText({text:body});
         var fixT=same&&!hasT(cur.c.text)&&hasT(body); /* put back a time that an older version stripped */
-        if((same&&!fixT)&&cur.c.time===r.time&&cur.p===pr)return;
+        if((same&&!fixT)&&cur.c.time===r.time&&cur.p===pr&&(!r.by||cur.c.by===r.by))return;
         if(cur.p!==pr){cur.p.cases=cur.p.cases.filter(function(c){return c!==cur.c});pr.cases.push(cur.c)}
-        if(!same||fixT)cur.c.text=body;cur.c.time=r.time;
-      }else pr.cases.push({id:r.id,time:r.time,text:body});
+        if(!same||fixT)cur.c.text=body;cur.c.time=r.time;if(r.by)cur.c.by=r.by;
+      }else pr.cases.push(r.by?{id:r.id,time:r.time,text:body,by:r.by}:{id:r.id,time:r.time,text:body});
       touched[pr.id]=pr;changed++;
     });
     Object.keys(touched).forEach(function(k){touched[k].cases.sort(byTime)});
@@ -2119,7 +2150,7 @@ function syncHTML(){
 /* ---------- render ---------- */
 var app=document.getElementById('app');
 function renderTotals(){var n=counts();
-  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ ทั้งในเครื่องนี้ บน Drive และในเครื่องอื่นที่ซิงก์ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="syncnow" class="syncbtn" title="ซิงก์วันที่เปิดอยู่"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span></button>';paintSync()}
+  document.getElementById('totals').innerHTML='<span><b>'+n.p+'</b>โครงการที่มีเหตุการณ์</span><span><b>'+n.c+'</b>เคส</span><span><b>'+n.ph+'</b>รูป</span>'+(n.c?'<button type="button" class="ghost clr" id="clrday" title="ลบทุกเหตุการณ์และรูปของวันที่รายงานนี้ ทั้งในเครื่องนี้ บน Drive และในเครื่องอื่นที่ซิงก์ เก็บรายชื่อโครงการไว้">ล้างข้อมูลวันนี้</button>':'')+'<button type="button" id="syncst" class="pill"></button><button type="button" id="sumbtn" class="syncbtn sumbtn" title="สรุปก่อนปิดกะ: โครงการที่ยังไม่ส่ง และเคสที่ยังไม่มีรูป"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="3" width="12" height="14.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 8.5l2 2 4-4M7 13.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>สรุปกะ</span></button><button type="button" id="syncnow" class="syncbtn" title="ซิงก์วันที่เปิดอยู่"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 0 1-10.6 3.9M4 10a6 6 0 0 1 10.6-3.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.8 2.8v3.5h-3.5M5.2 17.2v-3.5h3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sync</span></button>';paintSync()}
 /* project search: filters the project list (and the folder overview) by name */
 var pq='';
 function pqMatch(p){if(!pq)return true;return norm(p.name||'').indexOf(norm(pq))>=0||String(p.name||'').toLowerCase().indexOf(pq.toLowerCase())>=0}
@@ -2157,7 +2188,7 @@ function caseHTML(c){
     '<input type="time" id="t-'+c.id+'" data-f="time" value="'+esc(c.time)+'" aria-label="เวลา">'+
     '<textarea id="x-'+c.id+'" data-f="text" rows="1" aria-label="รายละเอียดเหตุการณ์"'+(isFixed(c)?' readonly class="locked" title="ข้อความเหตุการณ์ปกติล็อกไว้ แก้ได้เฉพาะเวลา"':c.tpl?' readonly class="locked tplk" title="ข้อความประจำล็อกไว้ แก้ได้เฉพาะเวลา"':'')+'>'+esc(c.text)+'</textarea>'+
     (c.tpl?'<label class="tplret">กลับมาประจำจุดเวลา<input type="time" data-f="ret" value="'+esc(c.ret||'')+'" aria-label="เวลากลับมาประจำจุด"></label>':'')+
-    '<div class="ca"><label class="ib wide addph cab" title="เลือกรูปจากเครื่อง (หรือลากรูปมาวางที่เคส)">'+IC.cam+'<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label>'+
+    '<div class="ca">'+(DUPS[c.id]?'<span class="dupb" title="คล้ายกับเคส '+hhmm(DUPS[c.id].time)+' ในโครงการนี้">อาจซ้ำ</span>':'')+(c.by?'<span class="who" title="กรอกโดย '+esc(c.by)+'">'+esc(c.by)+'</span>':'')+'<label class="ib wide addph cab" title="เลือกรูปจากเครื่อง (หรือลากรูปมาวางที่เคส)">'+IC.cam+'<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple data-act="file"></label>'+
     '<button type="button" class="ib wide cab2" data-act="pastephoto" title="วางรูปที่คัดลอกไว้ (หรือคลิกที่เคสแล้วกด Ctrl+V)">'+IC.paste+'<span>วางรูป</span></button>'+
     '<button type="button" class="ib del" data-act="delcase" title="ลบเหตุการณ์" aria-label="ลบเหตุการณ์">'+IC.trash+'</button></div>'+
     (th?'<div class="photos">'+th+'</div>':'')+'</div>';
@@ -2173,6 +2204,7 @@ var IC={
   dots:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="15.5" cy="10" r="1.6" fill="currentColor"/></svg>'
 };
 function projHTML(p,solo){
+  p.cases.forEach(function(c){var d=isRoutine(c)?[]:dupsIn(p,c.time,c.text,c.id);if(d.length)DUPS[c.id]=d[0];else delete DUPS[c.id]});
   var opts=ORDER.map(function(m){return '<option value="'+m+'"'+((p.mode||'')===m?' selected':'')+'>'+(m?MODES[m]:'ไม่ระบุช่วงเวลา')+'</option>'}).join('');
   return '<section class="proj'+(solo?' solo':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
     '<input class="pname" id="n-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'" placeholder="ชื่อโครงการ" aria-label="ชื่อโครงการ">'+
@@ -2528,7 +2560,7 @@ function renderData(){
   });
   var orph=orphanPhotos(),ob=0;orph.forEach(function(x){ob+=x.data.length*0.75});
   var ex=emptyExtras();
-  app.innerHTML=syncHTML()+'<article class="sheet"><header><p class="kick">ข้อมูลในเบราว์เซอร์นี้</p><h2>ล้างและลบข้อมูล</h2>'+
+  app.innerHTML=monthHTML()+syncHTML()+'<article class="sheet"><header><p class="kick">ข้อมูลในเบราว์เซอร์นี้</p><h2>ล้างและลบข้อมูล</h2>'+
     '<p class="tot">'+days.length+' วัน · '+tot.c+' เคส · '+tot.ph+' รูป · ประมาณ '+fmtB(tot.by)+'</p><p class="msg" id="est"></p></header>'+
     '<div class="dsec"><h3>ลบข้อมูลในเครื่องนี้</h3><p>คืนพื้นที่เครื่อง ข้อมูลในชีตและบน Drive ยังอยู่ครบ และเครื่องอื่นไม่ถูกลบ ต้องการคืน กด ดึงข้อมูลกลับจากชีต</p><div class="rowb">'+
       '<label for="oldn" class="msg">เก่ากว่า</label><select id="oldn" class="msel"><option value="7">7 วัน</option><option value="30" selected>30 วัน</option><option value="90">90 วัน</option><option value="180">180 วัน</option><option value="all">ทั้งหมด (ทุกวัน)</option></select>'+
@@ -2614,6 +2646,7 @@ app.addEventListener('change',function(e){
     if(np.cases.some(function(k){return (k.text||'').trim()===ntx})){toast('มีบรรทัดนี้ในโครงการแล้ว');return}
     var nc={id:uid(),time:tm,text:ntx};np.cases.push(nc);np.cases.sort(byTime);markP(np);save();render();return;
   }
+  if(t.id==='cntm'){cntMonth=t.value;render();return}
   if(t.id==='rep-from'||t.id==='rep-to'){var fr=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;if(fr&&to){if(fr===to){toast('เวลาเริ่มกับเวลาสิ้นสุดต้องไม่เท่ากัน');return}R().repFrom=fr;R().repTo=to;save();render()}return}
   if(t.dataset&&t.dataset.f==='text'&&t.readOnly)return;
   if(t.dataset&&t.dataset.f==='text'){var p0=findP(t),c0=p0&&findC(t,p0);if(c0&&!applyTime(p0,c0,false)){tidy(c0);t.value=c0.text;markP(p0);save();fit(t)}return}
@@ -2664,7 +2697,7 @@ app.addEventListener('click',function(e){
   var act=b.dataset.act,p=findP(b),c=p&&findC(b,p);
   if(act==='pmore'&&p){var rr=b.getBoundingClientRect();openCtx(rr.left,rr.bottom+6,p,true);return}
   if(act==='addproj'){var np={id:uid(),name:'',mode:'',cases:[{id:uid(),time:'08:00',text:'♦️ '}]};R().projects.push(np);sel=np.id;save();render();var i=document.getElementById('n-'+np.id);if(i)i.focus()}
-  else if(act==='addcase'&&p){var nc={id:uid(),time:'08:00',text:'♦️ '};p.cases.push(nc);save();render();var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}
+  else if(act==='addcase'&&p){var nc={id:uid(),time:'08:00',text:'♦️ ',by:whoAmI()};p.cases.push(nc);save();render();var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}
   else if(act==='delcase'&&c){if(!arm(b,'ยืนยันลบ'))return;markDel(c);delCasePhotos(c);p.cases=p.cases.filter(function(k){return k!==c});save();render()}
   else if(act==='addnormal'&&p){
     var added=0;normalKinds(p).forEach(function(w){var tx=w==='night'?LINE_NIGHT:LINE_DAY;if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;p.cases.push({id:uid(),time:w==='night'?'19:00':'07:00',text:tx});added++});
@@ -2698,6 +2731,7 @@ app.addEventListener('click',function(e){
     save();toast((act==='old-all'?'ลบข้อมูล ':'ลบรูป ')+ds.length+' วันในเครื่องนี้แล้ว · ในชีตยังอยู่ครบ');render();
     if(all&&act==='old-photos')syncPull(true,keep);
   }
+  else if(act==='cnt-copy'){copyText(monthTSV(),'คัดลอกตารางจำนวนเคสแล้ว วางใน Excel ได้เลย')}
   else if(act==='sy-pullall'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
     if(hasSkip()&&!arm(b,'ยืนยันดึงทุกวันกลับมา'))return;
@@ -2925,12 +2959,20 @@ function pasteNewCase(text,imgs){
     if(!l.length){pickProj(pt.code,nearProj(pt.code),function(p){pt.p=cache[pt.code]=p;i++;next()},true);return}
     pickProj(pt.code,l,function(p){pt.p=cache[pt.code]=p;i++;next()});
   })();
+  var dupOk=false;
   function make(){
+    if(!dupOk&&!parts.some(function(x){return !x.p})){
+      var dl=parts.map(function(pt){return {pt:pt,d:pt.text?dupsIn(pt.p,timeOf(pt.text)||nowHM(),pt.text):[]}}).filter(function(x){return x.d.length});
+      if(dl.length){askDup(dl,function(m){
+        if(m==='cancel'){toast('ยังไม่ได้เพิ่มเหตุการณ์');return}
+        if(m==='skip'){parts=parts.filter(function(pt){return !dl.some(function(x){return x.pt===pt})});if(!parts.length){toast('ไม่ได้เพิ่ม เพราะซ้ำกับเคสที่มีอยู่แล้ว');return}}
+        dupOk=true;make()});return}
+    }
     if(parts.some(function(x){return !x.p})){toast('ไม่รู้ว่าเป็นโครงการไหน เปิดโครงการก่อน หรือใส่ชื่อย่อ เช่น ASK นำหน้า แล้ววางอีกครั้ง');return}
     var made=[],projs={};
     parts.forEach(function(pt){
       var tx=pt.text,t=timeOf(tx)||nowHM();if(tx&&!/^♦/.test(tx))tx='♦️ '+tx;
-      var nc={id:uid(),time:t,text:tx||'♦️ เวลา '+hhmm(t)+'น. '};pt.p.cases.push(nc);projs[pt.p.id]=pt.p;made.push({c:nc,p:pt.p,hasText:!!tx});
+      var nc={id:uid(),time:t,text:tx||'♦️ เวลา '+hhmm(t)+'น. ',by:whoAmI()};pt.p.cases.push(nc);projs[pt.p.id]=pt.p;made.push({c:nc,p:pt.p,hasText:!!tx});
     });
     Object.keys(projs).forEach(function(k){markP(projs[k])});save();
     pend=[];
@@ -2947,6 +2989,84 @@ function pasteNewCase(text,imgs){
         'เพิ่มเหตุการณ์ '+hhmm(first.c.time)+' ให้ '+names+(imgs.length&&first.hasText?' พร้อมรูป '+imgs.length+' รูป':imgs.length?' · คัดลอกข้อความมาวางต่อได้เลย':' · คัดลอกรูปมาวางต่อได้เลย'))};
     if(imgs.length)addPhotos(first.c.id,imgs).then(done);else done();
   }
+}
+/* ---------- who entered, possible duplicates, shift summary, cases per day ---------- */
+function whoAmI(){var S=settings();return String((S.sender==='__other'?S.senderOther:S.sender)||'').replace(/\s*EOC$/i,'').trim()}
+function normTxt(t){return bodyText({text:t||''}).replace(/[\s.,:;!?()\-–—"'“”‘’]/g,'').toLowerCase()}
+function simTxt(a,b){a=normTxt(a);b=normTxt(b);if(!a||!b)return 0;if(a===b)return 1;
+  var g=function(x){var m={};for(var i=0;i<x.length-1;i++){var k=x.substr(i,2);m[k]=(m[k]||0)+1}return m},A=g(a),B=g(b),n=0,t=0,k;
+  for(k in A){t+=A[k];if(B[k])n+=Math.min(A[k],B[k])}for(k in B)t+=B[k];return t?2*n/t:0}
+function hmMin(t){var m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?(+m[1])*60+(+m[2]):null}
+function minGap(a,b){var x=hmMin(a),y=hmMin(b);if(x==null||y==null)return 999;var d=Math.abs(x-y);return Math.min(d,1440-d)}
+/* same project, within 15 minutes, wording mostly the same */
+function dupsIn(p,time,text,except){return p.cases.filter(function(c){return c.id!==except&&!isRoutine(c)&&bodyText(c)&&minGap(c.time,time)<=15&&simTxt(c.text,text)>=0.72})}
+var DUPS={};
+function openDlg(title,body,foot,onClick){
+  closeMsg();
+  var d=document.createElement('div');d.id='msgdlg';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',title);
+  d.innerHTML='<div class="mbox"><div class="mhead"><b>'+title+'</b><button type="button" class="ghost" data-m="close" aria-label="ปิด">✕</button></div><div class="dbody">'+body+'</div><div class="mfoot">'+foot+'</div></div>';
+  document.body.appendChild(d);document.body.style.overflow='hidden';
+  d.addEventListener('click',function(e){var b=e.target.closest('[data-m],[data-go]');if(e.target===d||(b&&b.dataset.m==='close')){closeMsg();onClick&&onClick('close');return}if(b)onClick&&onClick(b.dataset.m||'go',b)});
+  var f=d.querySelector('.mfoot .pri')||d.querySelector('.mfoot .btn');if(f)f.focus();
+  return d;
+}
+function askDup(list,cb){
+  var h='<p class="msg">มีเหตุการณ์คล้ายกันในโครงการเดียวกัน เวลาห่างกันไม่เกิน 15 นาที อาจเป็นเคสเดียวกันที่อีกเครื่องกรอกไว้แล้ว</p>'+
+    list.map(function(x){var o=x.d[0];return '<div class="dupx"><div><small>จะเพิ่ม · '+esc(x.pt.p.name)+'</small><p>'+esc(bodyText({text:x.pt.text}))+'</p></div>'+
+      '<div><small>มีอยู่แล้ว · '+hhmm(o.time)+(o.by?' · '+esc(o.by):'')+'</small><p>'+esc(bodyText(o))+'</p></div></div>'}).join('');
+  var done=false;
+  openDlg('อาจเป็นเคสซ้ำ ('+list.length+')',h,'<button type="button" class="btn" data-m="close">ยกเลิก</button><button type="button" class="btn" data-m="keep">บันทึกเพิ่มอยู่ดี</button><button type="button" class="btn pri" data-m="skip">ไม่บันทึกเคสที่ซ้ำ</button>',
+    function(m){if(done)return;if(m==='close'){done=true;cb('cancel');return}if(m==='keep'||m==='skip'){done=true;closeMsg();cb(m)}});
+}
+function openSummary(){
+  var ps=sortedProjects().filter(inShift),un=[],sent=[],none=[],nop=[],tot=0;
+  ps.forEach(function(p){tot+=realN(p.cases);if(!p.cases.length){none.push(p);return}(isSent(p)?sent:un).push(p);
+    p.cases.forEach(function(c){if(!isRoutine(c)&&bodyText(c)&&!allPhotos(c).length)nop.push({p:p,c:c})})});
+  var shiftL={all:'ทั้งวัน',day:'กลางวัน',night:'กลางคืน'}[curShift()]||'';
+  var li=function(p,extra,cid){return '<button type="button" class="sumi" data-go="'+p.id+'"'+(cid?' data-gc="'+cid+'"':'')+'><b>'+esc(p.name)+'</b><span>'+extra+'</span></button>'};
+  var h='<div class="sumst"><div><b>'+tot+'</b><span>เคสทั้งหมด</span></div><div><b>'+sent.length+'/'+(un.length+sent.length)+'</b><span>โครงการที่ส่งแล้ว</span></div><div class="'+(un.length?'w':'')+'"><b>'+un.length+'</b><span>ยังไม่ส่ง</span></div><div class="'+(nop.length?'w':'')+'"><b>'+nop.length+'</b><span>เคสไม่มีรูป</span></div></div>'+
+    '<h4>ยังไม่ส่ง ('+un.length+')</h4>'+(un.length?un.map(function(p){var n=realN(p.cases);return li(p,n?n+' เคส':'ปกติ')}).join(''):'<p class="msg">ส่งครบทุกโครงการแล้ว ✓</p>')+
+    '<h4>เคสที่ยังไม่มีรูป ('+nop.length+')</h4>'+(nop.length?nop.map(function(x){return li(x.p,hhmm(x.c.time)+' · '+esc(bodyText(x.c).slice(0,60)),x.c.id)}).join(''):'<p class="msg">ทุกเคสมีรูปแล้ว ✓</p>')+
+    (none.length?'<h4>ยังไม่มีเหตุการณ์ ('+none.length+')</h4><p class="msg">'+none.map(function(p){return esc(p.name)}).join(' · ')+'</p>':'');
+  var txt='สรุปกะ'+shiftL+' วันที่ '+thaiShort(store.date)+'\nเคสทั้งหมด '+tot+' · ส่งแล้ว '+sent.length+'/'+(un.length+sent.length)+' โครงการ'+
+    '\nยังไม่ส่ง: '+(un.length?un.map(function(p){return p.name}).join(', '):'-')+
+    '\nเคสที่ยังไม่มีรูป: '+(nop.length?nop.map(function(x){return x.p.name+' '+hhmm(x.c.time)}).join(', '):'-');
+  openDlg('สรุปก่อนปิดกะ · '+shiftL+' '+thaiShort(store.date),h,'<button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn pri" data-m="copy">คัดลอกสรุป</button>',function(m,b){
+    if(m==='copy'){copyText(txt,'คัดลอกสรุปกะแล้ว');return}
+    if(m==='go'&&b){closeMsg();mode='edit';sel=b.dataset.go;selAllChosen=false;render();
+      var n=b.dataset.gc&&app.querySelector('.case[data-c="'+b.dataset.gc+'"]');if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-140,behavior:'instant'})}else window.scrollTo(0,0)}
+  });
+}
+/* cases per project per day for one month, like the monthly sheet */
+var cntMonth='';
+function monthCounts(ym){
+  var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),names={},have=[];
+  for(var d=1;d<=nd;d++){var k=ym+'-'+('0'+d).slice(-2),r=store.reports[k];have.push(!!r);if(r)r.projects.forEach(function(p){if(p.name)names[p.name]=1})}
+  var list=Object.keys(names).sort(function(a,b){return folderIdx({name:a})-folderIdx({name:b})||a.localeCompare(b,'th')});
+  var rows=list.map(function(nm){var cells=[],sum=0;for(var d=1;d<=nd;d++){var r=store.reports[ym+'-'+('0'+d).slice(-2)];
+      if(!r){cells.push('');continue}var p=r.projects.filter(function(q){return q.name===nm})[0],n=p?realN(p.cases):0;sum+=n;cells.push(n||'-')}
+    return {name:nm,cells:cells,sum:sum}});
+  var col=[];for(var d=0;d<nd;d++){var t=0;rows.forEach(function(r){if(typeof r.cells[d]==='number')t+=r.cells[d]});col.push(have[d]?t:'')}
+  return {nd:nd,rows:rows,col:col,total:rows.reduce(function(a,r){return a+r.sum},0)};
+}
+function monthHTML(){
+  var months={};Object.keys(store.reports).forEach(function(d){months[d.slice(0,7)]=1});months[store.date.slice(0,7)]=1;
+  var ml=Object.keys(months).sort().reverse();if(!cntMonth||!months[cntMonth])cntMonth=store.date.slice(0,7);
+  var mc=monthCounts(cntMonth),today=store.date.slice(0,7)===cntMonth?+store.date.slice(8,10):0;
+  var mname=function(ym){return new Date(ym+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'})};
+  var th='<th class="no">ลำดับ</th><th class="nm">ชื่อโครงการ</th>';for(var d=1;d<=mc.nd;d++)th+='<th'+(d===today?' class="td"':'')+'>'+d+'</th>';th+='<th class="sm">รวม</th>';
+  var body=mc.rows.map(function(r,i){return '<tr><td class="no">'+(i+1)+'</td><td class="nm">'+esc(r.name)+'</td>'+r.cells.map(function(c,j){return '<td'+(j+1===today?' class="td"':'')+'>'+c+'</td>'}).join('')+'<td class="sm">'+r.sum+'</td></tr>'}).join('');
+  var foot='<tr class="tot"><td></td><td class="nm">รวมทั้งหมด</td>'+mc.col.map(function(c,j){return '<td'+(j+1===today?' class="td"':'')+'>'+c+'</td>'}).join('')+'<td class="sm">'+mc.total+'</td></tr>';
+  return '<article class="sheet cnt-sheet"><header><p class="kick">นับเคสรายวัน</p><h2>จำนวนเคส '+mname(cntMonth)+'</h2>'+
+    '<p class="sub">นับเฉพาะเหตุการณ์ ไม่นับบรรทัดเหตุการณ์ปกติ · ช่องว่าง = ยังไม่มีข้อมูลวันนั้นในเครื่องนี้ · ขีด = ไม่มีเคส</p>'+
+    '<div class="rowb"><select id="cntm" class="msel" aria-label="เลือกเดือน">'+ml.map(function(m){return '<option value="'+m+'"'+(m===cntMonth?' selected':'')+'>'+mname(m)+'</option>'}).join('')+'</select>'+
+    '<button type="button" class="btn" data-act="cnt-copy">คัดลอกไป Excel</button><span class="msg">รวม '+mc.total+' เคส</span></div></header>'+
+    (mc.rows.length?'<div class="cntwrap"><table class="cnt"><thead><tr>'+th+'</tr></thead><tbody>'+body+foot+'</tbody></table></div>':'<p class="empty">ยังไม่มีข้อมูลในเดือนนี้</p>')+'</article>';
+}
+function monthTSV(){
+  var mc=monthCounts(cntMonth),h=['ลำดับ','ชื่อโครงการ'];for(var d=1;d<=mc.nd;d++)h.push(d);h.push('รวม');
+  var out=[h.join('\t')];mc.rows.forEach(function(r,i){out.push([i+1,r.name].concat(r.cells,[r.sum]).join('\t'))});
+  out.push(['','รวมทั้งหมด'].concat(mc.col,[mc.total]).join('\t'));return out.join('\n');
 }
 function quickHTML(){
   return '<div class="qbox"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3" width="10" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5h4V2H8z" fill="currentColor"/></svg>'+
@@ -3143,6 +3263,7 @@ document.getElementById('m-fold').addEventListener('click',function(){mode='fold
 document.getElementById('m-rep').addEventListener('click',function(){mode='report';render();window.scrollTo(0,0)});
 document.getElementById('totals').addEventListener('click',function(e){
   if(e.target.closest('#syncst')){mode='data';render();window.scrollTo(0,0);return}
+  if(e.target.closest('#sumbtn')){openSummary();return}
   var snb=e.target.closest('#syncnow');
   if(snb){var rr=snb.getBoundingClientRect(),d=Math.max(rr.width,rr.height),rp=document.createElement('span');rp.className='rip';rp.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-rr.left-d/2)+'px;top:'+(e.clientY-rr.top-d/2)+'px';snb.appendChild(rp);setTimeout(function(){rp.remove()},600)}
   if(snb){
