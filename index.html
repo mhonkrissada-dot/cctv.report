@@ -2023,7 +2023,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='14 พ.ย. 69 · 5';
+var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 1';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -3094,18 +3094,27 @@ var cntMonth='';
 var COUNT_ORDER=['ทาวน์โฮม ระยอง','คลังสินค้า ระยอง','จรรยวรรธ กม.16','คลังสินค้า กม.16','LV-SW RM2','ELDN','AN-ID-ASK','AN-ID-LSL','LPARK-RM9','LPARK-VC','LP-RM3 RR','LSL-C65','LV-SK109','IDRS','LC-EC48','LPARK-PH32','LP-RM3 RV','LP-RM4 RD','LUM-T','LV-CC','LV-SK101/1','SPC-RM3','TIJ','TPS','LT-LPN','U-CENTER','LP-SH','TRR71','VL 168 WG'];
 var COUNT_ALIAS={LSLCS65:'LSLC65',TRR:'TRR71',LPNT:'LTLPN'};
 function countKey(name){var k=norm(name||'');return COUNT_ALIAS[k]||k}
+/* one app project that covers two sheet rows: each case goes to the row whose place it names */
+var COUNT_SPLIT={
+  'จรรยวรรธ':[[/ทาวน์โฮม/,'ทาวน์โฮม ระยอง'],[/คลังสินค้า/,'คลังสินค้า ระยอง']],
+  CHODKM16:[[/คลังสินค้า/,'คลังสินค้า กม.16'],[/จรรยวรรธ/,'จรรยวรรธ กม.16']]
+};
 function monthCounts(ym){
-  var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),have=[],rows=[],byKey={};
+  var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),have=[],rows=[],byKey={},extra=[];
   COUNT_ORDER.forEach(function(nm){var r={name:nm,cells:[],sum:0};rows.push(r);byKey[countKey(nm)]=r});
-  var extra=[];
-  for(var d=1;d<=nd;d++){var rp=store.reports[ym+'-'+('0'+d).slice(-2)];have.push(!!rp);if(!rp)continue;
-    rp.projects.forEach(function(p){if(!p.name)return;var k=countKey(p.name);if(!byKey[k]){byKey[k]={name:p.name,cells:[],sum:0};extra.push(byKey[k])}})}
+  var rowFor=function(name){var k=countKey(name);if(!byKey[k]){byKey[k]={name:name,cells:[],sum:0,extra:true};extra.push(byKey[k])}return byKey[k]};
+  var days=[];
+  for(var d=1;d<=nd;d++){var rp=store.reports[ym+'-'+('0'+d).slice(-2)],cnt=new Map();have.push(!!rp);days.push(cnt);if(!rp)continue;
+    rp.projects.forEach(function(p){if(!p.name)return;var sp=COUNT_SPLIT[norm(p.name)];
+      if(!sp){var r=rowFor(p.name);cnt.set(r,(cnt.get(r)||0)+realN(p.cases));return}
+      sp.forEach(function(x){var r=rowFor(x[1]);if(!cnt.has(r))cnt.set(r,0)});
+      p.cases.forEach(function(c){if(isRoutine(c))return;var t=bodyText(c),hit=sp.filter(function(x){return x[0].test(t)})[0];
+        var r=hit?rowFor(hit[1]):rowFor(p.name+' (แยกไม่ได้)');cnt.set(r,(cnt.get(r)||0)+1)})})}
   extra.sort(function(a,b){return a.name.localeCompare(b.name,'th')});rows=rows.concat(extra);
-  rows.forEach(function(r){for(var d=1;d<=nd;d++){var rp=store.reports[ym+'-'+('0'+d).slice(-2)];
-    if(!rp){r.cells.push('');continue}
-    var n=0;rp.projects.forEach(function(p){if(p.name&&byKey[countKey(p.name)]===r)n+=realN(p.cases)});r.sum+=n;r.cells.push(n||'-')}});
+  rows.forEach(function(r){for(var d=0;d<nd;d++){if(!have[d]){r.cells.push('');continue}var n=days[d].get(r)||0;r.sum+=n;r.cells.push(n||'-')}});
+  rows=rows.filter(function(r){return !r.extra||r.sum>0||r.cells.some(function(c){return c==='-'})});
   var col=[];for(var d=0;d<nd;d++){var t=0;rows.forEach(function(r){if(typeof r.cells[d]==='number')t+=r.cells[d]});col.push(have[d]?t:'')}
-  return {nd:nd,rows:rows,col:col,total:rows.reduce(function(a,r){return a+r.sum},0),extra:extra.length};
+  return {nd:nd,rows:rows,col:col,total:rows.reduce(function(a,r){return a+r.sum},0),extra:rows.filter(function(r){return r.extra}).length};
 }
 function monthHTML(){
   var months={};Object.keys(store.reports).forEach(function(d){months[d.slice(0,7)]=1});months[store.date.slice(0,7)]=1;
