@@ -1619,7 +1619,7 @@ function removeProject(p){
   R().projects=R().projects.filter(function(k){return k!==p});
   if(sel===p.id)sel='all';save();render();toast('ลบโครงการ '+(p.name||'')+' แล้ว'+(inReg(p)?' กู้คืนได้ในหน้าจัดการข้อมูล':''));
 }
-function clearProject(p){p.cases.forEach(function(k){markDel(k);delCasePhotos(k)});p.cases=[];save();render();toast('ล้างเหตุการณ์ของ '+p.name+' แล้ว')}
+function clearProject(p){var gone=casesIn(p);gone.forEach(function(k){markDel(k);delCasePhotos(k)});p.cases=p.cases.filter(function(k){return gone.indexOf(k)<0});save();render();toast('ล้างเหตุการณ์ของ '+p.name+(curShift()!=='all'?' เฉพาะกะนี้':'')+' แล้ว')}
 /* right-click menu on the project list */
 var ctx=null;
 /* popup with the full report message */
@@ -1632,7 +1632,7 @@ function xlKey(p){return p.id+'@'+xlShift(p)}
 function xlEdits(p){var m=(R().xledit=R().xledit||{});return m[xlKey(p)]||(m[xlKey(p)]={})}
 function xlRows(p){
   var sh=xlShift(p),hrs=xlHours(sh),by={},ed=(R().xledit||{})[xlKey(p)]||{};
-  sortCases(p.cases,p).forEach(function(c){
+  sortCases(casesIn(p),p).forEach(function(c){
     if(isRoutine(c))return;var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
     if(hh)(by[+hh]=by[+hh]||[]).push(caseText(c).replace(/^\s*♦️?\s*/,''));
@@ -1675,7 +1675,7 @@ function xlStepReset(){if(!XLSTEP)return;var b=document.querySelector('.proj[dat
 /* every hour that has an incident, whatever the shift button says (ordered by the shift, other hours after) */
 function xlHitRows(p){
   var by={},order=xlHours(xlShift(p));
-  sortCases(p.cases,p).forEach(function(c){
+  sortCases(casesIn(p),p).forEach(function(c){
     if(isRoutine(c))return;
     var hh=String(c.time||'').slice(0,2);
     if(!/^\d\d$/.test(hh)){var m=String(c.text||'').match(/เวลา\s*(\d{1,2})\s*[.:]\s*\d{2}/);hh=m?('0'+m[1]).slice(-2):''}
@@ -1697,7 +1697,7 @@ function xlStep(p,btn){
   else if(!nx)xlStepReset();
 }
 function xlCopyAll(){
-  var ps=sortedProjects().filter(function(p){return p.cases.length});
+  var ps=sortedProjects().filter(function(p){return casesIn(p).length});
   if(!ps.length){toast('ยังไม่มีโครงการที่มีเหตุการณ์');return}
   xlCopy(ps.map(function(p){return {title:'โครงการ '+p.name,rows:xlRows(p)}}),'คัดลอก EXCEL แล้ว '+ps.length+' โครงการ (ชื่อโครงการอยู่บรรทัดแรกของแต่ละชุด) → วางใน Excel ด้วย Ctrl+V');
 }
@@ -1771,7 +1771,7 @@ function openCtx(x,y,p,fromMore){
     '<div class="ctxsep"></div>'+
     '<div class="ctxl">สีโฟลเดอร์</div><div class="swatches">'+PAL.map(function(c,i){return '<button type="button" class="sw'+(pal(p)===c?' on':'')+'" data-sw="'+i+'" style="--a:'+c[1]+';--b:'+c[2]+'" aria-label="สีที่ '+(i+1)+'"></button>'}).join('')+'<button type="button" class="sw auto" data-sw="auto" title="สีอัตโนมัติ" aria-label="สีอัตโนมัติ">A</button></div><div class="ctxsep"></div>'+
     '<button type="button" role="menuitem" data-c="open">เปิดโครงการนี้</button>'+
-    '<button type="button" role="menuitem" data-c="clear"'+(p.cases.length?'':' disabled')+'>ล้างเหตุการณ์ ('+p.cases.length+' เคส)</button>'+
+    '<button type="button" role="menuitem" data-c="clear"'+(casesIn(p).length?'':' disabled')+'>ล้างเหตุการณ์ ('+casesIn(p).length+' เคส'+(curShift()!=='all'?' ในกะนี้':'')+')</button>'+
     '<button type="button" role="menuitem" data-c="remove" class="dz">ลบโครงการ</button>';
   document.body.appendChild(ctx);
   var w=ctx.offsetWidth,h=ctx.offsetHeight;ctx.style.left=Math.min(x,innerWidth-w-8)+'px';ctx.style.top=Math.min(y,innerHeight-h-8)+'px';
@@ -1796,7 +1796,7 @@ function openCtx(x,y,p,fromMore){
 }
 function inShift(p){var s=curShift(),m=p.mode||'';return s==='all'||m===''||m==='24'||m===s}
 function shiftHTML(){
-  var all=sortedProjects(),vis=all.filter(inShift),pend=vis.filter(function(p){return !p.cases.length}).length,s=curShift();
+  var all=sortedProjects(),vis=all.filter(inShift),pend=vis.filter(function(p){return !casesIn(p).length}).length,s=curShift();
   var opts=[['all','ทั้งหมด'],['day','กลางวัน'],['night','กลางคืน']];
   var what=s==='all'?'แสดงทุกโครงการ':(s==='day'?'ดู 24 ชม. + เฉพาะกลางวัน':'ดู 24 ชม. + เฉพาะกลางคืน');
   return '<div class="shift" role="group" aria-label="กรองตามช่วงเวลาที่ดู"><div class="seg">'+
@@ -1823,10 +1823,10 @@ function isFixed(c){return nkey(c)!=='2'}
 /* routine lines (เหตุการณ์ปกติ, LP-RM3 RR โหลดดิ้ง/ล็อบบี้) are not counted as cases */
 function isRoutine(c){return isFixed(c)||!!c.tpl}
 function realN(list){return list.filter(function(c){return !isRoutine(c)}).length}
-function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){if(!inShift(x))return;var r=realN(x.cases);if(r)p++;c+=r;x.cases.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
+function counts(){var p=0,c=0,ph=0;R().projects.forEach(function(x){if(!inShift(x))return;var xs=casesIn(x),r=realN(xs);if(r)p++;c+=r;xs.forEach(function(k){ph+=allPhotos(k).length})});return{p:p,c:c,ph:ph}}
 function bodyText(c){return (c.text||'').replace(LEAD,'').replace(/^เวลา\s*\d{1,2}\s*[.:]\s*\d{2}\s*น?\.?\s*/,'').trim()}
 function caseText(c){var t=(c.text||'').replace(LEAD,'').trim();return '♦️ '+(/^เวลา\s*\d/.test(t)?t:'เวลา'+hhmm(c.time)+'น. '+t)}
-function projText(p){return 'โครงการ '+p.name+' จำนวน '+p.cases.length+' เคส\n'+p.cases.slice().sort(byTime).map(caseText).join('\n')}
+function projText(p){var l=casesIn(p);return 'โครงการ '+p.name+' จำนวน '+l.length+' เคส\n'+l.slice().sort(byTime).map(caseText).join('\n')}
 function reportProjects(){var all=sortedProjects();return{ps:all.filter(function(p){return casesIn(p).length&&inShift(p)}),none:[]}}
 function plainText(){var r=reportProjects();return r.ps.concat(r.none).map(msgFinal).join('\n\n')}
 var PAL=[['#1B2B4B','#5D7AB5','#24385F',0,'#24385F'],['#8E2B2B','#F08A8A','#C94444',0,'#C94444'],['#1E6B45','#7FD3A4','#2E9B60',0,'#2E9B60'],['#9C3B6B','#F4A3C8','#D0578F',0,'#D0578F'],['#2b4a4c','#8fbdba','#3a6264',0,'#3a6264'],['#f09a6e','#ffb893','#f2733f',0,'#f2733f'],['#d6d9df','#f6f7f9','#e0e3e8',1,'#9aa0aa'],['#5b4b9a','#b3a7e6','#6b5bb5',0,'#7b6bc5'],['#e0a21a','#ffd777','#f0b429',0,'#f0b429'],['#2d4fb3','#97aef7','#4565d6',0,'#4565d6']];
@@ -2023,7 +2023,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 1';
+var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 2';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2187,14 +2187,14 @@ function navHTML(attr,pv,nx){
     (pv?'<button type="button" class="navb prev" '+attr+'="'+pv.id+'">'+L+'<span><small>ก่อนหน้า</small><b>'+esc(pv.name||'(ยังไม่ตั้งชื่อ)')+'</b></span></button>':'')+
     (nx?'<button type="button" class="navb next" '+attr+'="'+nx.id+'"><span><small>ถัดไป</small><b>'+esc(nx.name||'(ยังไม่ตั้งชื่อ)')+'</b></span>'+Rt+'</button>':'')+'</nav>';
 }
-function railGroup(p){return p.cases.length?(isSent(p)?'sent':'wait'):'none'}
+function railGroup(p){return casesIn(p).length?(isSent(p)?'sent':'wait'):'none'}
 function railList(){return sortedProjects().filter(function(p){return pq?pqMatch(p):(inShift(p)||sel===p.id)})}
 function railOrder(){var l=railList(),o=[];['wait','sent','none'].forEach(function(k){l.forEach(function(p){if(railGroup(p)===k)o.push(p)})});return o}
 function railHTML(){
   var n=counts(),list=railList(),g={wait:[],sent:[],none:[]};
   list.forEach(function(p){g[railGroup(p)].push(p)});
   var h='<button type="button" class="f all" data-sel="all" '+(sel==='all'?'aria-current="true"':'')+'><span class="fn">ภาพรวมทุกโครงการ</span><span class="rc">'+n.c+' เคส</span></button>';
-  function item(p,k){var c=realN(p.cases);return '<button type="button" class="f '+k+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'><span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span>'+(c?'<span class="rc">'+c+'</span>':p.cases.length?'<span class="rc">ปกติ</span>':'')+'<i class="sd" aria-hidden="true"></i></button>'}
+  function item(p,k){var l=casesIn(p),c=realN(l);return '<button type="button" class="f '+k+'" data-sel="'+p.id+'" '+(sel===p.id?'aria-current="true"':'')+'><span class="fn">'+esc(p.name||'(ยังไม่ตั้งชื่อ)')+'</span>'+(c?'<span class="rc">'+c+'</span>':l.length?'<span class="rc">ปกติ</span>':'')+'<i class="sd" aria-hidden="true"></i></button>'}
   [['wait','ยังไม่ส่ง'],['sent','ส่งแล้ว'],['none','ยังไม่มีเหตุการณ์']].forEach(function(x){
     var k=x[0],l=g[k];if(!l.length&&k==='none')return;
     var open=k!=='none'||railOpenNone||!!pq||l.some(function(p){return p.id===sel});
@@ -2226,20 +2226,21 @@ var IC={
   dots:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="15.5" cy="10" r="1.6" fill="currentColor"/></svg>'
 };
 function projHTML(p,solo){
+  var vc=casesIn(p);
   p.cases.forEach(function(c){var d=isRoutine(c)?[]:dupsIn(p,c.time,c.text,c.id);if(d.length)DUPS[c.id]=d[0];else delete DUPS[c.id]});
   var opts=ORDER.map(function(m){return '<option value="'+m+'"'+((p.mode||'')===m?' selected':'')+'>'+(m?MODES[m]:'ไม่ระบุช่วงเวลา')+'</option>'}).join('');
   return '<section class="proj'+(solo?' solo':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><header>'+folderIcon()+
     '<input class="pname" id="n-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'" placeholder="ชื่อโครงการ" aria-label="ชื่อโครงการ">'+
     '<select class="msel" id="s-'+p.id+'" data-f="mode" aria-label="ช่วงเวลาที่ดู CCTV">'+opts+'</select>'+
-    '<span class="cnt">'+(realN(p.cases)||!p.cases.length?realN(p.cases)+' เคส':'ปกติ')+'</span>'+
-    (p.cases.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>':'')+
+    '<span class="cnt">'+(realN(vc)||!vc.length?realN(vc)+' เคส':'ปกติ')+'</span>'+
+    (vc.length?'<button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>':'')+
     '<span class="pacts">'+
-      (p.cases.length?'<button type="button" class="btn pri" data-act="copymsg">'+IC.copy+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
+      (vc.length?'<button type="button" class="btn pri" data-act="copymsg">'+IC.copy+(projPhotos(p).length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button>':'')+
       '<button type="button" class="btn xl" data-act="xlfull" title="คัดลอกตาราง 13 แถว: ใน Excel กด Ctrl+V = พร้อมสี / Ctrl+Shift+V = ข้อความล้วน">'+IC.grid+'Excel</button>'+
       '<button type="button" class="btn xl2" data-act="xlview" title="ดูและแก้ไขข้อความในตารางก่อนคัดลอก">'+IC.pen+'แก้ไข</button>'+
       '<button type="button" class="btn ib more" data-act="pmore" title="ตัวเลือกอื่น: ดูข้อความ อัลบั้มรูป สีโฟลเดอร์ ล้างเหตุการณ์ ลบโครงการ" aria-label="ตัวเลือกอื่น" aria-haspopup="menu">'+IC.dots+'</button>'+
     '</span></header>'+
-    (p.cases.length?p.cases.map(caseHTML).join(''):'<div class="empty">ยังไม่มีเหตุการณ์ในโครงการนี้</div>')+
+    (vc.length?vc.map(caseHTML).join(''):'<div class="empty">'+(p.cases.length?'ไม่มีเหตุการณ์ในกะนี้ ('+(p.cases.length)+' เคสอยู่ในอีกกะ)':'ยังไม่มีเหตุการณ์ในโครงการนี้')+'</div>')+
     '<div class="rowb addc"><button type="button" class="btn" data-act="addcase">+ เพิ่มเหตุการณ์</button></div></section>';
 }
 function fit(el){if(!el.offsetWidth)return;el.style.height='0px';el.style.height=Math.max(el.classList.contains('mp')?100:30,el.scrollHeight+2)+'px'}
@@ -2250,7 +2251,7 @@ function renderEdit(){
   /* open the first project still waiting to be sent, unless the overview was picked on purpose */
   if(sel==='all'&&!selAllChosen){var fw=railOrder().filter(function(p){return railGroup(p)==='wait'})[0];if(fw)sel=fw.id}
   if(sel==='all'){
-    var withC=ps.filter(function(p){return p.cases.length&&inShift(p)}),quiet=ps.filter(function(p){return !p.cases.length&&inShift(p)});
+    var withC=ps.filter(function(p){return casesIn(p).length&&inShift(p)}),quiet=ps.filter(function(p){return !casesIn(p).length&&inShift(p)});
     body=(withC.length?withC.map(projHTML).join(''):'<div class="empty">วันนี้ยังไม่มีเหตุการณ์ เลือกโครงการทางซ้ายเพื่อเพิ่มเหตุการณ์</div>');
     if(quiet.length){
       body+='<div class="quiet"><h3>ยังไม่มีเหตุการณ์วันนี้ ('+quiet.length+' โครงการ)</h3>';
@@ -2321,7 +2322,10 @@ var LINE_NIGHT='♦️ เวลา 19.00น.-07.00น. เหตุการณ
 /* report period: '' = whole day; otherwise HH:MM from/to (wraps past midnight when to <= from) */
 function repRange(){return{from:'',to:''}}
 function inRange(t){var g=repRange();if(!g.from||!g.to)return true;return g.from<g.to?(t>=g.from&&t<g.to):(t>=g.from||t<g.to)}
-function casesIn(p){return p.cases.filter(function(c){return inRange(c.time||'')})}
+/* day 07:00-18:59, night 19:00-06:59; a 24-hour project shows only the cases of the chosen shift */
+function shiftOf(t){var m=hmMin(t);if(m==null)return '';return m>=420&&m<1140?'day':'night'}
+function casesIn(p){var s=curShift(),m=p.mode||'',l=p.cases.filter(function(c){return inRange(c.time||'')});
+  if((s==='day'||s==='night')&&(m===''||m==='24'))l=l.filter(function(c){return shiftOf(c.time)===s});return l}
 function repPreset(){var g=repRange();if(!g.from||!g.to)return 'all';if(g.from==='07:00'&&g.to==='19:00')return 'day';if(g.from==='19:00'&&g.to==='07:00')return 'night';return 'custom'}
 function showProj(p){var k=repPreset(),m=p.mode||'';if(k==='day'||k==='night')return m===''||m==='24'||m===k;return k==='custom'?true:inShift(p)}
 /* lines for a period with nothing to report: night-only and day-only projects are fixed,
@@ -2480,7 +2484,7 @@ function isLUMT(p){return norm(p.name)===norm('LUM-T')}
 function msgShift(p){var s=curShift();if(s==='night'||s==='day')return s;var t=p.cases.map(function(c){return (c.text||'').trim()});return t.indexOf(LINE_DAY)>=0&&t.indexOf(LINE_NIGHT)<0?'day':'night'}
 function lumtText(p){
   var S=settings(),sh=msgShift(p),rng=sh==='night'?'19.00-07.00น.':'07.00-19.00น.';
-  var other=sortCases(p.cases,p).filter(function(c){var t=(c.text||'').trim();return t!==LINE_NIGHT&&t!==LINE_DAY}).map(caseText);
+  var other=sortCases(casesIn(p),p).filter(function(c){var t=(c.text||'').trim();return t!==LINE_NIGHT&&t!==LINE_DAY}).map(caseText);
   return '         '+S.salute+' @'+p.name+' '+S.particle+'\n'+
     'สรุปรายงานเหตุการณ์ประจำวันที่ '+thaiShort(R().repDate||store.date)+' จากระบบ CCTV เวลา '+rng+' ดังต่อไปนี้\n\n'+
     '♦️ ลิฟต์ตัว A - L\n'+
@@ -2530,7 +2534,7 @@ function renderReport(){
     '<div class="prog" id="prog"></div></header>';
   function card(p,quiet){
     var tag=SHORT[p.mode||''],phs=[];
-    sortCases(p.cases,p).forEach(function(c){allPhotos(c).forEach(function(x){phs.push({c:c,x:x})})});
+    sortCases(casesIn(p),p).forEach(function(c){allPhotos(c).forEach(function(x){phs.push({c:c,x:x})})});
     var o=nl(p);
     return '<section class="sp'+(quiet?' quiet3':'')+(isEdited(p)?' edited':'')+(isSent(p)?' done':'')+'" data-p="'+p.id+'"><h3>โครงการ <span data-pn>'+esc(p.name)+'</span><small>'+(tag?tag+' · ':'')+(quiet?'เหตุการณ์ปกติ':(realN(p.cases)?realN(p.cases)+' เคส':'เหตุการณ์ปกติ'))+'</small><span class="hbtn"><button type="button" class="btn sentb" data-act="sent" aria-pressed="'+isSent(p)+'">'+(isSent(p)?'ส่งแล้ว':'ยังไม่ส่ง')+'</button>'+'<button type="button" class="btn pri" data-act="copymsg">'+(phs.length?'คัดลอกข้อความ + รูป':'คัดลอกข้อความ')+'</button></span></h3>'+
       '<div class="rn"><label for="rn-'+p.id+'">ชื่อโครงการ (ใช้หลัง @ ในข้อความ)</label><input id="rn-'+p.id+'" list="folders" data-f="name" value="'+esc(p.name)+'"></div>'+
@@ -3024,6 +3028,8 @@ function pasteNewCase(text,imgs){
       if(n){n.classList.add('target');window.scrollTo({top:n.getBoundingClientRect().top+window.scrollY-120,behavior:'instant'});
         if(!first.hasText&&made.length===1){var x=document.getElementById('x-'+first.c.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}}
       var names=ids.map(function(k){return projs[k].name}).join(', ');
+      var hid=made.filter(function(x){return casesIn(x.p).indexOf(x.c)<0}).length;
+      if(hid)setTimeout(function(){toast(hid+' เหตุการณ์อยู่ใน'+(curShift()==='day'?'กะกลางคืน':'กะกลางวัน')+' ไม่แสดงในกะที่เลือกอยู่ กด ทั้งหมด เพื่อดู')},1800);
       toast(made.length>1?'เพิ่ม '+made.length+' เหตุการณ์ให้ '+names+(pend.length?' · วางรูปต่อได้เลย รูปแรกเข้า '+hhmm(findCase(pend[0].id).c.time):''):
         'เพิ่มเหตุการณ์ '+hhmm(first.c.time)+' ให้ '+names+(imgs.length&&first.hasText?' พร้อมรูป '+imgs.length+' รูป':imgs.length?' · คัดลอกข้อความมาวางต่อได้เลย':' · คัดลอกรูปมาวางต่อได้เลย'))};
     if(imgs.length)addPhotos(first.c.id,imgs).then(done);else done();
@@ -3071,12 +3077,12 @@ function askDup(list,cb){
 }
 function openSummary(){
   var ps=sortedProjects().filter(inShift),un=[],sent=[],none=[],nop=[],tot=0;
-  ps.forEach(function(p){tot+=realN(p.cases);if(!p.cases.length){none.push(p);return}(isSent(p)?sent:un).push(p);
-    p.cases.forEach(function(c){if(!isRoutine(c)&&bodyText(c)&&!allPhotos(c).length)nop.push({p:p,c:c})})});
+  ps.forEach(function(p){var vl=casesIn(p);tot+=realN(vl);if(!vl.length){none.push(p);return}(isSent(p)?sent:un).push(p);
+    vl.forEach(function(c){if(!isRoutine(c)&&bodyText(c)&&!allPhotos(c).length)nop.push({p:p,c:c})})});
   var shiftL={all:'ทั้งวัน',day:'กลางวัน',night:'กลางคืน'}[curShift()]||'';
   var li=function(p,extra,cid){return '<button type="button" class="sumi" data-go="'+p.id+'"'+(cid?' data-gc="'+cid+'"':'')+'><b>'+esc(p.name)+'</b><span>'+extra+'</span></button>'};
   var h='<div class="sumst"><div><b>'+tot+'</b><span>เคสทั้งหมด</span></div><div><b>'+sent.length+'/'+(un.length+sent.length)+'</b><span>โครงการที่ส่งแล้ว</span></div><div class="'+(un.length?'w':'')+'"><b>'+un.length+'</b><span>ยังไม่ส่ง</span></div><div class="'+(nop.length?'w':'')+'"><b>'+nop.length+'</b><span>เคสไม่มีรูป</span></div></div>'+
-    '<h4>ยังไม่ส่ง ('+un.length+')</h4>'+(un.length?un.map(function(p){var n=realN(p.cases);return li(p,n?n+' เคส':'ปกติ')}).join(''):'<p class="msg">ส่งครบทุกโครงการแล้ว ✓</p>')+
+    '<h4>ยังไม่ส่ง ('+un.length+')</h4>'+(un.length?un.map(function(p){var n=realN(casesIn(p));return li(p,n?n+' เคส':'ปกติ')}).join(''):'<p class="msg">ส่งครบทุกโครงการแล้ว ✓</p>')+
     '<h4>เคสที่ยังไม่มีรูป ('+nop.length+')</h4>'+(nop.length?nop.map(function(x){return li(x.p,hhmm(x.c.time)+' · '+esc(bodyText(x.c).slice(0,60)),x.c.id)}).join(''):'<p class="msg">ทุกเคสมีรูปแล้ว ✓</p>')+
     (none.length?'<h4>ยังไม่มีเหตุการณ์ ('+none.length+')</h4><p class="msg">'+none.map(function(p){return esc(p.name)}).join(' · ')+'</p>':'');
   var txt='สรุปกะ'+shiftL+' วันที่ '+thaiShort(store.date)+'\nเคสทั้งหมด '+tot+' · ส่งแล้ว '+sent.length+'/'+(un.length+sent.length)+' โครงการ'+
