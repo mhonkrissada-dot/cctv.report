@@ -1067,6 +1067,13 @@ table.cnt tr.tot td{font-weight:700;background:var(--fill)}
 .cnt .dcol:hover{background:var(--accent-soft);color:var(--accent-2)}
 .cnt .dcol.copied{background:var(--ok-soft);color:var(--ok)}
 
+.addrow{display:flex;gap:10px;align-items:center;margin:4px 0}
+.addin{flex:none;min-height:76px;width:100%;border:1px solid var(--fld);border-radius:10px;padding:8px 10px;background:transparent;color:var(--ink);font:inherit;font-size:13px;resize:vertical}
+.addin:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+table.addt{width:auto;min-width:320px;margin-top:6px}
+table.addt .nm{position:static}
+.warnm{color:var(--warn)!important}
+
 .case button.who{border:0;font:inherit;font-size:11.5px;cursor:pointer;transition:background-color .15s,color .15s}
 .case button.who:hover{background:var(--accent-soft);color:var(--accent-2)}
 .case button.who.empty{background:transparent;border:1px dashed var(--fld);opacity:0;pointer-events:none}
@@ -2023,7 +2030,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 3';
+var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 4';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2773,6 +2780,7 @@ app.addEventListener('click',function(e){
     var colv=mc2.rows.slice(0,COUNT_ORDER.length).map(function(r){var v=r.cells[dd-1];return v===''?'-':v});
     copyText(colv.join('\n'),'คัดลอกวันที่ '+dd+' แล้ว ('+colv.length+' แถว) วางในช่องวันที่ '+dd+' แถวแรกของ Excel ได้เลย'+(mc2.extra?' · มีโครงการนอกไฟล์ '+mc2.extra+' โครงการไม่ได้คัดลอก':''));
     var hb=document.querySelectorAll('.cnt [data-d="'+dd+'"]');hb.forEach(function(x){x.classList.add('copied');setTimeout(function(){x.classList.remove('copied')},900)})}
+  else if(act==='cnt-add'){var tdd=store.date.slice(0,7)===cntMonth?+store.date.slice(8,10):1;openAddDay(tdd)}
   else if(act==='cnt-copy'){copyText(monthTSV(),'คัดลอกตารางจำนวนเคสแล้ว วางใน Excel ได้เลย')}
   else if(act==='sy-pullall'){
     if(!syOn()){toast('ใส่ลิงก์ รหัสลับ และติ๊ก ส่งอัตโนมัติ ก่อน');return}
@@ -3133,8 +3141,28 @@ function monthHTML(){
   return '<article class="sheet cnt-sheet"><header><p class="kick">นับเคสรายวัน</p><h2>จำนวนเคส '+mname(cntMonth)+'</h2>'+
     '<p class="sub">เรียงตามไฟล์ EOC · นับเฉพาะเหตุการณ์ ไม่นับบรรทัดเหตุการณ์ปกติ · ขีด = ไม่มีเคส · ช่องว่าง = ยังไม่มีข้อมูลวันนั้นในเครื่องนี้ · <b>กดเลขวันที่ เพื่อคัดลอกทั้งคอลัมน์</b></p>'+
     '<div class="rowb"><select id="cntm" class="msel" aria-label="เลือกเดือน">'+ml.map(function(m){return '<option value="'+m+'"'+(m===cntMonth?' selected':'')+'>'+mname(m)+'</option>'}).join('')+'</select>'+
-    '<button type="button" class="btn pri" data-act="cnt-day" data-d="'+(today||'')+'"'+(today?'':' disabled')+'>คัดลอกคอลัมน์วันนี้</button><button type="button" class="btn" data-act="cnt-copy">คัดลอกทั้งตาราง</button><span class="msg">รวม '+mc.total+' เคส</span></div></header>'+
+    '<button type="button" class="btn pri" data-act="cnt-day" data-d="'+(today||'')+'"'+(today?'':' disabled')+'>คัดลอกคอลัมน์วันนี้</button><button type="button" class="btn" data-act="cnt-add">บวกกับตัวเลขใน Excel</button><button type="button" class="btn" data-act="cnt-copy">คัดลอกทั้งตาราง</button><span class="msg">รวม '+mc.total+' เคส</span></div></header>'+
     (mc.rows.length?'<div class="cntwrap"><table class="cnt"><thead><tr>'+th+'</tr></thead><tbody>'+body+foot+'</tbody></table></div>':'<p class="empty">ยังไม่มีข้อมูลในเดือนนี้</p>')+'</article>';
+}
+/* add this app's counts to the numbers already in the Excel column, then copy the sums back */
+function openAddDay(dd){
+  var mc=monthCounts(cntMonth),n=COUNT_ORDER.length,day=dd||1;
+  var opts='';for(var d=1;d<=mc.nd;d++)opts+='<option value="'+d+'"'+(d===day?' selected':'')+'>'+d+'</option>';
+  var body='<p class="msg">1) ใน Excel ลากเลือกช่องของวันนั้น '+n+' แถว (ทาวน์โฮม ระยอง ถึง VL 168 WG) แล้วกด Ctrl+C · 2) วางในช่องด้านล่าง · 3) กด คัดลอกผลรวม แล้ววางกลับที่เดิมใน Excel</p>'+
+    '<div class="addrow"><label>วันที่ <select id="addd" class="msel">'+opts+'</select></label></div>'+
+    '<textarea id="addin" class="addin" rows="4" placeholder="วางตัวเลขเดิมจาก Excel ที่นี่ (Ctrl+V)"></textarea><div id="addtbl"></div>';
+  var sums=[];
+  var calc=function(){var d=+document.getElementById('addd').value,lines=document.getElementById('addin').value.replace(/\r/g,'').split('\n');
+    if(lines.length&&lines[lines.length-1]==='')lines.pop();
+    var m2=monthCounts(cntMonth),h='<table class="cnt addt"><thead><tr><th class="nm">โครงการ</th><th>เดิม</th><th>แอป</th><th>รวม</th></tr></thead><tbody>';sums=[];
+    for(var i=0;i<n;i++){var r=m2.rows[i],o=parseFloat(String(lines[i]||'').trim())||0,a=typeof r.cells[d-1]==='number'?r.cells[d-1]:0,t=o+a;sums.push(t||'-');
+      h+='<tr><td class="nm">'+esc(r.name)+'</td><td>'+(o||'-')+'</td><td>'+(a||'-')+'</td><td class="sm">'+(t||'-')+'</td></tr>'}
+    var tot=sums.reduce(function(x,v){return x+(typeof v==='number'?v:0)},0);
+    document.getElementById('addtbl').innerHTML=(lines.length&&lines.length!==n?'<p class="msg warnm">วางมา '+lines.length+' แถว ควรเป็น '+n+' แถว ตรวจว่าเลือกช่องครบ</p>':'')+h+'<tr class="tot"><td class="nm">รวมทั้งหมด</td><td></td><td></td><td class="sm">'+tot+'</td></tr></tbody></table>'};
+  var dl=openDlg('บวกกับตัวเลขเดิมใน Excel',body,'<button type="button" class="btn" data-m="close">ปิด</button><button type="button" class="btn pri" data-m="copysum">คัดลอกผลรวม</button>',function(m){
+    if(m==='copysum'){calc();copyText(sums.join('\n'),'คัดลอกผลรวมวันที่ '+document.getElementById('addd').value+' แล้ว วางทับช่องเดิมใน Excel ได้เลย')}});
+  dl.querySelector('#addin').addEventListener('input',calc);dl.querySelector('#addd').addEventListener('change',calc);
+  setTimeout(function(){var t=document.getElementById('addin');if(t)t.focus()},50);calc();
 }
 function monthTSV(){
   var mc=monthCounts(cntMonth),h=['ลำดับ','ชื่อโครงการ'];for(var d=1;d<=mc.nd;d++)h.push(d);h.push('รวม');
