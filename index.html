@@ -2023,7 +2023,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 2';
+var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 3';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -3103,7 +3103,7 @@ function countKey(name){var k=norm(name||'');return COUNT_ALIAS[k]||k}
 /* one app project that covers two sheet rows: each case goes to the row whose place it names */
 var COUNT_SPLIT={
   'จรรยวรรธ':[[/ทาวน์โฮม/,'ทาวน์โฮม ระยอง'],[/คลังสินค้า/,'คลังสินค้า ระยอง']],
-  CHODKM16:[[/คลังสินค้า/,'คลังสินค้า กม.16'],[/จรรยวรรธ/,'จรรยวรรธ กม.16']]
+  CHODKM16:[[/คลังสินค้า/,'คลังสินค้า กม.16'],[/จรรยวรรธ|ทาวน์?โฮม/,'จรรยวรรธ กม.16']] /* ทาวน์โฮม at กม.16 is จรรยวรรธ */
 };
 function monthCounts(ym){
   var y=+ym.slice(0,4),m=+ym.slice(5,7),nd=new Date(y,m,0).getDate(),have=[],rows=[],byKey={},extra=[];
