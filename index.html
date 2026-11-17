@@ -1428,8 +1428,10 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 /* fixed routine lines per project: wording is locked, both times can be changed */
 var TPLS={
   'LPRM3RR':[
-    {k:'load',time:'00:00',ret:'01:37',shift:'night',tx:'♦️ เวลา {t}น.รปภ.โหลดดิ้ง ทำการจดรถ และกลับมาประจำจุดเวลา {r}น.'},
-    {k:'lobby',time:'02:00',ret:'06:23',shift:'night',tx:'♦️ เวลา {t}น. รปภ.ล็อบบี้ ทำการจดรถ และกลับมาป ประจำจุดเวลา {r}น'}
+    {k:'load',time:'00:00',ret:'01:37',shift:'night',tx:'♦️ เวลา {t}น. รปภ.โหลดดิ้ง ออกตรวจและจดทะเบียนรถ แล้วกลับมาประจำจุดเวลา {r}น.',
+      old:['♦️ เวลา {t}น.รปภ.โหลดดิ้ง ทำการจดรถ และกลับมาประจำจุดเวลา {r}น.']},
+    {k:'lobby',time:'02:00',ret:'06:23',shift:'night',tx:'♦️ เวลา {t}น. รปภ.ล็อบบี้ ออกตรวจและจดทะเบียนรถ แล้วกลับมาประจำจุดเวลา {r}น.',
+      old:['♦️ เวลา {t}น. รปภ.ล็อบบี้ ทำการจดรถ และกลับมาป ประจำจุดเวลา {r}น','♦️ เวลา {t}น. รปภ.ล็อบบี้ ทำการจดรถ และกลับมาประจำจุดเวลา {r}น']}
   ]
 };
 function tplsFor(p){return TPLS[norm(p&&p.name||'')]||[]}
@@ -1439,9 +1441,11 @@ function tplText(d,c){return d.tx.replace('{t}',hhmm(c.time)).replace('{r}',hhmm
 function ensureTpls(p,add){
   var ds=tplsFor(p);if(!ds.length)return false;var ch=false;
   ds.forEach(function(d){
-    var re=new RegExp('^'+d.tx.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace('\\{t\\}','(\\d{1,2})[.:](\\d{2})').replace('\\{r\\}','(\\d{1,2})[.:](\\d{2})').replace(/ /g,'\\s*')+'\\s*$');
+    var mk=function(tx){return new RegExp('^'+tx.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace('\\{t\\}','(\\d{1,2})[.:](\\d{2})').replace('\\{r\\}','(\\d{1,2})[.:](\\d{2})').replace(/ /g,'\\s*')+'\\.?\\s*$')};
+    var res=[d.tx].concat(d.old||[]).map(mk),hit=function(t){for(var i=0;i<res.length;i++){var m=t.match(res[i]);if(m)return m}return null};
     var has=p.cases.filter(function(c){return c.tpl===d.k})[0];
-    if(!has)p.cases.forEach(function(c){if(has||c.tpl)return;var m=String(c.text||'').trim().match(re);if(m){c.tpl=d.k;c.time=('0'+m[1]).slice(-2)+':'+m[2];c.ret=('0'+m[3]).slice(-2)+':'+m[4];c.text=tplText(d,c);has=c;ch=true}});
+    if(has&&has.text!==tplText(d,has)){has.text=tplText(d,has);ch=true} /* new wording for lines made earlier */
+    if(!has)p.cases.forEach(function(c){if(has||c.tpl)return;var m=hit(String(c.text||'').trim());if(m){c.tpl=d.k;c.time=('0'+m[1]).slice(-2)+':'+m[2];c.ret=('0'+m[3]).slice(-2)+':'+m[4];c.text=tplText(d,c);has=c;ch=true}});
     if(!has&&add){p.cases.push({id:uid(),time:d.time,ret:d.ret,tpl:d.k,text:''});var nc=p.cases[p.cases.length-1];nc.text=tplText(d,nc);ch=true}
   });
   if(ch){p.cases.sort(byTime);markP(p)}
@@ -2030,7 +2034,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='18 พ.ย. 69 · 1';
+var SY_PULL_GAP=60000,APPVER='18 พ.ย. 69 · 2';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
