@@ -2030,7 +2030,7 @@ function flush(){
 }
 /* ---------- pull from Drive: every device ends up with the same cases and photos ---------- */
 var MODE_REV={};Object.keys(MODES).forEach(function(k){MODE_REV[MODES[k]]=k});
-var SY_PULL_GAP=60000,APPVER='15 พ.ย. 69 · 4';
+var SY_PULL_GAP=60000,APPVER='18 พ.ย. 69 · 1';
 /* redraw now, or as soon as the person leaves the field they are typing in */
 var needRender=false;
 function softRender(){if(!isTyping(document.activeElement)){needRender=false;render()}else needRender=true}
@@ -2742,7 +2742,8 @@ app.addEventListener('click',function(e){
   var act=b.dataset.act,p=findP(b),c=p&&findC(b,p);
   if(act==='pmore'&&p){var rr=b.getBoundingClientRect();openCtx(rr.left,rr.bottom+6,p,true);return}
   if(act==='addproj'){var np={id:uid(),name:'',mode:'',cases:[{id:uid(),time:'08:00',text:'♦️ '}]};R().projects.push(np);sel=np.id;save();render();var i=document.getElementById('n-'+np.id);if(i)i.focus()}
-  else if(act==='addcase'&&p){var nc={id:uid(),time:'08:00',text:'♦️ ',by:whoAmI()};p.cases.push(nc);save();render();var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}
+  else if(act==='addcase'&&p){var nt=nowHM(),sh=curShift();if((sh==='day'||sh==='night')&&shiftOf(nt)!==sh)nt=sh==='day'?'07:00':'19:00'; /* a time inside the shift on screen, so the new row stays visible */
+    var nc={id:uid(),time:nt,text:'♦️ ',by:whoAmI()};p.cases.push(nc);save();render();var x=document.getElementById('x-'+nc.id);if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length)}}
   else if(act==='delcase'&&c){if(!arm(b,'ยืนยันลบ'))return;markDel(c);delCasePhotos(c);p.cases=p.cases.filter(function(k){return k!==c});save();render()}
   else if(act==='addnormal'&&p){
     var added=0;normalKinds(p).forEach(function(w){var tx=w==='night'?LINE_NIGHT:LINE_DAY;if(p.cases.some(function(k){return (k.text||'').trim()===tx}))return;p.cases.push({id:uid(),time:w==='night'?'19:00':'07:00',text:tx});added++});
